@@ -28,12 +28,14 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Media> books = [];
   final bdMedia = DatabaseMedia("Series");
   final GlobalKey<AnimatedListState> _listKey = GlobalKey(); // Clé pour la ListView.builder
+  int? pageMax = 1;
 
   _HomeScreenState({this.mediaParam1});
 
   void initState() {
     super.initState();
     loadMedia();
+    
   }
 
   void loadMedia() async {
@@ -65,9 +67,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
         bdMedia.closeDatabase();
         final appDirectory = await getDatabasesPath();
-        final databasePath = '${appDirectory}/maBDD2.db'; // Changement de nom ici
+        final databasePath = '${appDirectory}/maBDD3.db'; // Changement de nom ici
         await file.copy(databasePath);
-        
+        bdMedia.initDatabase("maBDD3.db");
+        loadMedia();
+
         return sourceFile.path;
       } else {
         // L'utilisateur a annulé la sélection du fichier
@@ -118,6 +122,37 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: <Widget>[
+          FutureBuilder<int?>(
+            future: bdMedia.countPageMedia(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator(); // Display a loading indicator while waiting for the count.
+              } else if (snapshot.hasError || !snapshot.hasData) {
+                // Handle errors or cases where count is not available
+                return Text('Error or no data available.');
+              } else {
+                int pageCount = snapshot.data!;
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: List.generate(pageCount, (i) {
+                      final pageNumber = i + 1;
+                      return ElevatedButton(
+                        onPressed: () {
+                          // Handle button tap for page number 'pageNumber'.
+                          // You can use 'pageNumber' to load data for the selected page.
+                          print('Button for page $pageNumber pressed.');
+                        },
+                        child: Text('Page $pageNumber'),
+                      );
+                    }),
+                  ),
+                );
+              }
+            },
+          ),
+
           Expanded(
             child: FutureBuilder<List<Media>>(
               future: bdMedia.getMedias(),
@@ -180,32 +215,40 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-              MaterialPageRoute(
-                builder: (context) => AddUpdateBookScreen(
-                    mediaParam: null, // Vous pouvez passer une instance Media si nécessaire
-                    tableName: tableName,
-                  ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddUpdateBookScreen(
+                          mediaParam: null,
+                          tableName: tableName,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Text('Creer'),
                 ),
-              );
-            },
-            child: Text('Creer'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              DatabaseHelper().exportDatabase(context);
-            },
-            child: Text('Exporter la base de données'),
-          ),
-           ElevatedButton(
-            onPressed: () {
-              replaceDatabase();
-            },
-            child: Text('Remplacer la base de données'),
-          ),
+                ElevatedButton(
+                  onPressed: () {
+                    DatabaseHelper().exportDatabase(context);
+                  },
+                  child: Text('Exporter la base de données'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    replaceDatabase();
+                  },
+                  child: Text('Remplacer la base de données'),
+                ),
+                // Add more buttons here if needed
+              ],
+            ),
+          )
         ],
       ),
     );

@@ -9,7 +9,7 @@ import '../Model/media.dart';
 
 
 class DatabaseHelper {
-  String myBDD = 'maBDD2.db';
+  String myBDD = 'maBDD3.db';
 
   Future<void> exportDatabase(BuildContext context) async {
     try {

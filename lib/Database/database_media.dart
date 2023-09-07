@@ -4,14 +4,15 @@
 
   class DatabaseMedia {
     String table;
-
+    String defaultName = "maBDD3.db";
     DatabaseMedia(this.table);
 
     final List<String> tableNames = ["Series", "Animes", "Games", "Webtoons", "Books", "Movies"];
     static Database? _database;
 
-    Future<Database> initDatabase() async {
-      final path = join(await getDatabasesPath(), 'maBDD2.db');
+    Future<Database> initDatabase(String name) async {
+      defaultName = name;
+      final path = join(await getDatabasesPath(), name);
 
       final db = await openDatabase(
         path,
@@ -35,11 +36,11 @@
     }
 
     Future<void> changeTable(String name) async {
-      final db = await initDatabase();
+      final db = await initDatabase(defaultName);
       table = name;
     }
     Future<void> insertMedia(Media book) async {
-      final db = await initDatabase();
+      final db = await initDatabase(defaultName);
       await db.insert(
         table,
         book.toMap(),
@@ -47,7 +48,7 @@
       );
     }
     Future<void> updateMedia(Media book) async {
-      final db = await initDatabase();
+      final db = await initDatabase(defaultName);
       await db.update(
         table,
         book.toMap(),
@@ -56,11 +57,10 @@
     }
     Future<List<Media>> getMedias() async {
       print(table);
-      final db = await initDatabase();
+      final db = await initDatabase(defaultName);
       //final List<Map<String, dynamic>> maps = await db.rawQuery('SELECT * FROM $table LIMIT 7');
       final List<Map<String, dynamic>> maps = await db.rawQuery('SELECT * FROM $table WHERE LENGTH(Image) <= ? LIMIT ?', [2 * 1024 * 1024, 10]);
       return List.generate(maps.length, (i) {
-        print(maps[i]['Nom']);
         return Media(
           id: maps[i]['ID'],
           nom: maps[i]['Nom'],
@@ -73,8 +73,22 @@
         );
       });
     }
+    
+    Future<int?> countPageMedia() async {
+      final db = await initDatabase(defaultName);
+      final result = await db.rawQuery('SELECT COUNT(*) as count FROM $table');
+      int? count = Sqflite.firstIntValue(result);
+
+      if (count != null) {
+        int totalPage = (count + 10 - 1) ~/ 10;
+        return totalPage;
+      } else {
+        return null;
+      }
+    }
+    
     Future<Media?> getMediaWithId(int id) async {
-      final db = await initDatabase();
+      final db = await initDatabase(defaultName);
       final List<Map<String, dynamic>> maps =
           await db.query(table, where: 'id = ?', whereArgs: [id]);
 
@@ -93,7 +107,7 @@
       }
     }
     Future<void> deleteMedia(Media book) async {
-      final db = await initDatabase();
+      final db = await initDatabase(defaultName);
       await db.delete(
         table,
         where: 'ID = ?',
