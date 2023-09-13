@@ -58,8 +58,12 @@
     Future<List<Media>> getMedias() async {
       print(table);
       final db = await initDatabase(defaultName);
-      //final List<Map<String, dynamic>> maps = await db.rawQuery('SELECT * FROM $table LIMIT 7');
-      final List<Map<String, dynamic>> maps = await db.rawQuery('SELECT * FROM $table WHERE LENGTH(Image) <= ? LIMIT ?', [2 * 1024 * 1024, 10]);
+      
+      int pageNumber = 1; // First page
+      int? count = await countPageMedia(); // Get the total page count
+      int offset = (pageNumber - 1) * (count ?? 0); 
+
+     final List<Map<String, dynamic>> maps = await db.rawQuery('SELECT * FROM $table WHERE LENGTH(Image) <= ? LIMIT 10 OFFSET ?', [2 * 1024 * 1024, offset]);
       return List.generate(maps.length, (i) {
         return Media(
           id: maps[i]['ID'],
