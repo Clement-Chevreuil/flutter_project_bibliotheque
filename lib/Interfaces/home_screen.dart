@@ -21,37 +21,212 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool isAdvancedSearchVisible = false;
   final String? mediaParam1;
   final TextEditingController _controller = TextEditingController();
-  final List<String> sidebarItems = ["Series", "Animes", "Games", "Webtoons", "Books", "Movies"];
+  TextEditingController _controllerNom = TextEditingController(text: '');
+  final List<String> sidebarItems = [
+    "Series",
+    "Animes",
+    "Games",
+    "Webtoons",
+    "Books",
+    "Movies"
+  ];
+  final List<String> StatutList = [
+    "Fini",
+    "En cours",
+    "Abandonnee",
+    "Envie",
+  ];
+  final List<String> GenresList = [
+    "Romance",
+    "School",
+    "Action",
+    "Isekai",
+    "+18",
+  ];
+  final List<String> OrderList = [
+    "ID",
+    "Note",
+    "Nom",
+  ];
+  String? selectedStatut = null; // Variable pour stocker la valeur sélectionnée
+  String? selectedOrder =
+      null; // Variable pour stocker la valeur sélectionnée d'ordre
+  Set<String> selectedGenres =
+      Set(); // Ensemble pour stocker les genres sélectionnés
+
   String tableName = "Series";
   List<Media> books = [];
   final bdMedia = DatabaseMedia("Series");
-  final GlobalKey<AnimatedListState> _listKey = GlobalKey(); // Clé pour la ListView.builder
+  final GlobalKey<AnimatedListState> _listKey =
+      GlobalKey(); // Clé pour la ListView.builder
   int? pageMax = 1;
+  int page = 1;
 
   _HomeScreenState({this.mediaParam1});
 
   void initState() {
     super.initState();
     loadMedia();
-    
+    loadPageButtons();
   }
 
   void loadMedia() async {
     bdMedia.changeTable(tableName);
-    List<Media> updatedMediaList = await bdMedia.getMedias();
+    List<Media> updatedMediaList = await bdMedia.getMedias(
+        page, selectedStatut, selectedOrder, selectedGenres, _controllerNom.text);
     setState(() {
       books.clear();
-      books.addAll(updatedMediaList); // Ajoutez les médias chargés depuis la base de données
-      _listKey.currentState?.setState(() {}); // Mettre à jour la ListView.builder
+      books.addAll(
+          updatedMediaList); // Ajoutez les médias chargés depuis la base de données
+      _listKey.currentState
+          ?.setState(() {}); // Mettre à jour la ListView.builder
     });
+    loadPageButtons();
   }
+
+  void loadPageButtons() async {
+    int? pageCount = await bdMedia.countPageMedia();
+    if (pageCount != null) {
+      setState(() {
+        pageMax = pageCount;
+      });
+    }
+  }
+
+  // Fonction pour créer les boutons en fonction du nombre de pages
+  Widget buildPageButtons(int pageCount) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: List.generate(pageCount, (i) {
+          final pageNumber = i + 1;
+          final isSelected =
+              pageNumber == page; // Vérifiez si le bouton est sélectionné
+
+          return ElevatedButton(
+            onPressed: () {
+              // Mettez à jour la page sélectionnée
+              setState(() {
+                page = pageNumber;
+              });
+              loadMedia();
+            },
+            style: ElevatedButton.styleFrom(
+              primary:
+                  isSelected ? Colors.blue : null, // Fond bleu si sélectionné
+            ),
+            child: Text('Page $pageNumber'),
+          );
+        }),
+      ),
+    );
+  }
+
+  // Fonction pour créer les boutons en fonction du nombre de pages
+  Widget buildPageButtonsGenres() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: List.generate(GenresList.length, (i) {
+          final genre = GenresList[i];
+          final isSelected = selectedGenres
+              .contains(genre); // Vérifiez si le genre est sélectionné
+
+          return ElevatedButton(
+            onPressed: () {
+              // Mettez à jour les genres sélectionnés en ajoutant ou en supprimant le genre
+              setState(() {
+                if (isSelected) {
+                  selectedGenres.remove(genre); // Désélectionner le genre
+                } else {
+                  selectedGenres.add(genre); // Sélectionner le genre
+                }
+              });
+              loadMedia();
+            },
+            style: ElevatedButton.styleFrom(
+              primary:
+                  isSelected ? Colors.blue : null, // Fond bleu si sélectionné
+            ),
+            child: Text(genre),
+          );
+        }),
+      ),
+    );
+  }
+
+  Widget buildPageButtonsStatut() {
+  return SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: List.generate(StatutList.length, (i) {
+        final statut = StatutList[i];
+        final isSelected = statut == selectedStatut; // Vérifiez si le bouton est sélectionné
+
+        return ElevatedButton(
+          onPressed: () {
+            // Mettez à jour la valeur sélectionnée et rechargez les médias
+            setState(() {
+              if (isSelected) {
+                // Si le bouton est déjà sélectionné, annulez la sélection
+                selectedStatut = null;
+              } else {
+                selectedStatut = statut;
+              }
+            });
+            loadMedia();
+          },
+          style: ElevatedButton.styleFrom(
+            primary:
+                isSelected ? Colors.blue : null, // Fond bleu si sélectionné
+          ),
+          child: Text(statut),
+        );
+      }),
+    ),
+  );
+}
+
+ Widget buildPageButtonsOrders() {
+  return SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: List.generate(OrderList.length, (i) {
+        final order = OrderList[i];
+        final isSelected =
+            order == selectedOrder; // Vérifiez si le bouton est sélectionné
+
+        return ElevatedButton(
+          onPressed: () {
+            // Mettez à jour la valeur d'ordre sélectionnée et rechargez les médias
+            setState(() {
+              selectedOrder = order;
+            });
+            loadMedia();
+          },
+          style: ElevatedButton.styleFrom(
+            primary:
+                isSelected ? Colors.blue : null, // Fond bleu si sélectionné
+          ),
+          child: Text(order),
+        );
+      }),
+    ),
+  );
+}
 
   Future replaceDatabase() async {
     try {
       // Sélectionner un fichier depuis l'appareil
-      FilePickerResult? result = await FilePicker.platform.pickFiles(type: FileType.any);
+      FilePickerResult? result =
+          await FilePicker.platform.pickFiles(type: FileType.any);
 
       if (result != null) {
         // Récupérer le fichier sélectionné
@@ -67,7 +242,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
         bdMedia.closeDatabase();
         final appDirectory = await getDatabasesPath();
-        final databasePath = '${appDirectory}/maBDD3.db'; // Changement de nom ici
+        final databasePath =
+            '${appDirectory}/maBDD3.db'; // Changement de nom ici
         await file.copy(databasePath);
         bdMedia.initDatabase("maBDD3.db");
         loadMedia();
@@ -82,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // Gérer l'erreur de remplacement du fichier de base de données
       return null;
     }
-}
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,40 +298,47 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: <Widget>[
-          FutureBuilder<int?>(
-            future: bdMedia.countPageMedia(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator(); // Display a loading indicator while waiting for the count.
-              } else if (snapshot.hasError || !snapshot.hasData) {
-                // Handle errors or cases where count is not available
-                return Text('Error or no data available.');
-              } else {
-                int pageCount = snapshot.data!;
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: List.generate(pageCount, (i) {
-                      final pageNumber = i + 1;
-                      return ElevatedButton(
-                        onPressed: () {
-                          // Handle button tap for page number 'pageNumber'.
-                          // You can use 'pageNumber' to load data for the selected page.
-                          print('Button for page $pageNumber pressed.');
-                        },
-                        child: Text('Page $pageNumber'),
-                      );
-                    }),
+          if (pageMax != null) buildPageButtons(pageMax!),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: "Name",
                   ),
-                );
-              }
-            },
+                  controller: _controllerNom
+                ),
+              ),
+              ElevatedButton(
+                onPressed: loadMedia,
+                child: Text('Search'),
+              ),
+            ],
           ),
-
+          AnimatedContainer(
+            height: isAdvancedSearchVisible
+                ? null
+                : 0, // Utilisez null pour la hauteur pour permettre l'animation
+            duration: Duration(milliseconds: 300), // Durée de l'animation
+            child: Column(children: [
+              buildPageButtonsGenres(),
+              buildPageButtonsOrders(),
+              buildPageButtonsStatut(),
+            ]),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              setState(() {
+                isAdvancedSearchVisible =
+                    !isAdvancedSearchVisible; // Inversez la visibilité du bloc
+              });
+            },
+            child: Text('Recherche Avancée'),
+          ),
           Expanded(
             child: FutureBuilder<List<Media>>(
-              future: bdMedia.getMedias(),
+              future: bdMedia.getMedias(
+                  page, selectedStatut, selectedOrder, selectedGenres, _controllerNom.text),
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data == null) {
                   return Center(
@@ -188,17 +371,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => AddUpdateBookScreen(
-                                        mediaParam: book, // Vous pouvez passer une instance Media si nécessaire
-                                        tableName: tableName,
-                                      ),
+                                      mediaParam:
+                                          book, // Vous pouvez passer une instance Media si nécessaire
+                                      tableName: tableName,
                                     ),
+                                  ),
                                 );
                               },
                             ),
                             IconButton(
                               icon: Icon(Icons.delete),
                               onPressed: () async {
-                                await DatabaseMedia(tableName).deleteMedia(book);
+                                await DatabaseMedia(tableName)
+                                    .deleteMedia(book);
                                 loadMedia();
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text('Livre supprimé')),

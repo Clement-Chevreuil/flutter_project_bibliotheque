@@ -17,7 +17,7 @@ class Media {
     this.genres,
   });
 
-    Media.withoutID({
+  Media.withoutID({
     this.nom,
     this.image,
     this.note,
