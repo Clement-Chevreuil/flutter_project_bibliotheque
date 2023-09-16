@@ -1,3 +1,5 @@
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+
 import 'add_update_media.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -10,6 +12,8 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
+import 'package:getwidget/getwidget.dart';
+import 'package:number_paginator/number_paginator.dart';
 
 class HomeScreen extends StatefulWidget {
   final String? mediaParam1;
@@ -32,6 +36,14 @@ class _HomeScreenState extends State<HomeScreen> {
     "Webtoons",
     "Books",
     "Movies"
+  ];
+  List<IconData> itemIcons = [Icons.movie, Icons.movie, Icons.movie, Icons.movie, Icons.movie, Icons.movie]; // Ajoutez ici les icônes correspondantes
+
+  List list = [
+    "Flutter",
+    "React",
+    "Ionic",
+    "Xamarin",
   ];
   final List<String> StatutList = [
     "Fini",
@@ -56,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
       null; // Variable pour stocker la valeur sélectionnée d'ordre
   Set<String> selectedGenres =
       Set(); // Ensemble pour stocker les genres sélectionnés
-
+  String selectedTableName = "Series";
   String tableName = "Series";
   List<Media> books = [];
   final bdMedia = DatabaseMedia("Series");
@@ -64,6 +76,9 @@ class _HomeScreenState extends State<HomeScreen> {
       GlobalKey(); // Clé pour la ListView.builder
   int? pageMax = 1;
   int page = 1;
+  int index = 2;
+  // instantiate the controller in your state
+  final NumberPaginatorController _controller1 = NumberPaginatorController();
 
   _HomeScreenState({this.mediaParam1});
 
@@ -75,8 +90,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void loadMedia() async {
     bdMedia.changeTable(tableName);
-    List<Media> updatedMediaList = await bdMedia.getMedias(
-        page, selectedStatut, selectedOrder, selectedGenres, _controllerNom.text);
+    List<Media> updatedMediaList = await bdMedia.getMedias(page, selectedStatut,
+        selectedOrder, selectedGenres, _controllerNom.text);
     setState(() {
       books.clear();
       books.addAll(
@@ -88,7 +103,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void loadPageButtons() async {
-    int? pageCount = await bdMedia.countPageMedia();
+    int? pageCount = await bdMedia.countPageMedia(
+        selectedStatut, selectedGenres, _controllerNom.text);
     if (pageCount != null) {
       setState(() {
         pageMax = pageCount;
@@ -98,30 +114,86 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Fonction pour créer les boutons en fonction du nombre de pages
   Widget buildPageButtons(int pageCount) {
+    // Assurez-vous qu'il y a au moins deux boutons à afficher
+    if (pageCount < 2) {
+      return SizedBox();
+    }
+
+    // Définissez le nombre total de boutons à afficher autour de la page actuelle (toujours 7)
+    int totalButtons = 7;
+    int pageMin = 2;
+    int pageMax = 2;
+    // Calculez les bornes inférieures et supérieures pour afficher les boutons
+    int lowerBound = page - pageMin;
+    int upperBound = page + pageMax;
+
+    // Ajustez les bornes pour s'assurer qu'il y a toujours 7 boutons
+    if (lowerBound < 1) {
+      lowerBound = 1;
+      upperBound = lowerBound + totalButtons - 2;
+    }
+    if (upperBound > pageCount) {
+      upperBound = pageCount;
+      lowerBound = upperBound - totalButtons + 2;
+    }
+    if (page == 3) {
+      upperBound += 1;
+    }
+
+    if (page == pageCount - 2) {
+      lowerBound -= 1;
+    }
+
+    // Générez les boutons en fonction des bornes inférieures et supérieures
+    List<Widget> buttons = [];
+
+    for (int i = lowerBound; i <= upperBound; i++) {
+      buttons.add(buildButton(i));
+    }
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(pageCount, (i) {
-          final pageNumber = i + 1;
-          final isSelected =
-              pageNumber == page; // Vérifiez si le bouton est sélectionné
+        children: [
+          if (lowerBound > 1) buildButton(1), // Bouton de la page minimum
+          ...buttons, // Boutons centraux
+          if (upperBound < pageCount)
+            buildButton(pageCount), // Bouton de la page maximum
+        ],
+      ),
+    );
+  }
 
-          return ElevatedButton(
-            onPressed: () {
-              // Mettez à jour la page sélectionnée
-              setState(() {
-                page = pageNumber;
-              });
-              loadMedia();
-            },
-            style: ElevatedButton.styleFrom(
-              primary:
-                  isSelected ? Colors.blue : null, // Fond bleu si sélectionné
-            ),
-            child: Text('Page $pageNumber'),
-          );
-        }),
+  Widget buildButton(int pageNumber) {
+    final isSelected =
+        pageNumber == page; // Vérifiez si le bouton est sélectionné
+
+    return SizedBox(
+      width: 36.0, // Largeur fixe
+      height: 36.0, // Hauteur fixe
+      child: TextButton(
+        onPressed: () {
+          // Mettez à jour la page sélectionnée
+          setState(() {
+            page = pageNumber;
+          });
+          loadMedia();
+        },
+        style: TextButton.styleFrom(
+          padding: EdgeInsets.zero, // Aucun remplissage autour du texte
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0.0), // Bordures carrées
+          ),
+          backgroundColor:
+              isSelected ? Colors.blue : Colors.transparent, // Couleur de fond
+        ),
+        child: Text(
+          '$pageNumber',
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black, // Couleur du texte
+          ),
+        ),
       ),
     );
   }
@@ -161,66 +233,67 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget buildPageButtonsStatut() {
-  return SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: List.generate(StatutList.length, (i) {
-        final statut = StatutList[i];
-        final isSelected = statut == selectedStatut; // Vérifiez si le bouton est sélectionné
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: List.generate(StatutList.length, (i) {
+          final statut = StatutList[i];
+          final isSelected =
+              statut == selectedStatut; // Vérifiez si le bouton est sélectionné
 
-        return ElevatedButton(
-          onPressed: () {
-            // Mettez à jour la valeur sélectionnée et rechargez les médias
-            setState(() {
-              if (isSelected) {
-                // Si le bouton est déjà sélectionné, annulez la sélection
-                selectedStatut = null;
-              } else {
-                selectedStatut = statut;
-              }
-            });
-            loadMedia();
-          },
-          style: ElevatedButton.styleFrom(
-            primary:
-                isSelected ? Colors.blue : null, // Fond bleu si sélectionné
-          ),
-          child: Text(statut),
-        );
-      }),
-    ),
-  );
-}
+          return ElevatedButton(
+            onPressed: () {
+              // Mettez à jour la valeur sélectionnée et rechargez les médias
+              setState(() {
+                if (isSelected) {
+                  // Si le bouton est déjà sélectionné, annulez la sélection
+                  selectedStatut = null;
+                } else {
+                  selectedStatut = statut;
+                }
+              });
+              loadMedia();
+            },
+            style: ElevatedButton.styleFrom(
+              primary:
+                  isSelected ? Colors.blue : null, // Fond bleu si sélectionné
+            ),
+            child: Text(statut),
+          );
+        }),
+      ),
+    );
+  }
 
- Widget buildPageButtonsOrders() {
-  return SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: List.generate(OrderList.length, (i) {
-        final order = OrderList[i];
-        final isSelected =
-            order == selectedOrder; // Vérifiez si le bouton est sélectionné
+  Widget buildPageButtonsOrders() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: List.generate(OrderList.length, (i) {
+          final order = OrderList[i];
+          final isSelected =
+              order == selectedOrder; // Vérifiez si le bouton est sélectionné
 
-        return ElevatedButton(
-          onPressed: () {
-            // Mettez à jour la valeur d'ordre sélectionnée et rechargez les médias
-            setState(() {
-              selectedOrder = order;
-            });
-            loadMedia();
-          },
-          style: ElevatedButton.styleFrom(
-            primary:
-                isSelected ? Colors.blue : null, // Fond bleu si sélectionné
-          ),
-          child: Text(order),
-        );
-      }),
-    ),
-  );
-}
+          return ElevatedButton(
+            onPressed: () {
+              // Mettez à jour la valeur d'ordre sélectionnée et rechargez les médias
+              setState(() {
+                selectedOrder = order;
+              });
+              loadMedia();
+            },
+            style: ElevatedButton.styleFrom(
+              primary:
+                  isSelected ? Colors.blue : null, // Fond bleu si sélectionné
+            ),
+            child: Text(order),
+          );
+        }),
+      ),
+    );
+  }
 
   Future replaceDatabase() async {
     try {
@@ -263,57 +336,179 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Gestion des Livres'),
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
-              child: Text(
-                'Sidebar Header',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Action à effectuer lorsque le bouton est appuyé
+          // Par exemple, vous pouvez ouvrir une nouvelle page ici
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddUpdateBookScreen(
+                mediaParam: null,
+                tableName: tableName,
               ),
             ),
-            for (String item in sidebarItems)
-              ListTile(
-                title: Text(item),
-                onTap: () {
-                  setState(() {
-                    tableName = item;
-                    loadMedia();
-                  });
-                  Navigator.pop(context);
-                },
+          );
+        },
+        mini: true, // Réduit la taille du bouton
+        child: Icon(Icons
+            .add), // Icône du bouton flottant (vous pouvez la personnaliser)
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation
+          .endFloat, // Position du bouton flottant (en bas à droite)
+      //extendBody: true,
+      appBar: AppBar(
+        title: Text('Gestion des Livres'),
+        centerTitle: true,
+      ),
+      drawer: Drawer(
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: <Widget>[
+                  DrawerHeader(
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                    ),
+                    child: Text(
+                      'Sidebar Header',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                      ),
+                    ),
+                  ),
+                  for (int i = 0; i < sidebarItems.length; i++) 
+                  
+                    TextButton(
+                      style: ButtonStyle(
+                        shape: MaterialStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.zero, // Retirer les bords arrondis
+                          ),
+                        ),
+                        
+                        backgroundColor: sidebarItems[i]== selectedTableName
+                            ? MaterialStateProperty.all(Colors.transparent)
+                            : MaterialStateProperty.all(
+                                Colors.transparent), // Fond transparent
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          selectedTableName = sidebarItems[i];
+                          tableName = sidebarItems[i];
+                          loadMedia();
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: Row(
+                        children: [
+                          Icon(
+                            itemIcons[i], // Utilisez l'icône correspondante
+                            color: itemIcons[i] == selectedTableName ? Colors.blue : Colors.black, // Couleur de l'icône
+                          ),
+                          SizedBox(width: 8), // Espacement entre l'icône et le texte
+                          Text(
+                            sidebarItems[i],
+                            style: TextStyle(
+                              fontWeight: sidebarItems[i] == selectedTableName
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
+            ),
+            // Titre en bas du Drawer
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      // Traitez l'action d'exportation ici
+                      Navigator.pop(context);
+                    },
+                    child: Text("Exporter BDD"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      // Traitez l'action de remplacement ici
+                      Navigator.pop(context);
+                    },
+                    child: Text("Remplacer BDD"),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
       body: Column(
         children: <Widget>[
-          if (pageMax != null) buildPageButtons(pageMax!),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: "Name",
+          Container(
+            margin: EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(5.0),
+              border: Border.all(
+                color: Colors.black, // Couleur du bord en noir
+                width: 1.0, // Bordure plus fine
+              ),
+              color: Colors.transparent, // Fond transparent
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 10.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    style: TextStyle(
+                      color: Colors.black, // Texte en noir
+                      fontSize: 16.0, // Taille du texte
+                    ),
+                    decoration: InputDecoration(
+                      hintText: "Recherche...",
+                      hintStyle: TextStyle(
+                        color: Colors.black
+                            .withOpacity(0.5), // Texte d'indication en noir
+                      ),
+                      border: InputBorder.none,
+                    ),
+                    controller: _controllerNom,
                   ),
-                  controller: _controllerNom
                 ),
-              ),
-              ElevatedButton(
-                onPressed: loadMedia,
-                child: Text('Search'),
-              ),
-            ],
+                IconButton(
+                  icon: Icon(
+                    Icons.search,
+                    color: Colors.black, // Icône en noir
+                  ),
+                  onPressed: () {
+                    loadMedia();
+                  },
+                ),
+                InkWell(
+                  onTap: () {
+                    setState(() {
+                      isAdvancedSearchVisible =
+                          !isAdvancedSearchVisible; // Inversez la visibilité du bloc
+                    });
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: Icon(
+                      Icons.sort,
+                      color: Colors.black, // Icône en noir
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           AnimatedContainer(
             height: isAdvancedSearchVisible
@@ -326,19 +521,10 @@ class _HomeScreenState extends State<HomeScreen> {
               buildPageButtonsStatut(),
             ]),
           ),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                isAdvancedSearchVisible =
-                    !isAdvancedSearchVisible; // Inversez la visibilité du bloc
-              });
-            },
-            child: Text('Recherche Avancée'),
-          ),
           Expanded(
             child: FutureBuilder<List<Media>>(
-              future: bdMedia.getMedias(
-                  page, selectedStatut, selectedOrder, selectedGenres, _controllerNom.text),
+              future: bdMedia.getMedias(page, selectedStatut, selectedOrder,
+                  selectedGenres, _controllerNom.text),
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data == null) {
                   return Center(
@@ -348,91 +534,68 @@ class _HomeScreenState extends State<HomeScreen> {
                   books = snapshot.data!;
                   return ListView.builder(
                     key: _listKey, // Utilisation de la clé ici
-                    itemCount: books.length,
+                    itemCount: books.length + 1, // Ajouter 1 pour le SizedBox
                     itemBuilder: (context, index) {
-                      Media book = books[index];
-                      return ListTile(
-                        title: Text(book.nom ?? ''),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Note: ${book.note ?? ''}'),
-                            Text('Statut: ${book.statut ?? ''}'),
-                            Text('Genres: ${book.genres?.join(', ') ?? ''}'),
-                          ],
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.edit),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => AddUpdateBookScreen(
-                                      mediaParam:
-                                          book, // Vous pouvez passer une instance Media si nécessaire
-                                      tableName: tableName,
+                      if (index < books.length) {
+                        Media book = books[index];
+                        return ListTile(
+                          title: Text(book.nom ?? ''),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Note: ${book.note ?? ''}'),
+                              Text('Statut: ${book.statut ?? ''}'),
+                              Text('Genres: ${book.genres?.join(', ') ?? ''}'),
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.edit),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AddUpdateBookScreen(
+                                        mediaParam:
+                                            book, // Vous pouvez passer une instance Media si nécessaire
+                                        tableName: tableName,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete),
-                              onPressed: () async {
-                                await DatabaseMedia(tableName)
-                                    .deleteMedia(book);
-                                loadMedia();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Livre supprimé')),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                        leading: Image.memory(book.image ?? Uint8List(0)),
-                      );
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () async {
+                                  await DatabaseMedia(tableName)
+                                      .deleteMedia(book);
+                                  loadMedia();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Livre supprimé')),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                          leading: Image.memory(book.image ?? Uint8List(0)),
+                        );
+                      } else {
+                        // C'est le dernier élément, ajoutez le SizedBox
+                        return SizedBox(height: 50);
+                      }
                     },
                   );
                 }
               },
             ),
           ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddUpdateBookScreen(
-                          mediaParam: null,
-                          tableName: tableName,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Text('Creer'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    DatabaseHelper().exportDatabase(context);
-                  },
-                  child: Text('Exporter la base de données'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    replaceDatabase();
-                  },
-                  child: Text('Remplacer la base de données'),
-                ),
-                // Add more buttons here if needed
-              ],
-            ),
+          Padding(
+            padding: EdgeInsets.all(20.0), // Ajoutez le padding souhaité
+            child: pageMax != null
+                ? buildPageButtons(pageMax!)
+                : SizedBox(), // Affiche les boutons si pageMax n'est pas nulle
           )
         ],
       ),

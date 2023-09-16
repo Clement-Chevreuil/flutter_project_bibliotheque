@@ -435,7 +435,7 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
                     SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: () async {
-                        if (nom == null || imageBytes == null || note == null) {
+                        if (nom == null || (imageBytes == null && selectedImageUrl == null) || note == null) {
                           // Affichez un message d'erreur et empêchez la création
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(

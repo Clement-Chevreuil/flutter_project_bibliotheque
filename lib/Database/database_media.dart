@@ -68,7 +68,7 @@ class DatabaseMedia {
 
   Future<List<Media>> getMedias(int pageNumber, String? statut, String? order, Set<String>? genres, String search) async {
     final db = await initDatabase(defaultName);
-    int? count = await countPageMedia(); // Get the total page count
+    int? count = await countPageMedia(statut, genres, search); // Get the total page count
     int offset = (pageNumber - 1) * (count ?? 0);
     List<String> whereConditions = [];
     List<dynamic> whereValues = [];
@@ -120,9 +120,35 @@ class DatabaseMedia {
     });
   }
 
-  Future<int?> countPageMedia() async {
+  Future<int?> countPageMedia(String? statut, Set<String>? genres, String search) async {
+     List<String> whereConditions = [];
+    List<dynamic> whereValues = [];
+
     final db = await initDatabase(defaultName);
-    final result = await db.rawQuery('SELECT COUNT(*) as count FROM $table');
+
+      if (search != null && search.isNotEmpty) {
+      whereConditions.add('Nom LIKE ?');
+      whereValues.add('%$search%');
+    }
+
+    if (statut != null) {
+      whereConditions.add('Statut = ?');
+      whereValues.add(statut);
+    }
+
+    if (genres != null && genres.isNotEmpty) {
+      whereConditions.add('Genres IN (${genres.map((_) => '?').join(', ')})');
+      whereValues.addAll(genres.toList());
+    }
+
+    whereConditions.add('LENGTH(Image) <= ?');
+    whereValues.add(2 * 1024 * 1024);
+
+    String whereClause = whereConditions.isNotEmpty
+        ? ' WHERE ${whereConditions.join(' AND ')}'
+        : '';
+
+    final result = await db.rawQuery('SELECT COUNT(*) as count FROM $table $whereClause', whereValues,);
     int? count = Sqflite.firstIntValue(result);
 
     if (count != null) {
