@@ -1,5 +1,7 @@
 import 'dart:ffi';
 import 'dart:typed_data';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+
 import 'home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,7 +33,7 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
 
   String nom = "test";
   String _selectedValue = "Fini";
-  int note = 0;
+  double note = 0;
   Uint8List? imageBytes;
 
   bool _isRomanceChecked = false;
@@ -47,6 +49,7 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
   List<String> imageUrls = [];
 
   bool isImageDialogOpen = false; // Ajoutez cette variable d'état
+  double rating = 0;
   String?
       selectedImageUrl; // Ajoutez cette variable pour stocker l'URL de l'image sélectionnée
 
@@ -62,13 +65,12 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
     bdMedia.changeTable(tableName!);
     if (mediaParam != null) {
       _controllerNom = TextEditingController(text: mediaParam!.nom);
-      _controllerNote =
-          TextEditingController(text: mediaParam!.note.toString());
       _selectedValue = mediaParam!.statut!;
       imageBytes = mediaParam!.image;
 
-      if (mediaParam!.genres! != null) {
+      if (mediaParam!.genres != null) {
         for (String item in mediaParam!.genres!) {
+          print('helo' + item);
           if (item == "Romance") {
             _isRomanceChecked = true;
           }
@@ -88,13 +90,15 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
       }
     }
   }
-    Future<void> _loadImagesAndShowPopup() async {
+
+  Future<void> _loadImagesAndShowPopup() async {
     // Effectuez la recherche d'images
     await _searchImages(_controllerNom.text);
-    
+
     // Affichez la boîte de dialogue des images
     _showImagePopup(context);
   }
+
   Future<bool> downloadImage(String imageUrl) async {
     try {
       final response = await http.get(Uri.parse(imageUrl));
@@ -235,21 +239,18 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[300],
+      backgroundColor: Colors.white,
+            appBar: AppBar(
+        title: Text('Gestion des Livres'),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(2.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  "Create",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 40,
-                  ),
-                ),
                 SizedBox(height: 20),
                 Visibility(
                   visible: false, // Masque le champ texte "ID"
@@ -263,29 +264,48 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
                     ),
                   ),
                 ),
-                TextField(
-                    decoration: InputDecoration(
-                      hintText: "Name",
+                Container(
+                  margin: EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5.0),
+                    border: Border.all(
+                      color: Colors.black, // Couleur du bord en noir
+                      width: 1.0, // Bordure plus fine
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        nom =
-                            value; // Update the nom variable with the entered value
-                      });
-                    },
-                    controller: _controllerNom),
-                TextField(
-                    decoration: InputDecoration(
-                      hintText: "Note",
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      setState(() {
-                        note = int.parse(
-                            value); // Update the nom variable with the entered value
-                      });
-                    },
-                    controller: _controllerNote),
+                    color: Colors.transparent, // Fond transparent
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          style: TextStyle(
+                            color: Colors.black, // Texte en noir
+                            fontSize: 16.0, // Taille du texte
+                          ),
+                          decoration: InputDecoration(
+                            hintText: "Recherche...",
+                            hintStyle: TextStyle(
+                              color: Colors.black.withOpacity(
+                                  0.5), // Texte d'indication en noir
+                            ),
+                            border: InputBorder.none,
+                          ),
+                          controller: _controllerNom,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                RatingBar.builder(
+                    minRating: 0,
+                    itemSize: 46,
+                    itemBuilder: (context, _) =>
+                        Icon(Icons.star, color: Colors.amber),
+                    updateOnDrag: true,
+                    onRatingUpdate: (rating) => setState(() {
+                          this.rating = rating;
+                        })),
                 SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
@@ -312,6 +332,7 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
                             : Placeholder(),
                   ),
                 ),
+
                 SizedBox(height: 20),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -327,7 +348,7 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
                           });
                         },
                       ),
-                      Text("Fini", style: TextStyle(color: Colors.white)),
+                      Text("Fini", style: TextStyle(color: Colors.black)),
                       Radio(
                         value: "En cours",
                         groupValue: _selectedValue,
@@ -337,7 +358,7 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
                           });
                         },
                       ),
-                      Text("En cours", style: TextStyle(color: Colors.white)),
+                      Text("En cours", style: TextStyle(color: Colors.black)),
                       Radio(
                         value: "Abandonnee",
                         groupValue: _selectedValue,
@@ -347,7 +368,7 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
                           });
                         },
                       ),
-                      Text("Abandonnee", style: TextStyle(color: Colors.white)),
+                      Text("Abandonnee", style: TextStyle(color: Colors.black)),
                       Radio(
                         value: "Envie",
                         groupValue: _selectedValue,
@@ -357,7 +378,7 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
                           });
                         },
                       ),
-                      Text("Envie", style: TextStyle(color: Colors.white)),
+                      Text("Envie", style: TextStyle(color: Colors.black)),
                     ],
                   ),
                 ),
@@ -417,25 +438,14 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => HomeScreen()),
-                        );
-                      },
-                      child: Text("Back"),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        _loadImagesAndShowPopup();
-                      },
-                      child: Text("Chercher image"),
-                    ),
+                    
+                 
                     SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: () async {
-                        if (nom == null || (imageBytes == null && selectedImageUrl == null) || note == null) {
+                        if (nom == null ||
+                            (imageBytes == null && selectedImageUrl == null) ||
+                            note == null) {
                           // Affichez un message d'erreur et empêchez la création
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -457,11 +467,6 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
                           print(selectedImageUrl!);
 
                           bool success = await downloadImage(selectedImageUrl!);
-                          if (success) {
-                            print("hey1");
-                          } else {
-                            print("hey");
-                          }
                         }
 
                         // Create a Media instance with the data from UI
@@ -469,7 +474,7 @@ class _AddUpdateBookScreenState extends State<AddUpdateBookScreen> {
                             nom: nom, // Name from TextField,
                             image:
                                 imageBytes, // Uint8List from the image picker
-                            note: note,
+                            note: note.toInt(),
                             statut: _selectedValue,
                             genres: selectedGenres);
 

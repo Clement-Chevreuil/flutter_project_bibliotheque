@@ -13,7 +13,6 @@ import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
 import 'package:getwidget/getwidget.dart';
-import 'package:number_paginator/number_paginator.dart';
 
 class HomeScreen extends StatefulWidget {
   final String? mediaParam1;
@@ -37,7 +36,14 @@ class _HomeScreenState extends State<HomeScreen> {
     "Books",
     "Movies"
   ];
-  List<IconData> itemIcons = [Icons.movie, Icons.movie, Icons.movie, Icons.movie, Icons.movie, Icons.movie]; // Ajoutez ici les icônes correspondantes
+  List<IconData> itemIcons = [
+    Icons.movie,
+    Icons.movie,
+    Icons.movie,
+    Icons.movie,
+    Icons.movie,
+    Icons.movie
+  ]; // Ajoutez ici les icônes correspondantes
 
   List list = [
     "Flutter",
@@ -78,7 +84,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int page = 1;
   int index = 2;
   // instantiate the controller in your state
-  final NumberPaginatorController _controller1 = NumberPaginatorController();
 
   _HomeScreenState({this.mediaParam1});
 
@@ -200,97 +205,146 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Fonction pour créer les boutons en fonction du nombre de pages
   Widget buildPageButtonsGenres() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(GenresList.length, (i) {
-          final genre = GenresList[i];
-          final isSelected = selectedGenres
-              .contains(genre); // Vérifiez si le genre est sélectionné
-
-          return ElevatedButton(
-            onPressed: () {
-              // Mettez à jour les genres sélectionnés en ajoutant ou en supprimant le genre
-              setState(() {
-                if (isSelected) {
-                  selectedGenres.remove(genre); // Désélectionner le genre
-                } else {
-                  selectedGenres.add(genre); // Sélectionner le genre
-                }
-              });
-              loadMedia();
-            },
-            style: ElevatedButton.styleFrom(
-              primary:
-                  isSelected ? Colors.blue : null, // Fond bleu si sélectionné
+    return Container(
+      margin: EdgeInsets.all(4.0), // Marge autour du widget complet
+      child: Column(
+        children: [
+          Text(
+            'Genre :',
+            style: TextStyle(
+              fontSize: 16, // Taille du texte
+              fontWeight: FontWeight.bold, // Texte en gras
             ),
-            child: Text(genre),
-          );
-        }),
+          ),
+          SizedBox(height: 8.0), // Espacement entre le texte et les boutons
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(GenresList.length, (i) {
+                final genre = GenresList[i];
+                final isSelected = selectedGenres.contains(genre);
+
+                return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          if (isSelected) {
+                            selectedGenres.remove(genre);
+                          } else {
+                            selectedGenres.add(genre);
+                          }
+                        });
+                        loadMedia();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: isSelected ? Colors.blue : null,
+                      ),
+                      child: Text(genre),
+                    ));
+              }),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget buildPageButtonsStatut() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(StatutList.length, (i) {
-          final statut = StatutList[i];
-          final isSelected =
-              statut == selectedStatut; // Vérifiez si le bouton est sélectionné
+    return Container(
+      margin: EdgeInsets.all(4.0), // Marge autour du widget complet
+      child: Column(
+        children: [
+          Text(
+            "Statut :",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 8.0), // Espacement entre le texte et les boutons
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(StatutList.length, (i) {
+                final statut = StatutList[i];
+                final isSelected = statut ==
+                    selectedStatut; // Vérifiez si le bouton est sélectionné
 
-          return ElevatedButton(
-            onPressed: () {
-              // Mettez à jour la valeur sélectionnée et rechargez les médias
-              setState(() {
-                if (isSelected) {
-                  // Si le bouton est déjà sélectionné, annulez la sélection
-                  selectedStatut = null;
-                } else {
-                  selectedStatut = statut;
-                }
-              });
-              loadMedia();
-            },
-            style: ElevatedButton.styleFrom(
-              primary:
-                  isSelected ? Colors.blue : null, // Fond bleu si sélectionné
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Mettez à jour la valeur sélectionnée et rechargez les médias
+                      setState(() {
+                        if (isSelected) {
+                          // Si le bouton est déjà sélectionné, annulez la sélection
+                          selectedStatut = null;
+                        } else {
+                          selectedStatut = statut;
+                        }
+                      });
+                      loadMedia();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: isSelected
+                          ? Colors.blue
+                          : null, // Fond bleu si sélectionné
+                    ),
+                    child: Text(statut),
+                  ),
+                );
+              }),
             ),
-            child: Text(statut),
-          );
-        }),
+          ),
+        ],
       ),
     );
   }
 
   Widget buildPageButtonsOrders() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(OrderList.length, (i) {
-          final order = OrderList[i];
-          final isSelected =
-              order == selectedOrder; // Vérifiez si le bouton est sélectionné
+    return Container(
+      margin: EdgeInsets.all(4.0), // Marge autour du widget complet
+      child: Column(
+        children: [
+          Text(
+            "Ordre :",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 8.0), // Espacement entre le texte et les boutons
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: List.generate(OrderList.length, (i) {
+                final order = OrderList[i];
+                final isSelected = order == selectedOrder;
 
-          return ElevatedButton(
-            onPressed: () {
-              // Mettez à jour la valeur d'ordre sélectionnée et rechargez les médias
-              setState(() {
-                selectedOrder = order;
-              });
-              loadMedia();
-            },
-            style: ElevatedButton.styleFrom(
-              primary:
-                  isSelected ? Colors.blue : null, // Fond bleu si sélectionné
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Mettez à jour la valeur sélectionnée et rechargez les médias
+                      setState(() {
+                        if (isSelected) {
+                          // Si le bouton est déjà sélectionné, annulez la sélection
+                          selectedStatut = null;
+                        } else {
+                          selectedOrder = order;
+                        }
+                      });
+                      loadMedia();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: isSelected
+                          ? Colors.blue
+                          : null, // Fond bleu si sélectionné
+                    ),
+                    child: Text(order),
+                  ),
+                );
+              }),
             ),
-            child: Text(order),
-          );
-        }),
+          ),
+        ],
       ),
     );
   }
@@ -380,8 +434,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  for (int i = 0; i < sidebarItems.length; i++) 
-                  
+                  for (int i = 0; i < sidebarItems.length; i++)
                     TextButton(
                       style: ButtonStyle(
                         shape: MaterialStateProperty.all(
@@ -390,8 +443,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 BorderRadius.zero, // Retirer les bords arrondis
                           ),
                         ),
-                        
-                        backgroundColor: sidebarItems[i]== selectedTableName
+
+                        backgroundColor: sidebarItems[i] == selectedTableName
                             ? MaterialStateProperty.all(Colors.transparent)
                             : MaterialStateProperty.all(
                                 Colors.transparent), // Fond transparent
@@ -408,9 +461,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Icon(
                             itemIcons[i], // Utilisez l'icône correspondante
-                            color: itemIcons[i] == selectedTableName ? Colors.blue : Colors.black, // Couleur de l'icône
+                            color: itemIcons[i] == selectedTableName
+                                ? Colors.blue
+                                : Colors.black, // Couleur de l'icône
                           ),
-                          SizedBox(width: 8), // Espacement entre l'icône et le texte
+                          SizedBox(
+                              width: 8), // Espacement entre l'icône et le texte
                           Text(
                             sidebarItems[i],
                             style: TextStyle(
@@ -440,7 +496,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   TextButton(
                     onPressed: () {
-                      // Traitez l'action de remplacement ici
+                      replaceDatabase();
                       Navigator.pop(context);
                     },
                     child: Text("Remplacer BDD"),
@@ -511,16 +567,35 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           AnimatedContainer(
-            height: isAdvancedSearchVisible
-                ? null
-                : 0, // Utilisez null pour la hauteur pour permettre l'animation
-            duration: Duration(milliseconds: 300), // Durée de l'animation
-            child: Column(children: [
-              buildPageButtonsGenres(),
-              buildPageButtonsOrders(),
-              buildPageButtonsStatut(),
-            ]),
-          ),
+              height: isAdvancedSearchVisible
+                  ? null
+                  : 0, // Utilisez null pour la hauteur pour permettre l'animation
+              duration: Duration(milliseconds: 300), // Durée de l'animation
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical:
+                        8.0), // Ajustez la quantité de padding selon vos préférences
+                child: Card(
+                  elevation:
+                      4.0, // Ajoutez une élévation à la Card si vous le souhaitez
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(
+                            16.0), // Ajoutez du padding à l'intérieur de la Card
+                        child: Column(
+                          children: [
+                            buildPageButtonsGenres(),
+                            buildPageButtonsOrders(),
+                            buildPageButtonsStatut(),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )),
           Expanded(
             child: FutureBuilder<List<Media>>(
               future: bdMedia.getMedias(page, selectedStatut, selectedOrder,
@@ -533,56 +608,95 @@ class _HomeScreenState extends State<HomeScreen> {
                 } else {
                   books = snapshot.data!;
                   return ListView.builder(
-                    key: _listKey, // Utilisation de la clé ici
-                    itemCount: books.length + 1, // Ajouter 1 pour le SizedBox
+                    key: _listKey,
+                    itemCount: books.length + 1,
                     itemBuilder: (context, index) {
                       if (index < books.length) {
                         Media book = books[index];
-                        return ListTile(
-                          title: Text(book.nom ?? ''),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Note: ${book.note ?? ''}'),
-                              Text('Statut: ${book.statut ?? ''}'),
-                              Text('Genres: ${book.genres?.join(', ') ?? ''}'),
-                            ],
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: Icon(Icons.edit),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AddUpdateBookScreen(
-                                        mediaParam:
-                                            book, // Vous pouvez passer une instance Media si nécessaire
-                                        tableName: tableName,
+                        return Container(
+                          margin: EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 5.0), // Espace autour de la Card
+                          child: Card(
+                            elevation: 8.0,
+                            child: Padding(
+                              padding: const EdgeInsets.all(
+                                  16.0), // Espace à l'intérieur de la Card
+                              child: Row(
+                                children: [
+                                  // Image du livre à gauche avec une taille ajustée
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: Image.memory(
+                                      book.image ?? Uint8List(0),
+                                      height:
+                                          120, // Ajustez la hauteur de l'image
+                                      width:
+                                          90, // Ajustez la largeur de l'image
+                                    ),
+                                  ),
+                                  // Informations sur le livre à droite
+                                  Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          // Titre du livre aligné verticalement avec les autres informations
+                                          GFTypography(
+                                            text: book.nom ?? '',
+                                            type: GFTypographyType.typo5,
+                                          ),
+                                          Text('Note: ${book.note ?? ''}'),
+                                          Text('Statut: ${book.statut ?? ''}'),
+                                          Text(
+                                              'Genres: ${book.genres?.join(', ') ?? ''}'),
+                                        ],
                                       ),
                                     ),
-                                  );
-                                },
+                                  ),
+                                  // Boutons légèrement décalés vers la gauche
+                                  Column(
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(Icons.edit),
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  AddUpdateBookScreen(
+                                                mediaParam: book,
+                                                tableName: tableName,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.delete),
+                                        onPressed: () async {
+                                          await DatabaseMedia(tableName)
+                                              .deleteMedia(book);
+                                          loadMedia();
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                                content:
+                                                    Text('Livre supprimé')),
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                              IconButton(
-                                icon: Icon(Icons.delete),
-                                onPressed: () async {
-                                  await DatabaseMedia(tableName)
-                                      .deleteMedia(book);
-                                  loadMedia();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Livre supprimé')),
-                                  );
-                                },
-                              ),
-                            ],
+                            ),
                           ),
-                          leading: Image.memory(book.image ?? Uint8List(0)),
                         );
                       } else {
-                        // C'est le dernier élément, ajoutez le SizedBox
                         return SizedBox(height: 50);
                       }
                     },
@@ -596,7 +710,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: pageMax != null
                 ? buildPageButtons(pageMax!)
                 : SizedBox(), // Affiche les boutons si pageMax n'est pas nulle
-          )
+          ),
         ],
       ),
     );
