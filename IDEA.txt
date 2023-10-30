@@ -1,0 +1,11 @@
+- RECHERCHES AVANCE FAIRE UN PANEL POUR L'INTERFACE PRINCIPAL
+- Genres ajouter un systeme qui verifie si il existe sur un autre genre
+- Systeme chapitre, episode, saison un
+- systeme comparaison 
+- systeme extraire pdf, csv
+- systeme objectifs lectures,jeux ... (mois, annee...)
+- Dashboard recapitulatif
+- created_at
+- updated_at
+- finish_at
+- mettre un Unique sur les noms en bdd 

@@ -1,8 +1,13 @@
-import 'Interfaces/add_update_media.dart';
-import 'Interfaces/home_screen.dart';
+import 'package:flutter_project_n1/Interfaces/media_dashboard.dart';
+
+import 'Interfaces/media_manager.dart';
+import 'Interfaces/media_index.dart';
+import 'Interfaces/home_page.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -13,12 +18,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'OFLINE',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: HomeScreen(),
+      home: HomePage(),
     );
   }
 }

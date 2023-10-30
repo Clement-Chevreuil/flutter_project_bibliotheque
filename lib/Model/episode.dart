@@ -1,43 +1,41 @@
 import 'dart:typed_data';
 import 'package:intl/intl.dart';
 
-class Media {
+class Episode {
+
   int? id;
+  int? id_saison;
   String? nom;
   Uint8List? image; // Utilisez Uint8List pour stocker des données binaires
   int? note;
   String? statut;
-  List<String>? genres;
+  String? description;
+  String? avis;
   DateTime? created_at; 
   DateTime? updated_at; 
 
-  List<int> saison_episode = [];
-
-  Media({
+  Episode({
     this.id,
+    this.id_saison,
     this.nom,
     this.image,
     this.note,
     this.statut,
-    this.genres,
+    this.description,
+    this.avis,
     this.created_at,
     this.updated_at,
   });
 
-  void updateSaisonEpisode(List<int> saison_episode) 
-  {
-    this.saison_episode = saison_episode; 
-  }
-
-  
-
   Map<String, dynamic> toMap() {
     return {
+      'id_saison': id_saison,
       'nom': nom,
       'image': image,
       'note': note,
       'statut': statut,
-      'genres': genres?.join(', ') ?? "",
+      'avis': avis,
+      'description': description,
       'created_at': created_at != null ? DateFormat("yyyy-MM-dd HH:mm:ss").format(created_at!) : null,
       'updated_at': updated_at != null ? DateFormat("yyyy-MM-dd HH:mm:ss").format(updated_at!) : null,
     };
