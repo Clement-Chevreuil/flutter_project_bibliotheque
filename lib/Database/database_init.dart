@@ -30,7 +30,7 @@ class DatabaseInit {
 
     final db = await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: (db, version) async {
         for (String tableName in tableNames) {
           await db.execute(

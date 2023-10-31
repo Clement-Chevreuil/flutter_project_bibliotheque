@@ -1,23 +1,12 @@
-import 'dart:ffi';
 import 'dart:typed_data';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:sqflite/sqflite.dart';
-
-import 'media_index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import '../Database/database_media.dart';
-import '../Database/database_genre.dart';
 import '../Database/database_init.dart';
 import '../Database/database_episode.dart';
-import '../Model/media.dart';
 import '../Model/episode.dart';
 import '../Logic/helper.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:toggle_switch/toggle_switch.dart';
+import '../Logic/interface_helper.dart';
 
 class EpisodeManager extends StatefulWidget {
   final Episode? episode;
@@ -33,7 +22,7 @@ class EpisodeManager extends StatefulWidget {
 class _EpisodeManagerState extends State<EpisodeManager> {
   final Episode? episode;
   final int? idSaison;
-
+   InterfaceHelper? interfaceHelper;
   final picker = ImagePicker();
   List<bool> _toggleValues = [false, false, false, false, false];
   final bdEpisode = DatabaseEpisode();
@@ -62,24 +51,32 @@ class _EpisodeManagerState extends State<EpisodeManager> {
       selectedImageUrl; // Ajoutez cette variable pour stocker l'URL de l'image sélectionnée
   DatabaseHelper databaseHelper = new DatabaseHelper();
   _EpisodeManagerState({this.episode, this.idSaison});
+    bool isInitComplete = false;
 
   @override
   void initState() {
     super.initState();
     _databaseInit = DatabaseInit();
 
+    String? nom; 
     if (episode != null) {
-      _controllerNom = TextEditingController(text: episode!.nom);
+      nom = episode!.nom;
       _selectedValue = episode!.statut != null ? episode!.statut! : "Fini";
       imageBytes = episode!.image;
       id = episode!.id;
       note = episode!.note != null ? episode!.note!.toDouble() : 0.0;
     }
+    interfaceHelper = InterfaceHelper(nom: nom, note: note, statut: "Fini", image: imageBytes);
+    isInitComplete = true;
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!isInitComplete) {
+      // Attendre que l'initialisation soit terminée
+      return CircularProgressIndicator(); // Ou tout autre indicateur de chargement
+    }
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -90,168 +87,7 @@ class _EpisodeManagerState extends State<EpisodeManager> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              GestureDetector(
-                onTap: () {
-                  // Ouvrez la boîte de dialogue des images lorsque vous cliquez sur l'image
-                  databaseHelper
-                      .openImagePicker(isImagePickerActive, picker)
-                      .then((value) => setState(() {
-                            this.imageBytes = Uint8List.fromList(value!);
-                            selectedImageUrl =
-                                null; // Réinitialisez selectedImageUrl à null
-                          }));
-                },
-                child: Container(
-                    width: double.infinity,
-                    height: 350, // Ajustez la hauteur selon vos besoins
-                    color: Colors.transparent,
-                    child: selectedImageUrl != null
-                        ? Stack(
-                            children: [
-                              Image.network(
-                                selectedImageUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  print('Error loading image: $error');
-                                  return Text('Image not available');
-                                },
-                              ),
-                            ],
-                          )
-                        : imageBytes != null
-                            ? Stack(
-                                children: [
-                                  Image.memory(imageBytes!), // Votre image
-                                ],
-                              )
-                            : Stack(
-                                children: [
-                                  Container(
-                                    color: Colors.grey,
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      'Image',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              )),
-              ),
-              Card(
-                color: Colors.transparent,
-                margin: EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8.0,
-                ),
-                elevation: 0,
-                child: Column(
-                  children: [
-                    Container(
-                      margin: EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        border: Border.all(
-                          color: Colors.black,
-                          width: 1.0,
-                        ),
-                        color: Colors.white,
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 16.0,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: "Recherche...",
-                                hintStyle: TextStyle(
-                                  color: Colors.black.withOpacity(0.5),
-                                ),
-                                border: InputBorder.none,
-                              ),
-                              controller: _controllerNom,
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(
-                              Icons.search,
-                              color: Colors.black,
-                            ),
-                            onPressed: _loadImagesAndShowPopup,
-                          ),
-                        ],
-                      ),
-                    ),
-                    RatingBar.builder(
-                      minRating: 0,
-                      itemSize: 46,
-                      itemBuilder: (context, _) => Icon(
-                        Icons.star,
-                        color: Colors.black,
-                      ),
-                      updateOnDrag: true,
-                      onRatingUpdate: (rating) => setState(() {
-                        note = rating;
-                        // Vous devrez peut-être adapter cela en fonction de votre code
-                        // Si 'rating' est lié à un état, sinon ignorez cette partie
-                      }),
-                      initialRating: 0,
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(2.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ToggleSwitch(
-                      minWidth: 40.0,
-                      minHeight: 40.0,
-                      cornerRadius: 5.0,
-                      inactiveFgColor: Colors.white,
-                      activeBgColors: [
-                        [Colors.white54],
-                        [Colors.white54],
-                        [Colors.white54],
-                        [Colors.white54],
-                      ],
-                      initialLabelIndex: 0,
-                      totalSwitches: 4,
-                      customIcons: [
-                        Icon(
-                          Icons.hourglass_empty,
-                          size: 20.0,
-                        ),
-                        Icon(
-                          Icons.check,
-                          size: 20.0,
-                        ),
-                        Icon(
-                          Icons.cancel_outlined,
-                          size: 20.0,
-                        ),
-                        Icon(
-                          Icons.star_border,
-                          size: 20.0,
-                        )
-                      ],
-                      onToggle: (index) {
-                        List<String> StatutList = [
-                          "En cours",
-                          "Fini",
-                          "Abandonnee",
-                          "Envie",
-                        ];
-                        _selectedValue = StatutList[index!];
-                      },
-                    ),
+              
                     Padding(
                       padding: const EdgeInsets.symmetric(
                           vertical: 8.0, horizontal: 16.0),
@@ -276,81 +112,78 @@ class _EpisodeManagerState extends State<EpisodeManager> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () async {
-                            if (_controllerNom.text == null || note == null) {
-                              // Affichez un message d'erreur et empêchez la création
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'Veuillez remplir tous les champs requis')),
-                              );
-                              return; // Arrêtez ici si les champs requis sont null
-                            }
+                        // ElevatedButton(
+                        //   onPressed: () async {
+                        //     if (_controllerNom.text == null || note == null) {
+                        //       // Affichez un message d'erreur et empêchez la création
+                        //       ScaffoldMessenger.of(context).showSnackBar(
+                        //         SnackBar(
+                        //             content: Text(
+                        //                 'Veuillez remplir tous les champs requis')),
+                        //       );
+                        //       return; // Arrêtez ici si les champs requis sont null
+                        //     }
 
-                            if (imageBytes == null &&
-                                selectedImageUrl != null) {
-                              print(selectedImageUrl!);
+                        //     if (imageBytes == null &&
+                        //         selectedImageUrl != null) {
+                        //       print(selectedImageUrl!);
 
-                              imageBytes = await databaseHelper
-                                  .downloadImage(selectedImageUrl!);
-                            }
+                        //       imageBytes = await databaseHelper
+                        //           .downloadImage(selectedImageUrl!);
+                        //     }
 
-                            if (imageBytes != null) {
-                              final imageSizeInBytes =
-                                  imageBytes!.lengthInBytes;
-                              final imageSizeInKB = imageSizeInBytes / 1024;
-                              final imageSizeInMB = imageSizeInKB / 1024;
+                        //     if (imageBytes != null) {
+                        //       final imageSizeInBytes =
+                        //           imageBytes!.lengthInBytes;
+                        //       final imageSizeInKB = imageSizeInBytes / 1024;
+                        //       final imageSizeInMB = imageSizeInKB / 1024;
 
-                              if (imageSizeInMB > 2) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          'La taille est trop Grande veuillez choisir une image plus petite.')),
-                                );
-                                return;
-                              }
-                            } else {
-                              final ByteData data = await rootBundle
-                                  .load('images/default_image.jpeg');
-                              final List<int> bytes = data.buffer.asUint8List();
-                              imageBytes = Uint8List.fromList(bytes);
-                            }
+                        //       if (imageSizeInMB > 2) {
+                        //         ScaffoldMessenger.of(context).showSnackBar(
+                        //           SnackBar(
+                        //               content: Text(
+                        //                   'La taille est trop Grande veuillez choisir une image plus petite.')),
+                        //         );
+                        //         return;
+                        //       }
+                        //     } else {
+                        //       final ByteData data = await rootBundle
+                        //           .load('images/default_image.jpeg');
+                        //       final List<int> bytes = data.buffer.asUint8List();
+                        //       imageBytes = Uint8List.fromList(bytes);
+                        //     }
 
-                            Episode book = Episode(
-                              nom: _controllerNom.text,
-                              image: imageBytes,
-                              note: note!.toInt(),
-                              avis: _avisController.text,
-                              description: _descriptionController.text,
-                              statut: _selectedValue,
-                            );
+                        //     Episode book = Episode(
+                        //       nom: _controllerNom.text,
+                        //       image: imageBytes,
+                        //       note: note!.toInt(),
+                        //       avis: _avisController.text,
+                        //       description: _descriptionController.text,
+                        //       statut: _selectedValue,
+                        //     );
 
-                            if (id != null) {
-                              book.id = id;
-                            }
-                            if (episode != null) {
-                              await bdEpisode.update(book);
-                            } else {
-                              // Insert the book into the database
-                              await bdEpisode.insert(book);
-                            }
-                            // Show a success message
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content:
-                                      Text('Episode created successfully')),
-                            );
-                            Navigator.of(context).pop();
-                          },
-                          child: Text("Create"),
-                        ),
+                        //     if (id != null) {
+                        //       book.id = id;
+                        //     }
+                        //     if (episode != null) {
+                        //       await bdEpisode.update(book);
+                        //     } else {
+                        //       // Insert the book into the database
+                        //       await bdEpisode.insert(book);
+                        //     }
+                        //     // Show a success message
+                        //     ScaffoldMessenger.of(context).showSnackBar(
+                        //       SnackBar(
+                        //           content:
+                        //               Text('Episode created successfully')),
+                        //     );
+                        //     Navigator.of(context).pop();
+                        //   },
+                        //   child: Text("Create"),
+                        // ),
                       ],
                     ),
                   ],
-                ),
-              ),
-            ],
           ),
         ),
       ),

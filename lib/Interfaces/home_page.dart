@@ -50,7 +50,6 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   late DatabaseInit _databaseInit;
 
-  
   final home = new MediaIndex("Series");
 
   final List<String> sidebarItems = [
@@ -62,7 +61,7 @@ class _HomePageState extends State<HomePage> {
     "Movies"
   ];
 
-    final List<String> ItemsTitle = [
+  final List<String> ItemsTitle = [
     "Series",
     "Animes",
     "Games",
@@ -85,12 +84,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _databaseInit = DatabaseInit();
-  
   }
 
-
-
-  
   static int _currentPage = 0;
   PageController _pageController = PageController();
   @override
@@ -120,19 +115,19 @@ class _HomePageState extends State<HomePage> {
                 padding: EdgeInsets.zero,
                 children: <Widget>[
                   DrawerHeader(
-  decoration: BoxDecoration(
-    color: Colors.blue,
-  ),
-  child: Center(
-    child: Text(
-      'Menu',
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 24,
-      ),
-    ),
-  ),
-),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Menu',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                        ),
+                      ),
+                    ),
+                  ),
                   for (int i = 0; i < sidebarItems.length; i++)
                     TextButton(
                       style: ButtonStyle(
@@ -147,33 +142,19 @@ class _HomePageState extends State<HomePage> {
                       ),
                       onPressed: () {
                         setState(() {
-                    
-                           selectedTableName = sidebarItems[i];
+                          selectedTableName = sidebarItems[i];
                           _changePage(i);
-
                         });
                         Navigator.pop(context);
                       },
-                      child: Row(
-                        children: [
-                          Icon(
-                            itemIcons[i], // Utilisez l'icône correspondante
-                            color: itemIcons[i] == selectedTableName
-                                ? Colors.blue
-                                : Colors.black, // Couleur de l'icône
-                          ),
-                          SizedBox(
-                              width: 8), // Espacement entre l'icône et le texte
-                          Text(
-                            sidebarItems[i],
-                            style: TextStyle(
-                              fontWeight: sidebarItems[i] == selectedTableName
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        sidebarItems[i],
+                        style: TextStyle(
+                          fontWeight: sidebarItems[i] == selectedTableName
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                 ],
@@ -223,39 +204,40 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: 
-          PageView(
-              controller: _pageController,
-              physics: NeverScrollableScrollPhysics(), 
-              onPageChanged: (page) {
-                setState(() {
-                  _currentPage = page;
-                });
-              },
-              children: <Widget>[
-                 MediaIndex("Series",),
-                  MediaIndex("Animes"),
-                  MediaIndex("Games"),
-                  MediaIndex("Webtoons"),
-                  MediaIndex("Books"),
-                  MediaIndex("Movies"),
-                  MediaDashboard( onPageChanged: (page) {
-    _changePage(page); // Appel de la fonction _changePage pour mettre à jour la page
-  },),
-                  MediaCompare(),
-              ],
-            ),
+      body: PageView(
+        controller: _pageController,
+        physics: NeverScrollableScrollPhysics(),
+        onPageChanged: (page) {
+          setState(() {
+            _currentPage = page;
+          });
+        },
+        children: <Widget>[
+          MediaIndex(
+            "Series",
+          ),
+          MediaIndex("Animes"),
+          MediaIndex("Games"),
+          MediaIndex("Webtoons"),
+          MediaIndex("Books"),
+          MediaIndex("Movies"),
+          MediaDashboard(
+            onPageChanged: (page) {
+              _changePage(
+                  page); // Appel de la fonction _changePage pour mettre à jour la page
+            },
+          ),
+          MediaCompare(),
+        ],
+      ),
     );
   }
 
-
-
-   Future replaceDatabase() async {
+  Future replaceDatabase() async {
     try {
-      // Sélectionner un fichier depuis l'appareil      
+      // Sélectionner un fichier depuis l'appareil
       FilePickerResult? result =
           await FilePicker.platform.pickFiles(type: FileType.any);
-
 
       if (result != null) {
         // Récupérer le fichier sélectionné

@@ -6,27 +6,11 @@ import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import '../Database/database_media.dart';
-import '../Database/database_genre.dart';
-import '../Database/database_init.dart';
-import '../Database/database_saison.dart';
-import '../Database/database_episode.dart';
-import '../Model/media.dart';
-import '../Model/saison.dart';
-import '../Model/episode.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:toggle_switch/toggle_switch.dart';
-
-import '../Database/database_media.dart';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
-import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
-import '../Model/media.dart';
+
 
 
 class DatabaseHelper {
