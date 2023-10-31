@@ -11,7 +11,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:toggle_switch/toggle_switch.dart';
-import '../Logic/helper.dart';
+import 'function_helper.dart';
 
 class InterfaceHelper extends StatefulWidget {
   String? nom;
@@ -77,7 +77,7 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
   String _selectedValue = "Fini";
  
 
-  DatabaseHelper help = new DatabaseHelper();
+  FunctionHelper help = new FunctionHelper();
   bool isImagePickerActive = false;
   final picker = ImagePicker();
   String? selectedImageUrl;

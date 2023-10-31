@@ -18,7 +18,7 @@ import '../Database/database_genre.dart';
 import '../Database/database_reader.dart';
 import '../Database/database_init.dart';
 import '../Model/saison.dart';
-import '../Logic/helper.dart';
+import '../Logic/function_helper.dart';
 
 import 'genres_index.dart';
 import 'episode_index.dart';
@@ -63,6 +63,9 @@ class _SaisonIndexState extends State<SaisonIndex> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Saison Manager'),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(

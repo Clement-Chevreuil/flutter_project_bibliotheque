@@ -4,7 +4,7 @@ import 'media_manager.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../Logic/helper.dart';
+import '../Logic/function_helper.dart';
 import '../Database/database_genre.dart';
 import '../Model/genre.dart';
 import 'package:path_provider/path_provider.dart';

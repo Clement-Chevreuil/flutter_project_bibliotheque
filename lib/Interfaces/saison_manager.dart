@@ -1,12 +1,12 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import '../Database/database_init.dart';
 import '../Database/database_saison.dart';
 import '../Database/database_episode.dart';
 import '../Model/saison.dart';
-import '../Logic/helper.dart';
+import '../Model/episode.dart';
+import '../Logic/function_helper.dart';
 import '../Logic/interface_helper.dart';
 
 class SaisonManager extends StatefulWidget {
@@ -24,8 +24,6 @@ class _SaisonManagerState extends State<SaisonManager> {
 
   final Saison? mediaParam;
   final String? tableName;
-  final picker = ImagePicker();
-  List<bool> _toggleValues = [false, false, false, false, false];
   final bdSaison = DatabaseSaison();
   final bdEpisode = DatabaseEpisode();
   String _selectedValue = "Fini";
@@ -33,22 +31,18 @@ class _SaisonManagerState extends State<SaisonManager> {
   int? id = null;
   Uint8List? imageBytes;
   List<bool> isSelected = List.generate(9, (index) => false);
-  List<bool> _selections = [];
   bool isImagePickerActive = false;
   TextEditingController _controllerNom = TextEditingController(text: '');
-  TextEditingController _controllerNote = TextEditingController(text: '');
   TextEditingController _avisController = TextEditingController(text: '');
   TextEditingController _descriptionController = TextEditingController(text: '');
   List<String> imageUrls = [];
   TextEditingController _textControllers = TextEditingController();
   bool isImageDialogOpen = false; 
   late DatabaseInit _databaseInit;
-  late DatabaseEpisode _databaseEpisode;
-  late DatabaseSaison _databaseSaison;
   bool isInitComplete = false;
   InterfaceHelper? interfaceHelper;
   String? selectedImageUrl;
-  DatabaseHelper databaseHelper = new DatabaseHelper();
+  FunctionHelper databaseHelper = new FunctionHelper();
   _SaisonManagerState({this.mediaParam, this.tableName});
 
   @override
@@ -82,7 +76,7 @@ class _SaisonManagerState extends State<SaisonManager> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Menu Example'),
+        title: Text('Saison Manager'),
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -143,92 +137,97 @@ class _SaisonManagerState extends State<SaisonManager> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(width: 10),
-                  // ElevatedButton(
-                  //   onPressed: () async {
-                  //     if (_controllerNom.text == null || note == null) {
-                  //       // Affichez un message d'erreur et empêchez la création
-                  //       ScaffoldMessenger.of(context).showSnackBar(
-                  //         SnackBar(
-                  //             content: Text(
-                  //                 'Veuillez remplir tous les champs requis')),
-                  //       );
-                  //       return; // Arrêtez ici si les champs requis sont null
-                  //     }
+                  ElevatedButton(
+                    onPressed: () async {
+                       String? nom = await interfaceHelper!.getNom();
+                        Uint8List? imageBytes =
+                            await interfaceHelper!.getImage();
+                        String? selectedImageUrl =
+                            await interfaceHelper!.getImageLink();
+                        double? note = await interfaceHelper!.getNote();
+                        String? statut = await interfaceHelper!.getStatut();
 
-                  //     if (imageBytes == null &&
-                  //         selectedImageUrl != null) {
-                  //       print(selectedImageUrl!);
+                      if (nom == null ) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content: Text(
+                                  'Veuillez remplir tous les champs requis')),
+                        );
+                        return; // Arrêtez ici si les champs requis sont null
+                      }
 
-                  //       imageBytes = await databaseHelper
-                  //           .downloadImage(selectedImageUrl!);
-                  //     }
+                      if (imageBytes == null &&
+                          selectedImageUrl != null) {
+                        imageBytes = await databaseHelper
+                            .downloadImage(selectedImageUrl!);
+                      }
 
-                  //     if (imageBytes != null) {
-                  //       final imageSizeInBytes =
-                  //           imageBytes!.lengthInBytes;
-                  //       final imageSizeInKB = imageSizeInBytes / 1024;
-                  //       final imageSizeInMB = imageSizeInKB / 1024;
+                      if (imageBytes != null) {
+                        final imageSizeInBytes =
+                            imageBytes!.lengthInBytes;
+                        final imageSizeInKB = imageSizeInBytes / 1024;
+                        final imageSizeInMB = imageSizeInKB / 1024;
 
-                  //       if (imageSizeInMB > 2) {
-                  //         ScaffoldMessenger.of(context).showSnackBar(
-                  //           SnackBar(
-                  //               content: Text(
-                  //                   'La taille est trop Grande veuillez choisir une image plus petite.')),
-                  //         );
-                  //         return;
-                  //       }
-                  //     } else {
-                  //       final ByteData data = await rootBundle
-                  //           .load('images/default_image.jpeg');
-                  //       final List<int> bytes = data.buffer.asUint8List();
-                  //       imageBytes = Uint8List.fromList(bytes);
-                  //     }
+                        if (imageSizeInMB > 2) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(
+                                    'La taille est trop Grande veuillez choisir une image plus petite.')),
+                          );
+                          return;
+                        }
+                      } else {
+                        final ByteData data = await rootBundle
+                            .load('images/default_image.jpeg');
+                        final List<int> bytes = data.buffer.asUint8List();
+                        imageBytes = Uint8List.fromList(bytes);
+                      }
 
-                  //     Saison book = Saison(
-                  //       nom: _controllerNom.text,
-                  //       image: imageBytes,
-                  //       note: note!.toInt(),
-                  //       avis: _avisController.text,
-                  //       description: _descriptionController.text,
-                  //       statut: _selectedValue,
-                  //     );
+                      Saison book = Saison(
+                        nom: nom,
+                        image: imageBytes,
+                        note: note!.toInt(),
+                        avis: _avisController.text,
+                        description: _descriptionController.text,
+                        statut: statut,
+                      );
 
-                  //     if (id != null) {
-                  //       book.id = id;
-                  //     }
-                  //     if (mediaParam != null) {
-                  //       await bdSaison.update(book);
-                  //     } else {
-                  //       // Insert the book into the database
-                  //       int idSaison = await bdSaison.insert(book);
-                  //       if (id == null) {
-                  //         final ByteData data = await rootBundle
-                  //             .load('images/default_image.jpeg');
-                  //         final List<int> bytes =
-                  //             data.buffer.asUint8List();
-                  //         Uint8List imageBytesTest =
-                  //             Uint8List.fromList(bytes);
-                  //         await bdSaison.insert(book);
-                  //         for (int j = 0;
-                  //             j < int.parse(_textControllers.text);
-                  //             j++) {
-                  //           Episode episode = new Episode();
-                  //           episode.id_saison = idSaison;
-                  //           episode.nom = "Episode " + j.toString();
-                  //           episode.image = imageBytesTest;
-                  //           await bdEpisode.insert(episode);
-                  //         }
-                  //       }
-                  //     }
-                  //     // Show a success message
-                  //     ScaffoldMessenger.of(context).showSnackBar(
-                  //       SnackBar(
-                  //           content: Text('Saison created successfully')),
-                  //     );
-                  //     Navigator.of(context).pop();
-                  //   },
-                  //   child: Text("Create"),
-                  // ),
+                      if (id != null) {
+                        book.id = id;
+                      }
+                      if (mediaParam != null) {
+                        await bdSaison.update(book);
+                      } else {
+                        // Insert the book into the database
+                        int idSaison = await bdSaison.insert(book);
+                        if (id == null) {
+                          final ByteData data = await rootBundle
+                              .load('images/default_image.jpeg');
+                          final List<int> bytes =
+                              data.buffer.asUint8List();
+                          Uint8List imageBytesTest =
+                              Uint8List.fromList(bytes);
+                          await bdSaison.insert(book);
+                          for (int j = 0;
+                              j < int.parse(_textControllers.text);
+                              j++) {
+                            Episode episode = new Episode();
+                            episode.id_saison = idSaison;
+                            episode.nom = "Episode " + j.toString();
+                            episode.image = imageBytesTest;
+                            await bdEpisode.insert(episode);
+                          }
+                        }
+                      }
+                      // Show a success message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Text('Saison created successfully')),
+                      );
+                      Navigator.of(context).pop();
+                    },
+                    child: id != null ? Text("Update") : Text("Create"),
+                  ),
                 ],
               ),
             ],

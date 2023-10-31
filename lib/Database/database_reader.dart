@@ -7,7 +7,7 @@ import 'package:flutter_project_n1/Interfaces/genres_index.dart';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../Logic/helper.dart';
+import '../Logic/function_helper.dart';
 import '../Database/database_media.dart';
 import '../Database/database_genre.dart';
 import '../Model/media.dart';

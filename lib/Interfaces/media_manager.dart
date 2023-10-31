@@ -1,8 +1,5 @@
-import 'dart:typed_data';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import '../Database/database_media.dart';
 import '../Database/database_genre.dart';
 import '../Database/database_init.dart';
@@ -11,9 +8,8 @@ import '../Database/database_episode.dart';
 import '../Model/media.dart';
 import '../Model/saison.dart';
 import '../Model/episode.dart';
-import '../Logic/helper.dart';
+import '../Logic/function_helper.dart';
 import '../Logic/interface_helper.dart';
-import 'package:toggle_switch/toggle_switch.dart';
 
 class MediaManager extends StatefulWidget {
   final Media? mediaParam;
@@ -22,7 +18,8 @@ class MediaManager extends StatefulWidget {
   MediaManager({this.mediaParam, required this.tableName});
 
   @override
-  _MediaManagerState createState() => _MediaManagerState(mediaParam: mediaParam, tableName: tableName);
+  _MediaManagerState createState() =>
+      _MediaManagerState(mediaParam: mediaParam, tableName: tableName);
 }
 
 class _MediaManagerState extends State<MediaManager> {
@@ -31,26 +28,20 @@ class _MediaManagerState extends State<MediaManager> {
   final bdSaison = DatabaseSaison();
   final bdEpisode = DatabaseEpisode();
   late DatabaseInit _databaseInit;
-  late DatabaseEpisode _databaseEpisode;
-  late DatabaseSaison _databaseSaison;
-  DatabaseHelper help = new DatabaseHelper();
-
-  final Media? mediaParam;
-  final String? tableName;
+  FunctionHelper help = new FunctionHelper();
+  Media? mediaParam;
+  String? tableName;
   int? id = null;
   bool isInitComplete = false;
-
   List<bool> _selections = [];
   List<String> genres = [];
-  TextEditingController _controllerSaison = TextEditingController();
-  List<TextEditingController> _textControllers = [];
-
   List<String> _selectionsGenres = [];
   List<String> _selectionsGenresSelected = [];
-
+  List<TextEditingController> _textControllers = [];
+  TextEditingController _controllerSaison = TextEditingController();
 
   _MediaManagerState({this.mediaParam, this.tableName});
-  InterfaceHelper? interfaceHelper ;
+  InterfaceHelper? interfaceHelper;
   @override
   void initState() {
     super.initState();
@@ -80,7 +71,8 @@ class _MediaManagerState extends State<MediaManager> {
         id = mediaParam!.id;
         note = mediaParam!.note!.toDouble();
       }
-      interfaceHelper = InterfaceHelper(nom : nom, note: note, statut: "Fini", image: imageBytes);
+      interfaceHelper = InterfaceHelper(
+          nom: nom, note: note, statut: "Fini", image: imageBytes);
       isInitComplete = true;
       setState(() {});
     });
@@ -88,12 +80,11 @@ class _MediaManagerState extends State<MediaManager> {
 
   @override
   Widget build(BuildContext context) {
-
-     if (!isInitComplete) {
+    if (!isInitComplete) {
       // Attendre que l'initialisation soit terminée
       return CircularProgressIndicator(); // Ou tout autre indicateur de chargement
     }
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -104,7 +95,6 @@ class _MediaManagerState extends State<MediaManager> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-             
               Padding(
                 padding: const EdgeInsets.all(2.0),
                 child: Column(
@@ -178,15 +168,11 @@ class _MediaManagerState extends State<MediaManager> {
                     Padding(
                       padding: EdgeInsets.all(16.0),
                       child: Card(
-                        elevation:
-                            4.0, // Ajoutez une élévation à la Card si vous le souhaitez
+                        elevation: 4.0,
                         child: Column(children: [
                           ExpansionTile(
                             title: Text("Genres"),
-
-                            initiallyExpanded:
-                                false, // Vous pouvez changer ceci selon vos besoins
-
+                            initiallyExpanded: false,
                             children: [
                               ElevatedButton(
                                   onPressed: null, child: Text("Ajouter")),
@@ -249,114 +235,110 @@ class _MediaManagerState extends State<MediaManager> {
                       children: [
                         SizedBox(width: 10),
                         ElevatedButton(
-                          
                           onPressed: () async {
-                           
-                            if (interfaceHelper != null) {
-                              print( await interfaceHelper?.getNom());
+                            String? nom = await interfaceHelper!.getNom();
+                            Uint8List? imageBytes =
+                                await interfaceHelper!.getImage();
+                            String? selectedImageUrl =
+                                await interfaceHelper!.getImageLink();
+                            double? note = await interfaceHelper!.getNote();
+                            String? statut = await interfaceHelper!.getStatut();
+
+                            if (nom == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Veuillez remplir tous les champs requis')),
+                              );
+                              return;
                             }
-                            return;
-                            // if (_controllerNom.text == null || note == null) {
-                            //   // Affichez un message d'erreur et empêchez la création
-                            //   ScaffoldMessenger.of(context).showSnackBar(
-                            //     SnackBar(
-                            //         content: Text(
-                            //             'Veuillez remplir tous les champs requis')),
-                            //   );
-                            //   return; // Arrêtez ici si les champs requis sont null
-                            // }
+                            if (imageBytes == null &&
+                                selectedImageUrl != null) {
+                              imageBytes =
+                                  await help.downloadImage(selectedImageUrl!);
+                            }
+                            if (imageBytes != null) {
+                              final imageSizeInBytes =
+                                  imageBytes!.lengthInBytes;
+                              final imageSizeInKB = imageSizeInBytes / 1024;
+                              final imageSizeInMB = imageSizeInKB / 1024;
 
-                            // if (imageBytes == null &&
-                            //     selectedImageUrl != null) {
-                            //   print(selectedImageUrl!);
+                              if (imageSizeInMB > 2) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          'La taille est trop Grande veuillez choisir une image plus petite.')),
+                                );
+                                return;
+                              }
+                            } else {
+                              final ByteData data = await rootBundle
+                                  .load('images/default_image.jpeg');
+                              final List<int> bytes = data.buffer.asUint8List();
+                              imageBytes = Uint8List.fromList(bytes);
+                            }
 
-                            //   imageBytes = await help.downloadImage(selectedImageUrl!);
-                            // }
+                            // Create a Media instance with the data from UI
+                            Media book = Media(
+                                nom: nom,
+                                image:
+                                    imageBytes, // Uint8List from the image picker
+                                note: note == null ? 0 : note!.toInt(),
+                                statut: statut,
+                                genres: _selectionsGenresSelected);
 
-                            // if (imageBytes != null) {
-                            //   final imageSizeInBytes =
-                            //       imageBytes!.lengthInBytes;
-                            //   final imageSizeInKB = imageSizeInBytes / 1024;
-                            //   final imageSizeInMB = imageSizeInKB / 1024;
+                            List<int> intList =
+                                _textControllers.map((controller) {
+                              int parsedValue =
+                                  int.tryParse(controller.text) ?? 0;
+                              return parsedValue;
+                            }).toList();
 
-                            //   if (imageSizeInMB > 2) {
-                            //     ScaffoldMessenger.of(context).showSnackBar(
-                            //       SnackBar(
-                            //           content: Text(
-                            //               'La taille est trop Grande veuillez choisir une image plus petite.')),
-                            //     );
-                            //     return;
-                            //   }
-                            // } else {
-                            //   final ByteData data = await rootBundle
-                            //       .load('images/default_image.jpeg');
-                            //   final List<int> bytes = data.buffer.asUint8List();
-                            //   imageBytes = Uint8List.fromList(bytes);
-                            // }
+                            book.updateSaisonEpisode(intList);
 
-                            // // Create a Media instance with the data from UI
-                            // Media book = Media(
-                            //     nom:
-                            //         _controllerNom.text, // Name from TextField,
-                            //     image:
-                            //         imageBytes, // Uint8List from the image picker
-                            //     note: note!.toInt(),
-                            //     statut: "Fini",
-                            //     genres: _selectionsGenresSelected);
+                            if (id != null) {
+                              book.id = id;
+                            }
+                            if (mediaParam != null) {
+                              await bdMedia.updateMedia(book);
+                            } else {
+                              // Insert the book into the database
+                              int idMedia = await bdMedia.insertMedia(book);
+                              if (id == null) {
+                                List<int> idSaison = [];
 
-                            // List<int> intList =
-                            //     _textControllers.map((controller) {
-                            //   int parsedValue = int.tryParse(controller.text) ??
-                            //       0; // Use 0 as a default if parsing fails
-                            //   return parsedValue;
-                            // }).toList();
+                                final ByteData data = await rootBundle
+                                    .load('images/default_image.jpeg');
+                                final List<int> bytes =
+                                    data.buffer.asUint8List();
+                                Uint8List imageBytesTest =
+                                    Uint8List.fromList(bytes);
 
-                            // book.updateSaisonEpisode(intList);
+                                for (int i = 1; i < intList.length + 1; i++) {
+                                  Saison saison = new Saison();
+                                  saison.id_media = idMedia;
+                                  saison.nom = "Saison " + i.toString();
+                                  saison.image = imageBytesTest;
+                                  saison.media = tableName;
+                                  int idSaison = await bdSaison.insert(saison);
 
-                            // if (id != null) {
-                            //   book.id = id;
-                            // }
-                            // if (mediaParam != null) {
-                            //   await bdMedia.updateMedia(book);
-                            // } else {
-                            //   // Insert the book into the database
-                            //   int idMedia = await bdMedia.insertMedia(book);
-                            //   if (id == null) {
-                            //     List<int> idSaison = [];
-
-                            //     final ByteData data = await rootBundle
-                            //         .load('images/default_image.jpeg');
-                            //     final List<int> bytes =
-                            //         data.buffer.asUint8List();
-                            //     Uint8List imageBytesTest =
-                            //         Uint8List.fromList(bytes);
-
-                            //     for (int i = 1; i < intList.length + 1; i++) {
-                            //       Saison saison = new Saison();
-                            //       saison.id_media = idMedia;
-                            //       saison.nom = "Saison " + i.toString();
-                            //       saison.image = imageBytesTest;
-                            //       saison.media = tableName;
-                            //       int idSaison = await bdSaison.insert(saison);
-
-                            //       for (int j = 0; j < intList[i - 1]; j++) {
-                            //         Episode episode = new Episode();
-                            //         episode.id_saison = idSaison;
-                            //         episode.nom = "Episode " + j.toString();
-                            //         episode.image = imageBytesTest;
-                            //         await bdEpisode.insert(episode);
-                            //       }
-                            //    }
-                            //  } 
-                            //}
-                            // Show a success message
+                                  for (int j = 0; j < intList[i - 1]; j++) {
+                                    Episode episode = new Episode();
+                                    episode.id_saison = idSaison;
+                                    episode.nom = "Episode " + j.toString();
+                                    episode.image = imageBytesTest;
+                                    await bdEpisode.insert(episode);
+                                  }
+                                }
+                              }
+                            }
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                   content: Text('Media created successfully')),
                             );
                             Navigator.of(context).pop();
                           },
-                          child: Text("Create"),
+                          child: id != null ? Text("Update") : Text("Create"),
                         ),
                       ],
                     ),
@@ -370,13 +352,9 @@ class _MediaManagerState extends State<MediaManager> {
     );
   }
 
-
-
   Future<void> fetchData() async {
     _selectionsGenres = await bdGenre.getGenresList(tableName, "");
     print(_selectionsGenres);
     // Utilisez genresList comme vous le souhaitez ici
   }
-
-  
 }

@@ -19,7 +19,7 @@ import '../Database/database_init.dart';
 import '../Model/media.dart';
 import '../Model/media_dual.dart';
 import '../Model/genre.dart';
-import '../Logic/helper.dart';
+import '../Logic/function_helper.dart';
 
 import 'genres_index.dart';
 

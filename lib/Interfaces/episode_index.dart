@@ -21,7 +21,7 @@ import '../Database/database_episode.dart';
 import '../Database/database_init.dart';
 import '../Model/saison.dart';
 import '../Model/episode.dart';
-import '../Logic/helper.dart';
+import '../Logic/function_helper.dart';
 
 import 'genres_index.dart';
 import 'episode_manager.dart';
@@ -62,6 +62,9 @@ class _EpisodeIndexState extends State<EpisodeIndex> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Episode Index'),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(

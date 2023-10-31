@@ -18,7 +18,7 @@ import '../Database/database_genre.dart';
 import '../Database/database_reader.dart';
 import '../Database/database_init.dart';
 import '../Model/media.dart';
-import '../Logic/helper.dart';
+import '../Logic/function_helper.dart';
 
 import 'genres_index.dart';
 

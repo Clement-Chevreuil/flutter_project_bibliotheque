@@ -13,7 +13,7 @@ import 'package:path/path.dart' as p;
 
 
 
-class DatabaseHelper {
+class FunctionHelper {
   String myBDD = 'maBDD3.db';
 
   Future<void> exportDatabase(BuildContext context) async {
@@ -132,5 +132,10 @@ class DatabaseHelper {
       // );
       return null;
     }
+  }
+
+  Future<bool> imageVerification() async
+  {
+    return true;
   }
 }

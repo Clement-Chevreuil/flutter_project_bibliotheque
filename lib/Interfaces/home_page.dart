@@ -1,31 +1,13 @@
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_project_n1/Interfaces/media_compare.dart';
 import 'package:flutter_project_n1/Interfaces/media_dashboard.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
-import 'package:getwidget/getwidget.dart';
-import 'media_manager.dart';
-import 'dart:typed_data';
 import 'dart:io';
-
-import '../Database/database_media.dart';
-import '../Database/database_genre.dart';
-import '../Database/database_reader.dart';
 import '../Database/database_init.dart';
-import '../Model/media.dart';
-import '../Logic/helper.dart';
-
-import 'genres_index.dart';
-import 'package:flutter/material.dart';
-import 'media_dashboard.dart'; // Importez le fichier page1.dart
-import 'media_compare.dart';
 import 'media_index.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(MyApp());
@@ -86,7 +68,7 @@ class _HomePageState extends State<HomePage> {
     _databaseInit = DatabaseInit();
   }
 
-  static int _currentPage = 0;
+  static int _currentPage = 6;
   PageController _pageController = PageController();
   @override
   void dispose() {
