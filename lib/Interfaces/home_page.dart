@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_project_n1/Interfaces/media_compare.dart';
 import 'package:flutter_project_n1/Interfaces/media_dashboard.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_project_n1/Interfaces/utilisateur_manager.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
 import 'dart:io';
@@ -44,14 +45,15 @@ class _HomePageState extends State<HomePage> {
   ];
 
   final List<String> ItemsTitle = [
+    "Dashboard",
     "Series",
     "Animes",
     "Games",
     "Webtoons",
     "Books",
     "Movies",
-    "Dashboard",
     "Compare",
+    "Parametres",
   ];
   List<IconData> itemIcons = [
     Icons.movie,
@@ -68,7 +70,7 @@ class _HomePageState extends State<HomePage> {
     _databaseInit = DatabaseInit();
   }
 
-  static int _currentPage = 6;
+  static int _currentPage = 0;
   PageController _pageController = PageController();
   @override
   void dispose() {
@@ -125,7 +127,7 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () {
                         setState(() {
                           selectedTableName = sidebarItems[i];
-                          _changePage(i);
+                          _changePage(i + 1);
                         });
                         Navigator.pop(context);
                       },
@@ -150,11 +152,21 @@ class _HomePageState extends State<HomePage> {
                     onPressed: () {
                       activeMediaIndex = false;
                       setState(() {
-                        _changePage(6);
+                        _changePage(0);
                       });
                       Navigator.pop(context);
                     },
                     child: Text("Dashboard"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      activeMediaIndex = false;
+                      setState(() {
+                        _changePage(8);
+                      });
+                      Navigator.pop(context);
+                    },
+                    child: Text("Parametres"),
                   ),
                   TextButton(
                     onPressed: () {
@@ -180,6 +192,7 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Text("Remplacer BDD"),
                   ),
+                  
                 ],
               ),
             ),
@@ -195,6 +208,12 @@ class _HomePageState extends State<HomePage> {
           });
         },
         children: <Widget>[
+          MediaDashboard(
+            onPageChanged: (page) {
+              _changePage(
+                  page); // Appel de la fonction _changePage pour mettre à jour la page
+            },
+          ),
           MediaIndex(
             "Series",
           ),
@@ -203,13 +222,9 @@ class _HomePageState extends State<HomePage> {
           MediaIndex("Webtoons"),
           MediaIndex("Books"),
           MediaIndex("Movies"),
-          MediaDashboard(
-            onPageChanged: (page) {
-              _changePage(
-                  page); // Appel de la fonction _changePage pour mettre à jour la page
-            },
-          ),
+          
           MediaCompare(),
+          UtilisateurManager(),
         ],
       ),
     );

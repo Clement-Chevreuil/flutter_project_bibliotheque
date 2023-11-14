@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_project_n1/Model/utilisateur.dart';
 
 import 'dart:io';
 
@@ -20,6 +21,7 @@ class DatabaseInit {
     "Movies"
   ];
   static Database? _database;
+  static Utilisateur? _utilisateur;
 
   Future<Database> initDatabase([String? name]) async {
     if (name != null) {
@@ -30,7 +32,7 @@ class DatabaseInit {
 
     final db = await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: (db, version) async {
         for (String tableName in tableNames) {
           await db.execute(
@@ -46,19 +48,38 @@ class DatabaseInit {
         await db.execute(
           "CREATE TABLE Genre (ID INTEGER PRIMARY KEY, Nom TEXT, Media TEXT)",
         );
+         await db.execute(
+          "CREATE TABLE Utilisateur (ID INTEGER PRIMARY KEY, Episode INTEGER, Saison INTEGER, created_at DATETIME, updated_at DATETIME NULL)",
+        );
+        await db.execute(
+           "INSERT INTO Utilisateur (Episode, Saison, created_at) VALUES (1, 1, CURRENT_TIMESTAMP)"
+        );
       },
       onUpgrade: (db, oldVersion, newVersion) async {
+        await db.execute(
+          "CREATE TABLE Utilisateur (ID INTEGER PRIMARY KEY, Episode INTEGER, Saison INTEGER, created_at DATETIME, updated_at DATETIME NULL)",
+        );
+        await db.execute(
+          "INSERT INTO Utilisateur (Episode, Saison, created_at) VALUES (1, 1, CURRENT_TIMESTAMP)"
+        );
       },
     );
+
     return db;
   }
 
   static Future<Database> get database async {
     if (_database != null) return _database!;
 
-    _database = await DatabaseInit()
-        .initDatabase(); // Utilisez le constructeur pour initialiser la base de données.
+    _database = await DatabaseInit().initDatabase(); // Utilisez le constructeur pour initialiser la base de données.
     return _database!;
+  }
+
+    static Future<Utilisateur> get utilisateur async {
+    if (_utilisateur != null) return _utilisateur!;
+
+    _utilisateur = await DatabaseInit().get(); // Utilisez le constructeur pour initialiser la base de données.
+    return _utilisateur!;
   }
   
 
@@ -92,6 +113,39 @@ class DatabaseInit {
       throw Exception('La base de données source n\'existe pas.');
     }
   }
+  }
+
+    static Future<void> update(Utilisateur book) async {
+    book.updated_at = DateTime.now();
+
+    await _database!.update(
+      "Utilisateur",
+      book.toMap(),
+      where: "id = 1",
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+    _utilisateur = book;
+  }
+
+  Future<Utilisateur?> get() async {
+    final List<Map<String, dynamic>> maps =
+        await _database!.query("Utilisateur", where: 'id = ?', whereArgs: [1]);
+
+    if (maps.isNotEmpty) {
+      Map<String, dynamic> map = maps.first;
+      return Utilisateur(
+        id: map['ID'],
+        episode: map['Episode'],
+        saison: map['Saison'],
+        created_at: DateTime.parse(map['created_at']),
+        updated_at: map['updated_at'] != null
+            ? DateTime.parse(map['updated_at'])
+            : null,
+      );
+    } else {
+      return null; // Media with the specified ID not found
+    }
   }
 
 }

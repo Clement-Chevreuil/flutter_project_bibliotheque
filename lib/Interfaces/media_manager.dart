@@ -8,6 +8,7 @@ import '../Database/database_episode.dart';
 import '../Model/media.dart';
 import '../Model/saison.dart';
 import '../Model/episode.dart';
+import '../Model/utilisateur.dart';
 import '../Logic/function_helper.dart';
 import '../Logic/interface_helper.dart';
 
@@ -39,6 +40,7 @@ class _MediaManagerState extends State<MediaManager> {
   List<String> _selectionsGenresSelected = [];
   List<TextEditingController> _textControllers = [];
   TextEditingController _controllerSaison = TextEditingController();
+  Utilisateur? utilisateur;
 
   _MediaManagerState({this.mediaParam, this.tableName});
   InterfaceHelper? interfaceHelper;
@@ -75,6 +77,7 @@ class _MediaManagerState extends State<MediaManager> {
           nom: nom, note: note, statut: "Fini", image: imageBytes);
       isInitComplete = true;
       setState(() {});
+      getUtilisateur();
     });
   }
 
@@ -108,6 +111,7 @@ class _MediaManagerState extends State<MediaManager> {
                           elevation:
                               4.0, // Ajoutez une élévation à la Card si vous le souhaitez
                           child: Column(children: [
+                            if(utilisateur!.saison == 1)
                             ExpansionTile(
                               title: Text("Saison - Episodes"),
                               initiallyExpanded:
@@ -137,6 +141,7 @@ class _MediaManagerState extends State<MediaManager> {
                                     setState(() {}); // Refresh the UI
                                   },
                                 ),
+                                if(utilisateur!.episode == 1)
                                 SingleChildScrollView(
                                   child: SizedBox(
                                     height: 200,
@@ -149,7 +154,7 @@ class _MediaManagerState extends State<MediaManager> {
                                             controller: _textControllers[index],
                                             keyboardType: TextInputType.text,
                                             decoration: InputDecoration(
-                                              labelText: 'Text $index',
+                                              labelText: "Nombre d'episode : $index",
                                             ),
                                           ),
                                         );
@@ -355,6 +360,11 @@ class _MediaManagerState extends State<MediaManager> {
   Future<void> fetchData() async {
     _selectionsGenres = await bdGenre.getGenresList(tableName, "");
     print(_selectionsGenres);
+    // Utilisez genresList comme vous le souhaitez ici
+  }
+
+  Future<Utilisateur?> getUtilisateur() async {
+    utilisateur = await DatabaseInit.utilisateur;
     // Utilisez genresList comme vous le souhaitez ici
   }
 }

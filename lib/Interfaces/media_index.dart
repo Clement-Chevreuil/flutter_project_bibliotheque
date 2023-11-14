@@ -244,15 +244,15 @@ class _MediaIndexState extends State<MediaIndex> {
 
                         return GestureDetector(
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => SaisonIndex(
-                                    mediaParam1: tableName,
-                                    idSaison: book.id,
-                                  ),
-                                ),
-                              );
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (context) => SaisonIndex(
+                              //       mediaParam1: tableName,
+                              //       idSaison: book.id,
+                              //     ),
+                              //   ),
+                              // );
                               // Handle the click on the Card here
                               print('Card Clicked');
                             },
