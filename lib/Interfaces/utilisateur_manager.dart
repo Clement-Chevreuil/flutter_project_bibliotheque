@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../Database/database_init.dart';
-import '../Database/database_utilisateur.dart';
 import '../Model/utilisateur.dart';
 import '../Logic/function_helper.dart';
 import '../Logic/interface_helper.dart';
@@ -15,7 +14,6 @@ class UtilisateurManager extends StatefulWidget {
 
 class _UtilisateurManagerState extends State<UtilisateurManager> {
   InterfaceHelper? interfaceHelper;
-  final bdUtilisateur = DatabaseUtilisateur();
   late DatabaseInit _databaseInit;
   FunctionHelper databaseHelper = new FunctionHelper();
   _UtilisateurManagerState();

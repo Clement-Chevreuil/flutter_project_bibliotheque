@@ -9,24 +9,33 @@ class DatabaseGenre {
 
 
 
-  Future<void> insert(Genre genre) async {
+  Future<int?> insert(Genre genre) async {
     final db = await dbProvider;
-    await db.insert(
+    int id = await db.insert(
       "Genre",
       genre.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      conflictAlgorithm: ConflictAlgorithm.ignore,
     );
+
+    return id;
+  
+
   }
 
-  Future<void> update(Genre genre) async {
+  Future<int?> update(Genre genre) async {
   final db = await dbProvider;
-  await db.update(
+
+
+  int id = await db.update(
     "Genre",
     genre.toMap(),
     where: "ID = ?",
     whereArgs: [genre.id],
-    conflictAlgorithm: ConflictAlgorithm.replace,
+    conflictAlgorithm: ConflictAlgorithm.ignore,
   );
+
+  return id;
+
 }
  
     Future<Genre?> getGenresWithID(int id) async {

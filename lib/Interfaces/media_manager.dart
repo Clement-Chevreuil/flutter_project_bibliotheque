@@ -305,10 +305,36 @@ class _MediaManagerState extends State<MediaManager> {
                               book.id = id;
                             }
                             if (mediaParam != null) {
-                              await bdMedia.updateMedia(book);
+                              int? verif = await bdMedia.updateMedia(book);
+                              print(verif);
+                              if(verif == 0)
+                              {
+                                 ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Erreur lors de la création du media'),
+                                  ),
+                                );
+                                return;
+                              }
+                              ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text('Media Update Successfully')),
+                            );
+                            Navigator.pop(context, book);
+
                             } else {
                               // Insert the book into the database
                               int idMedia = await bdMedia.insertMedia(book);
+                              print(idMedia);
+                              if(idMedia == 0)
+                              {
+                                 ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Erreur lors de la création du media'),
+                                  ),
+                                );
+                                return;
+                              }
                               if (id == null) {
                                 List<int> idSaison = [];
 
@@ -336,12 +362,13 @@ class _MediaManagerState extends State<MediaManager> {
                                   }
                                 }
                               }
-                            }
-                            ScaffoldMessenger.of(context).showSnackBar(
+                              ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                   content: Text('Media created successfully')),
                             );
-                            Navigator.of(context).pop();
+                            Navigator.pop(context, "LoadMedia");
+                            }
+                            
                           },
                           child: id != null ? Text("Update") : Text("Create"),
                         ),

@@ -67,7 +67,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
       onTap: () {
         
        // Méthode pour naviguer vers la page "MediaCompare"
-        widget.onPageChanged(index); // Vous pouvez passer l'index de la page que vous souhaitez afficher
+        widget.onPageChanged(index+1); // Vous pouvez passer l'index de la page que vous souhaitez afficher
         
       },
       child: Container(

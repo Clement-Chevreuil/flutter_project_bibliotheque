@@ -36,7 +36,7 @@ class DatabaseInit {
       onCreate: (db, version) async {
         for (String tableName in tableNames) {
           await db.execute(
-            "CREATE TABLE $tableName(ID INTEGER PRIMARY KEY, Nom TEXT, Image BLOB, Note INTEGER, Statut TEXT, Genres TEXT, created_at DATETIME, updated_at DATETIME NULL)",
+            "CREATE TABLE $tableName(ID INTEGER PRIMARY KEY, Nom TEXT UNIQUE, Image BLOB, Note INTEGER, Statut TEXT, Genres TEXT, created_at DATETIME, updated_at DATETIME NULL)",
           );
         }
         await db.execute(
@@ -46,22 +46,22 @@ class DatabaseInit {
           "CREATE TABLE Saison(ID INTEGER PRIMARY KEY,ID_Media INTEGER,Media Text, Nom TEXT, Image BLOB, Note INTEGER NULL, Statut TEXT NULL, Avis TEXT NULL,Description TEXT NULL, created_at DATETIME, updated_at DATETIME NULL)",
         );
         await db.execute(
-          "CREATE TABLE Genre (ID INTEGER PRIMARY KEY, Nom TEXT, Media TEXT)",
+          "CREATE TABLE Genre (ID INTEGER PRIMARY KEY, Nom TEXT UNIQUE, Media TEXT)",
         );
          await db.execute(
           "CREATE TABLE Utilisateur (ID INTEGER PRIMARY KEY, Episode INTEGER, Saison INTEGER, created_at DATETIME, updated_at DATETIME NULL)",
         );
         await db.execute(
-           "INSERT INTO Utilisateur (Episode, Saison, created_at) VALUES (1, 1, CURRENT_TIMESTAMP)"
+           "INSERT INTO Utilisateur (Episode, Saison, created_at) VALUES (0, 0, CURRENT_TIMESTAMP)"
         );
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        await db.execute(
-          "CREATE TABLE Utilisateur (ID INTEGER PRIMARY KEY, Episode INTEGER, Saison INTEGER, created_at DATETIME, updated_at DATETIME NULL)",
-        );
-        await db.execute(
-          "INSERT INTO Utilisateur (Episode, Saison, created_at) VALUES (1, 1, CURRENT_TIMESTAMP)"
-        );
+        // await db.execute(
+        //   "CREATE TABLE Utilisateur (ID INTEGER PRIMARY KEY, Episode INTEGER, Saison INTEGER, created_at DATETIME, updated_at DATETIME NULL)",
+        // );
+        // await db.execute(
+        //   "INSERT INTO Utilisateur (Episode, Saison, created_at) VALUES (0, 0, CURRENT_TIMESTAMP)"
+        // );
       },
     );
 

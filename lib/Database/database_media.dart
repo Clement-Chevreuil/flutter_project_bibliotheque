@@ -30,22 +30,32 @@ class DatabaseMedia {
     int id = await db.insert(
       table,
       book.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      conflictAlgorithm: ConflictAlgorithm.ignore,
     );
     return id;
   }
 
-  Future<void> updateMedia(Media book) async {
+  Future<int?> updateMedia(Media book) async {
+  print(book.created_at);
   book.updated_at = DateTime.now();
   final db = await dbProvider;
   
-  await db.update(
+  int id = await db.update(
     table,
-    book.toMap(),
-    where: "id = ?",
+    {
+      'nom' : book.nom,
+      'image' : book.image, // Utilisez Uint8List pour stocker des données binaires
+      'note' : book.note,
+      'statut' : book.statut,
+      'genres' : book.genres?.join(', '),
+      'updated_at': book.updated_at?.toIso8601String(),
+    },
+    where: 'id = ?',
     whereArgs: [book.id],
-    conflictAlgorithm: ConflictAlgorithm.replace,
+    conflictAlgorithm: ConflictAlgorithm.ignore,
   );
+  return id;
+  
 }
 
   Future<void> deleteMedia(Media book) async {
@@ -144,7 +154,7 @@ class DatabaseMedia {
             ? maps[i]['Genres'].split(', ').toList()
             : null,
 
-        created_at :  maps[i]['updated_at'] != null ?  DateTime.parse(maps[i]['created_at']) : null,
+        created_at :  maps[i]['created_at'] != null ?  DateTime.parse(maps[i]['created_at']) : null,
         updated_at :  maps[i]['updated_at'] != null ? DateTime.parse(maps[i]['updated_at']) : null,
       );
     });

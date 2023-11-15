@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_project_n1/Interfaces/media_compare.dart';
 import 'package:flutter_project_n1/Interfaces/media_dashboard.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter_project_n1/Interfaces/utilisateur_manager.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
 import 'dart:io';
@@ -158,26 +156,26 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Text("Dashboard"),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      activeMediaIndex = false;
-                      setState(() {
-                        _changePage(8);
-                      });
-                      Navigator.pop(context);
-                    },
-                    child: Text("Parametres"),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      activeMediaIndex = false;
-                      setState(() {
-                        _changePage(7);
-                      });
-                      Navigator.pop(context);
-                    },
-                    child: Text("Compare Media With Other"),
-                  ),
+                  // TextButton(
+                  //   onPressed: () {
+                  //     activeMediaIndex = false;
+                  //     setState(() {
+                  //       _changePage(8);
+                  //     });
+                  //     Navigator.pop(context);
+                  //   },
+                  //   child: Text("Parametres"),
+                  // ),
+                  // TextButton(
+                  //   onPressed: () {
+                  //     activeMediaIndex = false;
+                  //     setState(() {
+                  //       _changePage(7);
+                  //     });
+                  //     Navigator.pop(context);
+                  //   },
+                  //   child: Text("Compare Media With Other"),
+                  // ),
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
@@ -214,17 +212,14 @@ class _HomePageState extends State<HomePage> {
                   page); // Appel de la fonction _changePage pour mettre à jour la page
             },
           ),
-          MediaIndex(
-            "Series",
-          ),
+          MediaIndex("Series",),
           MediaIndex("Animes"),
           MediaIndex("Games"),
           MediaIndex("Webtoons"),
           MediaIndex("Books"),
           MediaIndex("Movies"),
-          
-          MediaCompare(),
-          UtilisateurManager(),
+          //MediaCompare(),
+          //UtilisateurManager(),
         ],
       ),
     );

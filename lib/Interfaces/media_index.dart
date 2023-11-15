@@ -21,6 +21,7 @@ import '../Database/database_reader.dart';
 import '../Database/database_init.dart';
 import '../Model/media.dart';
 import '../Logic/function_helper.dart';
+import 'package:intl/intl.dart';
 
 import 'genres_index.dart';
 
@@ -37,7 +38,7 @@ class _MediaIndexState extends State<MediaIndex> {
   final String? mediaParam1;
   final TextEditingController _controller = TextEditingController();
   late DatabaseInit _databaseInit;
-
+  final DateFormat formatter = DateFormat('yyyy MM dd');
   bool isAdvancedSearchVisible = false;
   TextEditingController _controllerNom = TextEditingController(text: '');
 
@@ -119,8 +120,8 @@ class _MediaIndexState extends State<MediaIndex> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          var result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => MediaManager(
@@ -129,6 +130,10 @@ class _MediaIndexState extends State<MediaIndex> {
               ),
             ),
           );
+          if(result != null)
+          {
+            loadMedia();
+          }
         },
         mini: true,
         child: Icon(Icons.add),
@@ -298,6 +303,10 @@ class _MediaIndexState extends State<MediaIndex> {
                                                   'Statut: ${book.statut ?? ''}'),
                                               Text(
                                                   'Genres: ${book.genres?.join(', ') ?? ''}'),
+                                              Text(
+                                                  'Created_at: ${book.created_at != null ? formatter.format(book.created_at!) : ''}'),
+                                              Text(
+                                                  'Updated_at: ${book.updated_at != null ? formatter.format(book.updated_at!) : ''}'),
                                             ],
                                           ),
                                         ),
@@ -307,8 +316,8 @@ class _MediaIndexState extends State<MediaIndex> {
                                         children: [
                                           IconButton(
                                             icon: Icon(Icons.edit),
-                                            onPressed: () {
-                                              Navigator.push(
+                                            onPressed: () async{
+                                              var result = await Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
                                                   builder: (context) =>
@@ -318,6 +327,11 @@ class _MediaIndexState extends State<MediaIndex> {
                                                   ),
                                                 ),
                                               );
+                                              if (result != null) {
+                                                setState(() {
+                                                  book = result;
+                                                });
+                                              }
                                             },
                                           ),
                                           IconButton(
@@ -498,8 +512,8 @@ class _MediaIndexState extends State<MediaIndex> {
                 transform: Matrix4.translationValues(
                     0, -6.0, 0), // Translation vers le haut
                 child: IconButton(
-                  onPressed: () {
-                    Navigator.push(
+                  onPressed: () async {
+                    var result = await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => GenresIndex(
@@ -507,6 +521,11 @@ class _MediaIndexState extends State<MediaIndex> {
                         ),
                       ),
                     );
+                    if(result != null)
+                    {
+                      print("lol");
+                      fetchData();
+                    }
                   }, // Remplacez null par votre fonction onPressed
                   icon: Icon(Icons.settings),
                 ),
@@ -602,6 +621,7 @@ class _MediaIndexState extends State<MediaIndex> {
 
   Future<void> fetchData() async {
     GenresList = await bdGenre.getGenresList(tableName, "");
+    setState(() {});
   }
 
   Widget buildPageButtonsOrders() {

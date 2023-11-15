@@ -82,6 +82,13 @@ class _GenresIndexState extends State<GenresIndex> {
       appBar: AppBar(
         title: Text('Genres'),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            // Handle the back button click
+            Navigator.pop(context,"update");
+          },
+        ),
       ),
       body: Column(
         children: <Widget>[
@@ -293,7 +300,7 @@ class _GenresIndexState extends State<GenresIndex> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_controllerGenre.text == "") {
                     // Affichez un message d'erreur car _controllerGenre est nul
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -302,22 +309,40 @@ class _GenresIndexState extends State<GenresIndex> {
                       ),
                     );
                   } else {
-                    setState(() {
+                  
                       Genre newGenre = Genre();
                       newGenre.media = tableName;
                       newGenre.nom = _controllerGenre.text;
                       _controllerGenre.text = "";
                       if (idUpdate != null) {
                         newGenre.id = idUpdate;
-                        bdGenres.update(newGenre);
+                        int? verif = await bdGenres.update(newGenre);
+                        if(verif == 0)
+                              {
+                                 ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Erreur lors de la création du genre'),
+                                  ),
+                                );
+                                return;
+                              }
                         idUpdate = null;
                       } else {
-                        bdGenres.insert(newGenre);
+                        int? verif = await bdGenres.insert(newGenre);
+                        if(verif == 0)
+                              {
+                                 ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Erreur lors de la création du genre'),
+                                  ),
+                                );
+                                return;
+                              }
                       }
 
                       setState(() {});
                       Navigator.of(context).pop(); // Ferme la popup
-                    });
+                   
                   }
                 },
                 child: idUpdate != null ? Text("Update") : Text("Ajouter"),
