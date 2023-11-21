@@ -32,7 +32,7 @@ class DatabaseInit {
 
     final db = await openDatabase(
       path,
-      version: 5,
+      version: 6,
       onCreate: (db, version) async {
         for (String tableName in tableNames) {
           await db.execute(
@@ -54,14 +54,6 @@ class DatabaseInit {
         await db.execute(
            "INSERT INTO Utilisateur (Episode, Saison, created_at) VALUES (0, 0, CURRENT_TIMESTAMP)"
         );
-      },
-      onUpgrade: (db, oldVersion, newVersion) async {
-        // await db.execute(
-        //   "CREATE TABLE Utilisateur (ID INTEGER PRIMARY KEY, Episode INTEGER, Saison INTEGER, created_at DATETIME, updated_at DATETIME NULL)",
-        // );
-        // await db.execute(
-        //   "INSERT INTO Utilisateur (Episode, Saison, created_at) VALUES (0, 0, CURRENT_TIMESTAMP)"
-        // );
       },
     );
 
