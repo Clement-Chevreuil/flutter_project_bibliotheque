@@ -28,7 +28,12 @@ class InterfaceHelper extends StatefulWidget {
   });
 
   @override
-  _InterfaceHelperState createState() => _InterfaceHelperState(nom : nom,note:  note,statut:  statut,imageBytes: image,);
+  _InterfaceHelperState createState() => _InterfaceHelperState(
+        nom: nom,
+        note: note,
+        statut: statut,
+        imageBytes: image,
+      );
 
   Future<String> getNom() async {
     return nom!;
@@ -39,55 +44,69 @@ class InterfaceHelper extends StatefulWidget {
   }
 
   Future<String> getStatut() async {
-    return nom!;
+    return statut!;
   }
 
   Future<Uint8List?> getImage() async {
-    if(image != null)
-    {
+    if (image != null) {
       return image!;
-    }
-    else
-    {
+    } else {
       return null;
     }
   }
 
-    Future<String?> getImageLink() async {
-    if(imageLink != null)
-    {
+  Future<String?> getImageLink() async {
+    if (imageLink != null) {
       return imageLink!;
-    }
-    else
-    {
+    } else {
       return null;
     }
   }
 }
 
 class _InterfaceHelperState extends State<InterfaceHelper> {
-  
   String? nom;
   String? statut;
   double? note = 0.0;
   Uint8List? imageBytes;
-  
+
   _InterfaceHelperState({this.nom, this.note, this.statut, this.imageBytes});
   TextEditingController _controllerNom = TextEditingController(text: '');
   String _selectedValue = "Fini";
- 
 
   FunctionHelper help = new FunctionHelper();
   bool isImagePickerActive = false;
   final picker = ImagePicker();
   String? selectedImageUrl;
   List<String> imageUrls = [];
+  int initialIndexToggle = 0;
 
-    @override
+  @override
   void initState() {
     super.initState();
     print(nom);
     _controllerNom = TextEditingController(text: nom);
+
+    if(statut == "En cours")
+    {
+      initialIndexToggle = 0;
+    }
+    if(statut == "Fini")
+    {
+      initialIndexToggle = 1;
+    }
+     if(statut == "Abandonnee")
+     {
+      initialIndexToggle = 2;
+     }
+    if(statut == "Envie")
+    {
+      initialIndexToggle = 3;
+    }
+    setState(() {
+      
+    });
+    print(initialIndexToggle);
   }
 
   @override
@@ -146,117 +165,122 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
                         )),
         ),
         Card(
-          color: Colors.transparent,
+          color: Colors.blue,
           margin: EdgeInsets.symmetric(
             horizontal: 16.0,
             vertical: 8.0,
           ),
           elevation: 0,
-          child: Column(children: [
-            Container(
-              margin: EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5.0),
-                border: Border.all(
-                  color: Colors.black,
-                  width: 1.0,
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(children: [
+              Container(
+                margin: EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5.0),
+                  border: Border.all(
+                    color: Colors.black,
+                    width: 1.0,
+                  ),
+                  color: Colors.white,
                 ),
-                color: Colors.white,
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 10.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16.0,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: "Recherche...",
-                        hintStyle: TextStyle(
-                          color: Colors.black.withOpacity(0.5),
+                padding: EdgeInsets.symmetric(horizontal: 10.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16.0,
                         ),
-                        border: InputBorder.none,
+                        decoration: InputDecoration(
+                          hintText: "Recherche...",
+                          hintStyle: TextStyle(
+                            color: Colors.black.withOpacity(0.5),
+                          ),
+                          border: InputBorder.none,
+                        ),
+                        controller: _controllerNom,
+                        onChanged: (value) => {updateNom(value)},
                       ),
-                      controller: _controllerNom,
-                      onChanged: (value) => {updateNom(value)},
                     ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.search,
-                      color: Colors.black,
+                    IconButton(
+                      icon: Icon(
+                        Icons.search,
+                        color: Colors.black,
+                      ),
+                      onPressed: _loadImagesAndShowPopup,
                     ),
-                    onPressed: _loadImagesAndShowPopup,
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            RatingBar.builder(
-              minRating: 0,
-              itemSize: 46,
-              itemBuilder: (context, _) => Icon(
-                Icons.star,
-                color: Colors.black,
+              RatingBar.builder(
+                minRating: 0,
+                itemSize: 46,
+                itemBuilder: (context, _) => Icon(
+                  Icons.star,
+                  color: Colors.black,
+                ),
+                updateOnDrag: true,
+                onRatingUpdate: (rating) => setState(() {
+                  note = rating;
+                  updateNote(note!);
+                }),
+                initialRating: note!,
               ),
-              updateOnDrag: true,
-              onRatingUpdate: (rating) => setState(() {
-                note = rating;
-                updateNote(note!);
-              }),
-              initialRating: note!,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ToggleSwitch(
-                    minWidth: 40.0,
-                    minHeight: 40.0,
-                    cornerRadius: 5.0,
-                    inactiveFgColor: Colors.white,
-                    activeBgColors: [
-                      [Colors.white54],
-                      [Colors.white54],
-                      [Colors.white54],
-                      [Colors.white54],
-                    ],
-                    initialLabelIndex: 0,
-                    totalSwitches: 4,
-                    customIcons: [
-                      Icon(
-                        Icons.hourglass_empty,
-                        size: 20.0,
-                      ),
-                      Icon(
-                        Icons.check,
-                        size: 20.0,
-                      ),
-                      Icon(
-                        Icons.cancel_outlined,
-                        size: 20.0,
-                      ),
-                      Icon(
-                        Icons.star_border,
-                        size: 20.0,
-                      )
-                    ],
-                    onToggle: (index) {
-                      List<String> StatutList = [
-                        "En cours",
-                        "Fini",
-                        "Abandonnee",
-                        "Envie",
-                      ];
-                      _selectedValue = StatutList[index!];
-                    },
-                  ),
-                ],
+              Padding(
+                padding: const EdgeInsets.all(2.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ToggleSwitch(
+                      minWidth: 40.0,
+                      minHeight: 40.0,
+                      cornerRadius: 5.0,
+                      inactiveFgColor: Colors.white,
+                      activeBgColors: [
+                        [Colors.white54],
+                        [Colors.white54],
+                        [Colors.white54],
+                        [Colors.white54],
+                      ],
+                      initialLabelIndex: initialIndexToggle,
+                      totalSwitches: 4,
+                      customIcons: [
+                        Icon(
+                          Icons.hourglass_empty,
+                          size: 20.0,
+                        ),
+                        Icon(
+                          Icons.check,
+                          size: 20.0,
+                        ),
+                        Icon(
+                          Icons.cancel_outlined,
+                          size: 20.0,
+                        ),
+                        Icon(
+                          Icons.star_border,
+                          size: 20.0,
+                        )
+                      ],
+                      onToggle: (index) {
+                        List<String> StatutList = [
+                          "En cours",
+                          "Fini",
+                          "Abandonnee",
+                          "Envie",
+                        ];
+                        _selectedValue = StatutList[index!];
+                        print(_selectedValue);
+                        updateStatut(_selectedValue);
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ]),
+            ]),
+          ),
         ),
       ],
     );
@@ -333,9 +357,9 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
   }
 
   void updateStatut(String newStatut) {
-    setState(() {
+    
       widget.statut = newStatut;
-    });
+    
   }
 
   void updateImage(Uint8List newImage) {
@@ -345,7 +369,7 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
     });
   }
 
-    void updateImageLink(String newImage) {
+  void updateImageLink(String newImage) {
     setState(() {
       widget.imageLink = newImage;
       widget.image = null;

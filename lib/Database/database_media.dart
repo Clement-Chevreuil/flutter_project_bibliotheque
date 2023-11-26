@@ -233,6 +233,45 @@ class DatabaseMedia {
   return counts;
 }
 
+Future<Map<String, int>> getCountsByStatut() async {
+  Database db = await dbProvider;
+
+  List<Map<String, dynamic>> result = await db.rawQuery('''
+    SELECT
+      SUM(CASE WHEN statut = 'Fini' THEN 1 ELSE 0 END) AS countFini,
+      SUM(CASE WHEN statut = 'En cours' THEN 1 ELSE 0 END) AS countEnCours,
+      SUM(CASE WHEN statut = 'Abandonnee' THEN 1 ELSE 0 END) AS countAbandonner,
+      SUM(CASE WHEN statut = 'Envie de regarder' THEN 1 ELSE 0 END) AS countEnvieDeRegarder
+    FROM $table
+  ''');
+
+  return {
+    'countFini': result[0]['countFini'] as int? ?? 0,
+    'countEnCours': result[0]['countEnCours'] as int? ?? 0,
+    'countAbandonner': result[0]['countAbandonner'] as int? ?? 0,
+    'countEnvieDeRegarder': result[0]['countEnvieDeRegarder'] as int? ?? 0,
+  };
+}
+
+Future<List<Media>> getMostRecentRecords() async {
+  Database db = await dbProvider; // Replace dbProvider with your actual Database instance provider function
+  List<Map<String, dynamic>> maps = await db.rawQuery('''
+    SELECT *
+    FROM $table
+    ORDER BY DATETIME(created_at) DESC, DATETIME(updated_at) DESC
+    LIMIT 6
+  ''');
+
+   return List.generate(maps.length, (i) {
+      return Media(
+        
+        nom: maps[i]['Nom'],
+        note: maps[i]['Note'],
+        created_at: maps[i]['created_at'] != null ?  DateTime.parse(maps[i]['created_at']) : null,
+        updated_at: maps[i]['updated_at'] != null ?  DateTime.parse(maps[i]['updated_at']) : null,
+      );
+    });
+}
 
 
 

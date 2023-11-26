@@ -11,6 +11,7 @@ import '../Model/episode.dart';
 import '../Model/utilisateur.dart';
 import '../Logic/function_helper.dart';
 import '../Logic/interface_helper.dart';
+import 'genres_index.dart';
 
 class MediaManager extends StatefulWidget {
   final Media? mediaParam;
@@ -66,15 +67,17 @@ class _MediaManagerState extends State<MediaManager> {
       double note = 0.0;
       Uint8List? imageBytes;
       String? nom;
+      String statut = "Fini";
       if (mediaParam != null) {
         nom = mediaParam!.nom;
         //_selectedValue = mediaParam!.statut!;
         imageBytes = mediaParam!.image;
         id = mediaParam!.id;
         note = mediaParam!.note!.toDouble();
+        statut = mediaParam!.statut!;
       }
       interfaceHelper = InterfaceHelper(
-          nom: nom, note: note, statut: "Fini", image: imageBytes);
+          nom: nom, note: note, statut: statut, image: imageBytes);
       isInitComplete = true;
       setState(() {});
       getUtilisateur();
@@ -91,7 +94,7 @@ class _MediaManagerState extends State<MediaManager> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Menu Example'),
+        title: Text('Media Manager'),
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -111,62 +114,65 @@ class _MediaManagerState extends State<MediaManager> {
                           elevation:
                               4.0, // Ajoutez une élévation à la Card si vous le souhaitez
                           child: Column(children: [
-                            if(utilisateur!.saison == 1)
-                            ExpansionTile(
-                              title: Text("Saison - Episodes"),
-                              initiallyExpanded:
-                                  false, // Vous pouvez changer ceci selon vos besoins
+                            if (utilisateur!.saison == 1)
+                              ExpansionTile(
+                                title: Text("Saison - Episodes"),
+                                initiallyExpanded:
+                                    false, // Vous pouvez changer ceci selon vos besoins
 
-                              children: [
-                                TextField(
-                                  controller: _controllerSaison,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    labelText:
-                                        'Enter a number between 1 and 100',
-                                  ),
-                                  onChanged: (value) {
-                                    if (int.tryParse(value) != null) {
-                                      int number = int.parse(value);
-                                      if (number < 1 || number > 100) {
-                                        _controllerSaison.clear();
-                                      } else {
-                                        // Update the list of TextControllers based on the entered number
-                                        _textControllers = List.generate(
-                                          number,
-                                          (index) => TextEditingController(),
-                                        );
-                                      }
-                                    }
-                                    setState(() {}); // Refresh the UI
-                                  },
-                                ),
-                                if(utilisateur!.episode == 1)
-                                SingleChildScrollView(
-                                  child: SizedBox(
-                                    height: 200,
-                                    child: ListView.builder(
-                                      itemCount: _textControllers.length,
-                                      itemBuilder: (context, index) {
-                                        return Padding(
-                                          padding: EdgeInsets.all(16.0),
-                                          child: TextField(
-                                            controller: _textControllers[index],
-                                            keyboardType: TextInputType.text,
-                                            decoration: InputDecoration(
-                                              labelText: "Nombre d'episode : $index",
-                                            ),
-                                          ),
-                                        );
-                                      },
+                                children: [
+                                  TextField(
+                                    controller: _controllerSaison,
+                                    keyboardType: TextInputType.number,
+                                    decoration: InputDecoration(
+                                      labelText:
+                                          'Enter a number between 1 and 100',
                                     ),
+                                    onChanged: (value) {
+                                      if (int.tryParse(value) != null) {
+                                        int number = int.parse(value);
+                                        if (number < 1 || number > 100) {
+                                          _controllerSaison.clear();
+                                        } else {
+                                          // Update the list of TextControllers based on the entered number
+                                          _textControllers = List.generate(
+                                            number,
+                                            (index) => TextEditingController(),
+                                          );
+                                        }
+                                      }
+                                      setState(() {}); // Refresh the UI
+                                    },
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 20,
-                                )
-                              ],
-                            ),
+                                  if (utilisateur!.episode == 1)
+                                    SingleChildScrollView(
+                                      child: SizedBox(
+                                        height: 200,
+                                        child: ListView.builder(
+                                          itemCount: _textControllers.length,
+                                          itemBuilder: (context, index) {
+                                            return Padding(
+                                              padding: EdgeInsets.all(16.0),
+                                              child: TextField(
+                                                controller:
+                                                    _textControllers[index],
+                                                keyboardType:
+                                                    TextInputType.text,
+                                                decoration: InputDecoration(
+                                                  labelText:
+                                                      "Nombre d'episode : $index",
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  SizedBox(
+                                    height: 20,
+                                  )
+                                ],
+                              ),
                           ]),
                         ),
                       ),
@@ -176,11 +182,42 @@ class _MediaManagerState extends State<MediaManager> {
                         elevation: 4.0,
                         child: Column(children: [
                           ExpansionTile(
-                            title: Text("Genres"),
+                            title: Row(
+                              // Centre les éléments horizontalement
+                              children: [
+                                Text(
+                                  'Genre :',
+                                  style: TextStyle(
+                                    fontSize: 16, // Taille du texte
+                                    fontWeight:
+                                        FontWeight.bold, // Texte en gras
+                                  ),
+                                ),
+                                Container(
+                                  transform: Matrix4.translationValues(
+                                      0, -6.0, 0), // Translation vers le haut
+                                  child: IconButton(
+                                    onPressed: () async {
+                                      var result = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => GenresIndex(
+                                            mediaParam1: tableName,
+                                          ),
+                                        ),
+                                      );
+                                      if (result != null) {
+                                        print("lol");
+                                        fetchData();
+                                      }
+                                    }, // Remplacez null par votre fonction onPressed
+                                    icon: Icon(Icons.settings),
+                                  ),
+                                ),
+                              ],
+                            ),
                             initiallyExpanded: false,
                             children: [
-                              ElevatedButton(
-                                  onPressed: null, child: Text("Ajouter")),
                               Wrap(
                                 spacing: 0.0,
                                 runSpacing: 0.0,
@@ -307,30 +344,29 @@ class _MediaManagerState extends State<MediaManager> {
                             if (mediaParam != null) {
                               int? verif = await bdMedia.updateMedia(book);
                               print(verif);
-                              if(verif == 0)
-                              {
-                                 ScaffoldMessenger.of(context).showSnackBar(
+                              if (verif == 0) {
+                                ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Erreur lors de la création du media'),
+                                    content: Text(
+                                        'Erreur lors de la création du media'),
                                   ),
                                 );
                                 return;
                               }
                               ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text('Media Update Successfully')),
-                            );
-                            Navigator.pop(context, book);
-
+                                SnackBar(
+                                    content: Text('Media Update Successfully')),
+                              );
+                              Navigator.pop(context, book);
                             } else {
                               // Insert the book into the database
                               int idMedia = await bdMedia.insertMedia(book);
                               print(idMedia);
-                              if(idMedia == 0)
-                              {
-                                 ScaffoldMessenger.of(context).showSnackBar(
+                              if (idMedia == 0) {
+                                ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Erreur lors de la création du media'),
+                                    content: Text(
+                                        'Erreur lors de la création du media'),
                                   ),
                                 );
                                 return;
@@ -363,12 +399,12 @@ class _MediaManagerState extends State<MediaManager> {
                                 }
                               }
                               ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text('Media created successfully')),
-                            );
-                            Navigator.pop(context, "LoadMedia");
+                                SnackBar(
+                                    content:
+                                        Text('Media created successfully')),
+                              );
+                              Navigator.pop(context, "LoadMedia");
                             }
-                            
                           },
                           child: id != null ? Text("Update") : Text("Create"),
                         ),
@@ -386,6 +422,7 @@ class _MediaManagerState extends State<MediaManager> {
 
   Future<void> fetchData() async {
     _selectionsGenres = await bdGenre.getGenresList(tableName, "");
+    setState(() {});
     print(_selectionsGenres);
     // Utilisez genresList comme vous le souhaitez ici
   }
