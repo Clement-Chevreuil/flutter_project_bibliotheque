@@ -273,6 +273,17 @@ Future<List<Media>> getMostRecentRecords() async {
     });
 }
 
+Future<List<Map<String, dynamic>>> getCountByDate() async {
+  Database db = await dbProvider; // Remplacez dbProvider par votre fonction réelle pour obtenir une instance de Database
+  List<Map<String, dynamic>> result = await db.rawQuery('''
+    SELECT DATE(created_at) as date, COUNT(*) as count
+    FROM $table
+    GROUP BY date
+  ''');
+
+  return result;
+}
+
 
 
 }

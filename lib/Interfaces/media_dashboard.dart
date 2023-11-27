@@ -2,6 +2,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_project_n1/Interfaces/LineChartSample2.dart';
 import 'package:flutter_project_n1/Interfaces/media_index.dart';
 import 'package:flutter_project_n1/Interfaces/media_compare.dart';
 import 'package:path_provider/path_provider.dart';
@@ -20,8 +21,10 @@ import '../Database/database_reader.dart';
 import '../Database/database_init.dart';
 import '../Model/media.dart';
 import '../Logic/function_helper.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 import 'genres_index.dart';
+import 'LineChartSample2.dart';
 
 class MediaDashboard extends StatefulWidget {
   final Function(int) onPageChanged;
@@ -64,6 +67,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
   final bdMedia = DatabaseMedia("Series");
   final bdGenre = DatabaseGenre();
   Map<String, int>? count;
+  List<Map<String, dynamic>>? countDate = null;
   _MediaDashboardState();
 
   Map<String, int>? countsByStatut = null;
@@ -71,7 +75,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
   void initState() {
     super.initState();
     _databaseInit = DatabaseInit();
-    getLoadPage().then((value) =>  isInitComplete = true);
+    getLoadPage().then((value) =>  {isInitComplete = true});
    
   }
 
@@ -156,6 +160,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
                     getLoadPage();
                   });
                   print("Genre sélectionné : ${_selectionsGenres[index]}");
+                  
                 },
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
@@ -190,13 +195,13 @@ class _MediaDashboardState extends State<MediaDashboard> {
                 children: [
                   Container(
                     height: 165.0,
-                    width: 200.0,
+                    width: 150.0,
                     child: Wrap(
                       spacing: 5.0, // gap between adjacent chips
                       runSpacing: 5.0, // gap between lines
                       children: <Widget>[
                         Container(
-                          width: 90.0,
+                          width: 70.0,
                           height: 80.0,
                           child: Card(
                             child: Column(children : [Text('Fini'), Text(countsByStatut!['countFini'].toString())]),
@@ -204,7 +209,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
                           ),
                         ),
                         Container(
-                          width: 90.0,
+                          width: 70.0,
                           height: 80,
                           child: Card(
                             child: Column(children : [Text('En Cours'), Text(countsByStatut!['countEnCours'].toString())]),
@@ -212,7 +217,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
                           ),
                         ),
                         Container(
-                          width: 90.0,
+                          width: 70.0,
                           height: 80,
                           child: Card(
                             child: Column(children : [Text('Abandon'), Text(countsByStatut!['countAbandonner'].toString())]),
@@ -220,7 +225,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
                           ),
                         ),
                         Container(
-                          width: 90.0,
+                          width: 70.0,
                           height: 80,
                           child: Card(
                             child: Column(children : [Text('Envie'), Text(countsByStatut!['countEnvieDeRegarder'].toString())]),
@@ -236,12 +241,15 @@ class _MediaDashboardState extends State<MediaDashboard> {
                       child: Card(
                         elevation: 8.0,
                         child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              children: [
-                                Text("Courbe"),
-                              ],
-                            )),
+                            padding: const EdgeInsets.all(2.0),
+                            child: 
+                                Center(
+                                  child:countDate != null && countDate! != [] && countDate!.isNotEmpty
+                                    ? LineChartSample2(data: countDate!)
+                                    : Text('No Data'), // Replace 'Loading data...' with your desired text
+                                
+                                ),
+                        ),
                       ),
                     ),
                   ),
@@ -258,6 +266,8 @@ class _MediaDashboardState extends State<MediaDashboard> {
                 alignment: Alignment.centerLeft,
                 child: Text("Last Created/Updated"),
               ),
+
+
                
             ],
           ),
@@ -343,6 +353,8 @@ class _MediaDashboardState extends State<MediaDashboard> {
     count = await bdMedia.getCountsForTables();
     countsByStatut = await bdMedia.getCountsByStatut();
     mostRecentRecords = await bdMedia.getMostRecentRecords();
+    countDate = await bdMedia.getCountByDate();
+    print(countDate);
     setState(() {});
   }
 

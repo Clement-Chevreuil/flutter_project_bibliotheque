@@ -314,26 +314,7 @@ class _MediaIndexState extends State<MediaIndex> {
                                       // Boutons légèrement décalés vers la gauche
                                       Column(
                                         children: [
-                                          IconButton(
-                                            icon: Icon(Icons.edit),
-                                            onPressed: () async{
-                                              var result = await Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      MediaManager(
-                                                    mediaParam: book,
-                                                    tableName: tableName,
-                                                  ),
-                                                ),
-                                              );
-                                              if (result != null) {
-                                                setState(() {
-                                                  book = result;
-                                                });
-                                              }
-                                            },
-                                          ),
+                                         
                                           IconButton(
                                             icon: Icon(Icons.delete),
                                             onPressed: () async {
