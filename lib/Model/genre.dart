@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 class Genre {
   int? id;
   String? nom;

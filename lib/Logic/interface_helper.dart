@@ -1,15 +1,8 @@
-import 'dart:ffi';
 import 'dart:typed_data';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:sqflite/sqflite.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:io';
-import 'package:path/path.dart' as p;
 import 'package:toggle_switch/toggle_switch.dart';
 import 'function_helper.dart';
 

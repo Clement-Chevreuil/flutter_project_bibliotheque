@@ -31,7 +31,7 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   late DatabaseInit _databaseInit;
 
-  final home = new MediaIndex("Series");
+  final home = new MediaIndex("Series",null);
 
   final List<String> sidebarItems = [
     "Series",
@@ -53,6 +53,9 @@ class _HomePageState extends State<HomePage> {
     "Compare",
     "Parametres",
   ];
+
+  String? mediaIndexStatut = null;
+
   List<IconData> itemIcons = [
     Icons.movie,
     Icons.movie,
@@ -76,8 +79,9 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void _changePage(int page) {
+  void _changePage(int page, String? statut) {
     setState(() {
+      mediaIndexStatut = statut;
       _currentPage = page;
       _pageController.jumpToPage(_currentPage);
     });
@@ -125,7 +129,7 @@ class _HomePageState extends State<HomePage> {
                       onPressed: () {
                         setState(() {
                           selectedTableName = sidebarItems[i];
-                          _changePage(i + 1);
+                          _changePage(i + 1, null);
                         });
                         Navigator.pop(context);
                       },
@@ -150,7 +154,7 @@ class _HomePageState extends State<HomePage> {
                     onPressed: () {
                       activeMediaIndex = false;
                       setState(() {
-                        _changePage(0);
+                        _changePage(0, null);
                       });
                       Navigator.pop(context);
                     },
@@ -206,18 +210,13 @@ class _HomePageState extends State<HomePage> {
           });
         },
         children: <Widget>[
-          MediaDashboard(
-            onPageChanged: (page) {
-              _changePage(
-                  page); // Appel de la fonction _changePage pour mettre à jour la page
-            },
-          ),
-          MediaIndex("Series",),
-          MediaIndex("Animes"),
-          MediaIndex("Games"),
-          MediaIndex("Webtoons"),
-          MediaIndex("Books"),
-          MediaIndex("Movies"),
+          MediaDashboard(onPageChanged: (page, mediaIndexStatut) {_changePage(page, mediaIndexStatut); },),
+          MediaIndex("Series",mediaIndexStatut), //1
+          MediaIndex("Animes",mediaIndexStatut), //2
+          MediaIndex("Games",mediaIndexStatut), //3
+          MediaIndex("Webtoons",mediaIndexStatut), //4
+          MediaIndex("Books",mediaIndexStatut), //5
+          MediaIndex("Movies", mediaIndexStatut), //6
           //MediaCompare(),
           //UtilisateurManager(),
         ],

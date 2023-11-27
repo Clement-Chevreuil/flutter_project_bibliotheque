@@ -1,17 +1,7 @@
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_project_n1/Interfaces/media_compare.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart' as p;
 import 'package:getwidget/getwidget.dart';
-import 'media_manager.dart';
 import 'dart:typed_data';
-import 'dart:io';
-
 import '../Database/database_media.dart';
 import '../Database/database_genre.dart';
 import '../Database/database_reader.dart';
@@ -19,9 +9,6 @@ import '../Database/database_init.dart';
 import '../Model/media.dart';
 import '../Model/media_dual.dart';
 import '../Model/genre.dart';
-import '../Logic/function_helper.dart';
-
-import 'genres_index.dart';
 
 class MediaCompare extends StatefulWidget {
   final String? mediaParam1;

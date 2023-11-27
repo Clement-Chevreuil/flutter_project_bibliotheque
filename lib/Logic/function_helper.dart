@@ -1,8 +1,5 @@
-import 'dart:ffi';
 import 'dart:typed_data';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:sqflite/sqflite.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';

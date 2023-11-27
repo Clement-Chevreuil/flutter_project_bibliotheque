@@ -1,37 +1,24 @@
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_project_n1/Interfaces/media_compare.dart';
-import 'package:flutter_project_n1/Interfaces/media_dashboard.dart';
-import 'package:flutter_project_n1/Interfaces/saison_index.dart';
-import 'package:flutter_project_n1/Interfaces/saison_manager.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart' as p;
 import 'package:getwidget/getwidget.dart';
 import 'media_manager.dart';
 import 'dart:typed_data';
-import 'dart:io';
-
 import '../Database/database_media.dart';
 import '../Database/database_genre.dart';
-import '../Database/database_reader.dart';
 import '../Database/database_init.dart';
 import '../Model/media.dart';
-import '../Logic/function_helper.dart';
 import 'package:intl/intl.dart';
-
 import 'genres_index.dart';
 
 class MediaIndex extends StatefulWidget {
   String mediaParam1;
+  String? statut;
 
-  MediaIndex(this.mediaParam1);
+  MediaIndex(this.mediaParam1, this.statut);
 
   @override
-  _MediaIndexState createState() => _MediaIndexState(mediaParam1: mediaParam1);
+  _MediaIndexState createState() =>
+      _MediaIndexState(mediaParam1: mediaParam1, statut: statut);
 }
 
 class _MediaIndexState extends State<MediaIndex> {
@@ -78,6 +65,8 @@ class _MediaIndexState extends State<MediaIndex> {
     "Envie",
   ];
 
+  String? statut;
+
   final bdMedia = DatabaseMedia("Books");
   final bdGenre = DatabaseGenre();
 
@@ -98,13 +87,18 @@ class _MediaIndexState extends State<MediaIndex> {
   Set<String> selectedGenres = Set();
   // instantiate the controller in your state
 
-  _MediaIndexState({this.mediaParam1});
+  _MediaIndexState({
+    this.mediaParam1,
+    this.statut,
+  });
 
   void initState() {
     super.initState();
     tableName = mediaParam1!;
+    selectedStatut = statut;
     loadMedia();
     loadPageButtons();
+
     _databaseInit = DatabaseInit();
     fetchData();
   }
@@ -130,8 +124,7 @@ class _MediaIndexState extends State<MediaIndex> {
               ),
             ),
           );
-          if(result != null)
-          {
+          if (result != null) {
             loadMedia();
           }
         },
@@ -314,7 +307,26 @@ class _MediaIndexState extends State<MediaIndex> {
                                       // Boutons légèrement décalés vers la gauche
                                       Column(
                                         children: [
-                                         
+                                          IconButton(
+                                            icon: Icon(Icons.edit),
+                                            onPressed: () async {
+                                              var result = await Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      MediaManager(
+                                                    mediaParam: book,
+                                                    tableName: tableName,
+                                                  ),
+                                                ),
+                                              );
+                                              if (result != null) {
+                                                setState(() {
+                                                  book = result;
+                                                });
+                                              }
+                                            },
+                                          ),
                                           IconButton(
                                             icon: Icon(Icons.delete),
                                             onPressed: () async {
@@ -502,8 +514,7 @@ class _MediaIndexState extends State<MediaIndex> {
                         ),
                       ),
                     );
-                    if(result != null)
-                    {
+                    if (result != null) {
                       print("lol");
                       fetchData();
                     }
@@ -564,10 +575,9 @@ class _MediaIndexState extends State<MediaIndex> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: List.generate(StatutList.length, (i) {
-                final statut = StatutList[i];
+                statut = StatutList[i];
                 final isSelected = statut ==
                     selectedStatut; // Vérifiez si le bouton est sélectionné
-
                 return Padding(
                   padding: EdgeInsets.symmetric(horizontal: 4.0),
                   child: ElevatedButton(
@@ -589,7 +599,7 @@ class _MediaIndexState extends State<MediaIndex> {
                           ? Colors.blue
                           : null, // Fond bleu si sélectionné
                     ),
-                    child: Text(statut),
+                    child: Text(statut!),
                   ),
                 );
               }),

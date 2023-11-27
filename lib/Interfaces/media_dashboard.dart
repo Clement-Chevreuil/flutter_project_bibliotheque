@@ -1,33 +1,14 @@
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_project_n1/Interfaces/LineChartSample2.dart';
-import 'package:flutter_project_n1/Interfaces/media_index.dart';
-import 'package:flutter_project_n1/Interfaces/media_compare.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart' as p;
-import 'package:getwidget/getwidget.dart';
-import 'media_manager.dart';
-import 'dart:typed_data';
-import 'dart:io';
+import '/Chart/LineChartSample2.dart';
 import 'package:intl/intl.dart';
-
 import '../Database/database_media.dart';
 import '../Database/database_genre.dart';
-import '../Database/database_reader.dart';
 import '../Database/database_init.dart';
 import '../Model/media.dart';
-import '../Logic/function_helper.dart';
-import 'package:fl_chart/fl_chart.dart';
-
-import 'genres_index.dart';
-import 'LineChartSample2.dart';
 
 class MediaDashboard extends StatefulWidget {
-  final Function(int) onPageChanged;
+  final Function(int, String?) onPageChanged;
   MediaDashboard({required this.onPageChanged});
 
   @override
@@ -58,10 +39,12 @@ class _MediaDashboardState extends State<MediaDashboard> {
     "Books",
     "Movies"
   ];
+
+  int selectMediaPage = 1;
+
   bool isInitComplete = false;
   int selectedGenreIndex = 0;
- final GlobalKey<AnimatedListState> _listKey =
-      GlobalKey();
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey();
   String tableName = "Series";
 
   final bdMedia = DatabaseMedia("Series");
@@ -75,20 +58,20 @@ class _MediaDashboardState extends State<MediaDashboard> {
   void initState() {
     super.initState();
     _databaseInit = DatabaseInit();
-    getLoadPage().then((value) =>  {isInitComplete = true});
-   
+    getLoadPage().then((value) => {isInitComplete = true});
   }
 
   @override
   Widget build(BuildContext context) {
-
     if (!isInitComplete) {
       // Attendre que l'initialisation soit terminée
       return CircularProgressIndicator(); // Ou tout autre indicateur de chargement
     }
 
     return Scaffold(
-      body: Column(children: [
+      body:  SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child:Column(children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Container(
@@ -105,8 +88,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
               return InkWell(
                 onTap: () {
                   // Méthode pour naviguer vers la page "MediaCompare"
-                  widget.onPageChanged(index +
-                      1); // Vous pouvez passer l'index de la page que vous souhaitez afficher
+                  widget.onPageChanged(index + 1, null); // Vous pouvez passer l'index de la page que vous souhaitez afficher
                 },
                 child: Container(
                   //height: MediaQuery.of(context).size.height * 0.2,
@@ -147,7 +129,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
               height: 60.0,
               margin: EdgeInsets.all(2.0),
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () {  
                   setState(() {
                     if (selectedGenreIndex == index) {
                       // Désélectionnez l'élément s'il est déjà sélectionné
@@ -156,20 +138,26 @@ class _MediaDashboardState extends State<MediaDashboard> {
                       selectedGenreIndex = index;
                     }
                     tableName = _selectionsGenres[index];
+                    if(tableName == "Series"){ selectMediaPage = 1; }
+                    if(tableName == "Animes"){ selectMediaPage = 2; }
+                    if(tableName == "Games"){ selectMediaPage = 3; }
+                    if(tableName == "Webtoons"){ selectMediaPage = 4; }
+                    if(tableName == "Books"){ selectMediaPage = 5; }
+                    if(tableName == "Movies"){ selectMediaPage = 6; }
                     bdMedia.changeTable(tableName);
                     getLoadPage();
                   });
                   print("Genre sélectionné : ${_selectionsGenres[index]}");
-                  
                 },
                 style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  primary: selectedGenreIndex == index
-                      ? Color.fromARGB(255, 222, 233, 243)
-                      : Color.fromARGB(59, 222, 233, 243) // Changez la couleur du bouton ici
-                ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    primary: selectedGenreIndex == index
+                        ? Color.fromARGB(255, 222, 233, 243)
+                        : Color.fromARGB(59, 222, 233,
+                            243) // Changez la couleur du bouton ici
+                    ),
                 child: Text(
                   item,
                   style: TextStyle(
@@ -200,36 +188,74 @@ class _MediaDashboardState extends State<MediaDashboard> {
                       spacing: 5.0, // gap between adjacent chips
                       runSpacing: 5.0, // gap between lines
                       children: <Widget>[
-                        Container(
-                          width: 70.0,
-                          height: 80.0,
-                          child: Card(
-                            child: Column(children : [Text('Fini'), Text(countsByStatut!['countFini'].toString())]),
-                            elevation: 9.0,
+                        InkWell(
+                          onTap: () {
+                            // Méthode pour naviguer vers la page "MediaCompare"
+                            widget.onPageChanged(selectMediaPage, "Fini"); // Vous pouvez passer l'index de la page que vous souhaitez afficher
+                          },
+                          child: Container(
+                            width: 70.0,
+                            height: 80.0,
+                            child: Card(
+                              child: Column(children: [
+                                Text('Fini'),
+                                Text(countsByStatut!['countFini'].toString())
+                              ]),
+                              elevation: 9.0,
+                            ),
                           ),
                         ),
-                        Container(
-                          width: 70.0,
-                          height: 80,
-                          child: Card(
-                            child: Column(children : [Text('En Cours'), Text(countsByStatut!['countEnCours'].toString())]),
-                            elevation: 9.0,
+                        InkWell(
+                           onTap: () {
+                            // Méthode pour naviguer vers la page "MediaCompare"
+                            widget.onPageChanged(selectMediaPage, "En cours"); // Vous pouvez passer l'index de la page que vous souhaitez afficher
+                          },
+                          child: Container(
+                            width: 70.0,
+                            height: 80,
+                            child: Card(
+                              child: Column(children: [
+                                Text('En Cours'),
+                                Text(countsByStatut!['countEnCours'].toString())
+                              ]),
+                              elevation: 9.0,
+                            ),
                           ),
                         ),
-                        Container(
-                          width: 70.0,
-                          height: 80,
-                          child: Card(
-                            child: Column(children : [Text('Abandon'), Text(countsByStatut!['countAbandonner'].toString())]),
-                            elevation: 9.0,
+                        InkWell(
+                           onTap: () {
+                            // Méthode pour naviguer vers la page "MediaCompare"
+                            widget.onPageChanged(selectMediaPage, "Abandonnee"); // Vous pouvez passer l'index de la page que vous souhaitez afficher
+                          },
+                          child: Container(
+                            width: 70.0,
+                            height: 80,
+                            child: Card(
+                              child: Column(children: [
+                                Text('Abandon'),
+                                Text(countsByStatut!['countAbandonner']
+                                    .toString())
+                              ]),
+                              elevation: 9.0,
+                            ),
                           ),
                         ),
-                        Container(
-                          width: 70.0,
-                          height: 80,
-                          child: Card(
-                            child: Column(children : [Text('Envie'), Text(countsByStatut!['countEnvieDeRegarder'].toString())]),
-                            elevation: 9.0,
+                        InkWell(
+                           onTap: () {
+                            // Méthode pour naviguer vers la page "MediaCompare"
+                            widget.onPageChanged(selectMediaPage, "Envie"); // Vous pouvez passer l'index de la page que vous souhaitez afficher
+                          },
+                          child: Container(
+                            width: 70.0,
+                            height: 80,
+                            child: Card(
+                              child: Column(children: [
+                                Text('Envie'),
+                                Text(countsByStatut!['countEnvieDeRegarder']
+                                    .toString())
+                              ]),
+                              elevation: 9.0,
+                            ),
                           ),
                         ),
                       ],
@@ -241,14 +267,15 @@ class _MediaDashboardState extends State<MediaDashboard> {
                       child: Card(
                         elevation: 8.0,
                         child: Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: 
-                                Center(
-                                  child:countDate != null && countDate! != [] && countDate!.isNotEmpty
-                                    ? LineChartSample2(data: countDate!)
-                                    : Text('No Data'), // Replace 'Loading data...' with your desired text
-                                
-                                ),
+                          padding: const EdgeInsets.all(2.0),
+                          child: Center(
+                            child: countDate != null &&
+                                    countDate! != [] &&
+                                    countDate!.isNotEmpty
+                                ? LineChartSample2(data: countDate!)
+                                : Text(
+                                    'No Data'), // Replace 'Loading data...' with your desired text
+                          ),
                         ),
                       ),
                     ),
@@ -266,86 +293,100 @@ class _MediaDashboardState extends State<MediaDashboard> {
                 alignment: Alignment.centerLeft,
                 child: Text("Last Created/Updated"),
               ),
-
-
-               
             ],
           ),
-
         ),
-         Expanded(
-            child: FutureBuilder<List<Media>>(
-              future: bdMedia.getMostRecentRecords(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData || snapshot.data == null ||snapshot.data?.length == 0) {
-                  return Center(
-                    child: Text('Aucun Media.'),
-                  );
-                } else {
-                  mostRecentRecords = snapshot.data!;
-                  return ListView.builder(
-                    key: _listKey,
-                    itemCount: mostRecentRecords!.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index < mostRecentRecords!.length) {
-                        Media media = mostRecentRecords![index];
-                        return Container(
-                          margin: EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 5.0), // Espace autour de la Card
-                          child: Card(
-                            elevation: 8.0,
-                            child: Padding(
-                              padding: const EdgeInsets.all(
-                                  16.0), // Espace à l'intérieur de la Card
-                              child: Row(
-                                children: [
-                                  // Informations sur le livre à droite
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8.0),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                           Expanded(
-                                            child: Text(media.nom ?? '',),
-                                           ),
-                                          if(media.updated_at != null )
-                                            Expanded(
-                                              child: Text("Update"),
-                                            )
-                                          else
-                                            Expanded(
-                                              child:Text("Create"),
-                                            ),
-
-                                          if(media.updated_at != null )
-                                            Text(DateFormat("MMM d, ''yy").format(media.updated_at!))
-                                          else
-                                            Text(DateFormat("MMM d, ''yy").format(media.created_at!)),
-
-                                          
-                                        ],
-                                      ),
+        Container(
+          height: 200,
+          child: FutureBuilder<List<Media>>(
+            future: bdMedia.getMostRecentRecords(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData ||
+                  snapshot.data == null ||
+                  snapshot.data?.length == 0) {
+                return Center(
+                  child: Text('Aucun Media.'),
+                );
+              } else {
+                mostRecentRecords = snapshot.data!;
+                return ListView.builder(
+                  key: _listKey,
+                  itemCount: mostRecentRecords!.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index < mostRecentRecords!.length) {
+                      Media media = mostRecentRecords![index];
+                      return Container(
+                        margin: EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                            vertical: 5.0), // Espace autour de la Card
+                        child: Card(
+                          elevation: 8.0,
+                          child: Padding(
+                            padding: const EdgeInsets.all(
+                                16.0), // Espace à l'intérieur de la Card
+                            child: Row(
+                              children: [
+                                // Informations sur le livre à droite
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            media.nom ?? '',
+                                          ),
+                                        ),
+                                        if (media.updated_at != null)
+                                          Expanded(
+                                            child: Text("Update"),
+                                          )
+                                        else
+                                          Expanded(
+                                            child: Text("Create"),
+                                          ),
+                                        if (media.updated_at != null)
+                                          Text(DateFormat("MMM d, ''yy")
+                                              .format(media.updated_at!))
+                                        else
+                                          Text(DateFormat("MMM d, ''yy")
+                                              .format(media.created_at!)),
+                                      ],
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
-                        );
-                      } else {
-                        return SizedBox(height: 50);
-                      }
-                    },
-                  );
-                }
-              },
-            ),
+                        ),
+                      );
+                    } else {
+                      return SizedBox(height: 50);
+                    }
+                  },
+                );
+              }
+            },
           ),
+        ),
+       
+        
+         Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            children: [
+              Container(
+                alignment: Alignment.centerLeft,
+                child: Text("Evolutions de vos Genres"),
+              ),
+            ],
+          ),
+        ),
       ]),
+      ),
     );
   }
 
@@ -354,8 +395,8 @@ class _MediaDashboardState extends State<MediaDashboard> {
     countsByStatut = await bdMedia.getCountsByStatut();
     mostRecentRecords = await bdMedia.getMostRecentRecords();
     countDate = await bdMedia.getCountByDate();
+    bdMedia.getMostViewedGenresByMonth();
     print(countDate);
     setState(() {});
   }
-
 }

@@ -284,6 +284,21 @@ Future<List<Map<String, dynamic>>> getCountByDate() async {
   return result;
 }
 
+Future<List<Map<String, dynamic>>> getMostViewedGenresByMonth() async {
+    
+    Database db = await dbProvider; 
+    List<Map<String, dynamic>> result = await db.rawQuery('''
+      SELECT strftime('%Y-%m', created_at) as month,
+             genres,
+             COUNT(*) as count
+      FROM $table
+      GROUP BY month, genres
+      ORDER BY month, count DESC
+    ''');
+    print(result);
+    return result;
+  }
+
 
 
 }

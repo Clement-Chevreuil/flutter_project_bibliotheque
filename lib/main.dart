@@ -1,10 +1,6 @@
-import 'package:flutter_project_n1/Interfaces/media_dashboard.dart';
-
-import 'Interfaces/media_manager.dart';
-import 'Interfaces/media_index.dart';
 import 'Interfaces/home_page.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
+
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

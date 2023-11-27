@@ -1,23 +1,8 @@
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
-import 'package:path/path.dart' as p;
-
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:flutter_project_n1/Interfaces/genres_index.dart';
 import 'dart:typed_data';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../Logic/function_helper.dart';
-import '../Database/database_media.dart';
-import '../Database/database_genre.dart';
 import '../Model/media.dart';
-import '../Model/genre.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:file_picker/file_picker.dart';
-import 'dart:io';
-
-import 'package:getwidget/getwidget.dart';
-import '/Database/database_init.dart';
 
 class DatabaseReader {
   String? defaultName = null;
