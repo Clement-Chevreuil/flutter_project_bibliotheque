@@ -7,12 +7,12 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as p;
+import 'package:fluttertoast/fluttertoast.dart';
 
 
 
 class FunctionHelper {
   String myBDD = 'maBDD3.db';
-
   Future<void> exportDatabase(BuildContext context) async {
     try {
       // Get the source database file
@@ -68,7 +68,7 @@ class FunctionHelper {
 
     isImagePickerActive = true; // Mark the image picker as active
     try {
-      final pickedImage = await picker.getImage(source: ImageSource.gallery);
+      final pickedImage = await picker.pickImage(source: ImageSource.gallery);
 
       if (pickedImage != null) {
         Uint8List imageBytes = await pickedImage.readAsBytes();

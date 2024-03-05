@@ -547,9 +547,9 @@ class _MediaIndexState extends State<MediaIndex> {
                         });
                         loadMedia();
                       },
-                      style: ElevatedButton.styleFrom(
-                        primary: isSelected ? Colors.blue : null,
-                      ),
+                      // style: ElevatedButton.styleFrom(
+                      //   primary: isSelected ? Colors.blue : null,
+                      // ),
                       child: Text(genre),
                     ));
               }),
@@ -594,11 +594,11 @@ class _MediaIndexState extends State<MediaIndex> {
                       });
                       loadMedia();
                     },
-                    style: ElevatedButton.styleFrom(
-                      primary: isSelected
-                          ? Colors.blue
-                          : null, // Fond bleu si sélectionné
-                    ),
+                    // style: ElevatedButton.styleFrom(
+                    //   primary: isSelected
+                    //       ? Colors.blue
+                    //       : null, // Fond bleu si sélectionné
+                    // ),
                     child: Text(statut!),
                   ),
                 );
@@ -645,11 +645,11 @@ class _MediaIndexState extends State<MediaIndex> {
                       });
                       loadMedia();
                     },
-                    style: ElevatedButton.styleFrom(
-                      primary: isSelected
-                          ? Colors.blue
-                          : null, // Fond bleu si sélectionné
-                    ),
+                    // style: ElevatedButton.styleFrom(
+                    //   primary: isSelected
+                    //       ? Colors.blue
+                    //       : null, // Fond bleu si sélectionné
+                    // ),
                     child: Text(order),
                   ),
                 );
@@ -691,11 +691,11 @@ class _MediaIndexState extends State<MediaIndex> {
                       });
                       loadMedia();
                     },
-                    style: ElevatedButton.styleFrom(
-                      primary: isSelected
-                          ? Colors.blue
-                          : null, // Fond bleu si sélectionné
-                    ),
+                    // style: ElevatedButton.styleFrom(
+                    //   primary: isSelected
+                    //       ? Colors.blue
+                    //       : null, // Fond bleu si sélectionné
+                    // ),
                     child: Text(order),
                   ),
                 );

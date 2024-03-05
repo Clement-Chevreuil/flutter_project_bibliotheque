@@ -135,14 +135,14 @@ class _MediaCompareState extends State<MediaCompare> {
                     bdMedia.changeTable(tableName);
                     LoadDatas();
                   },
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    primary: selectedGenreIndex == index
-                        ? Colors.blue
-                        : Colors.grey, // Changez la couleur du bouton ici
-                  ),
+                  // style: ElevatedButton.styleFrom(
+                  //   shape: RoundedRectangleBorder(
+                  //     borderRadius: BorderRadius.circular(10.0),
+                  //   ),
+                  //   primary: selectedGenreIndex == index
+                  //       ? Colors.blue
+                  //       : Colors.grey, // Changez la couleur du bouton ici
+                  // ),
                   child: Text(
                     item,
                     style: TextStyle(

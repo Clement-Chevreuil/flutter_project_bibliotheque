@@ -149,15 +149,15 @@ class _MediaDashboardState extends State<MediaDashboard> {
                   });
                   print("Genre sélectionné : ${_selectionsGenres[index]}");
                 },
-                style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    primary: selectedGenreIndex == index
-                        ? Color.fromARGB(255, 222, 233, 243)
-                        : Color.fromARGB(59, 222, 233,
-                            243) // Changez la couleur du bouton ici
-                    ),
+                // style: ElevatedButton.styleFrom(
+                //     shape: RoundedRectangleBorder(
+                //       borderRadius: BorderRadius.circular(10.0),
+                //     ),
+                //     primary: selectedGenreIndex == index
+                //         ? Color.fromARGB(255, 222, 233, 243)
+                //         : Color.fromARGB(59, 222, 233,
+                //             243) // Changez la couleur du bouton ici
+                //     ),
                 child: Text(
                   item,
                   style: TextStyle(

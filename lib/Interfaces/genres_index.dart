@@ -147,14 +147,14 @@ class _GenresIndexState extends State<GenresIndex> {
                     });
                     print("Genre sélectionné : ${_selectionsGenres[index]}");
                   },
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    primary: selectedGenreIndex == index
-                        ? Colors.blue
-                        : Colors.grey, // Changez la couleur du bouton ici
-                  ),
+                  // style: ElevatedButton.styleFrom(
+                  //   shape: RoundedRectangleBorder(
+                  //     borderRadius: BorderRadius.circular(10.0),
+                  //   ),
+                  //   primary: selectedGenreIndex == index
+                  //       ? Colors.blue
+                  //       : Colors.grey, // Changez la couleur du bouton ici
+                  // ),
                   child: Text(
                     item,
                     style: TextStyle(

@@ -242,15 +242,15 @@ class _MediaManagerState extends State<MediaManager> {
                                         });
                                         print(_selectionsGenresSelected);
                                       },
-                                      style: ElevatedButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(0.0),
-                                        ),
-                                        primary: _selections[index]
-                                            ? Colors.blue
-                                            : Colors.grey,
-                                      ),
+                                      // style: ElevatedButton.styleFrom(
+                                      //   shape: RoundedRectangleBorder(
+                                      //     borderRadius:
+                                      //         BorderRadius.circular(0.0),
+                                      //   ),
+                                      //   primary: _selections[index]
+                                      //       ? Colors.blue
+                                      //       : Colors.grey,
+                                      // ),
                                       child: Text(
                                         item,
                                         style: TextStyle(

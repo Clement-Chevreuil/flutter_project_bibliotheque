@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_project_n1/Model/utilisateur.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'dart:io';
 
@@ -85,6 +86,7 @@ class DatabaseInit {
 
    Future<void> exportDatabaseWithUserChoice() async {
   // Demander à l'utilisateur de choisir un emplacement pour l'export
+
   final result = await FilePicker.platform.getDirectoryPath();
   if (result != null) {
     final exportPath = join(result, 'exported_database.db');
@@ -95,14 +97,18 @@ class DatabaseInit {
     // Copier le fichier de base de données vers l'emplacement choisi
     final dbFile = File(_database!.path);
     final outputFile = File(exportPath);
+    if (await Permission.storage.request().isGranted) {
+      if (dbFile.existsSync()) {
+        await dbFile.copy(outputFile.path);
 
-    if (dbFile.existsSync()) {
-      await dbFile.copy(outputFile.path);
-
-      // Rouvrir la base de données pour une utilisation ultérieure
-      initDatabase();
-    } else {
-      throw Exception('La base de données source n\'existe pas.');
+        // Rouvrir la base de données pour une utilisation ultérieure
+        initDatabase();
+      } else {
+        throw Exception('La base de données source n\'existe pas.');
+      }
+    }
+    else{
+      print("error");
     }
   }
   }
