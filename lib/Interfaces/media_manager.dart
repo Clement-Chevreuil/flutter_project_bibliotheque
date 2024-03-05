@@ -114,7 +114,7 @@ class _MediaManagerState extends State<MediaManager> {
                           elevation:
                               4.0, // Ajoutez une élévation à la Card si vous le souhaitez
                           child: Column(children: [
-                            if (utilisateur!.saison == 1)
+                            if (utilisateur?.saison == 1)
                               ExpansionTile(
                                 title: Text("Saison - Episodes"),
                                 initiallyExpanded:

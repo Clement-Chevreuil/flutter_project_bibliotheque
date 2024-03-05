@@ -26,8 +26,8 @@ class MyApp extends StatelessWidget {
     );
   }
 
-     Future<void> requestStoragePermission() async {
-    var status = await Permission.storage.request();
+Future<void> requestStoragePermission() async {
+    var status = await Permission.manageExternalStorage.request();
     if (status.isGranted) {
       print("Permission accordée");
       // L'autorisation est accordée, vous pouvez maintenant effectuer des opérations de stockage

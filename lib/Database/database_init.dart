@@ -97,18 +97,14 @@ class DatabaseInit {
     // Copier le fichier de base de données vers l'emplacement choisi
     final dbFile = File(_database!.path);
     final outputFile = File(exportPath);
-    if (await Permission.storage.request().isGranted) {
-      if (dbFile.existsSync()) {
-        await dbFile.copy(outputFile.path);
 
-        // Rouvrir la base de données pour une utilisation ultérieure
-        initDatabase();
-      } else {
-        throw Exception('La base de données source n\'existe pas.');
-      }
-    }
-    else{
-      print("error");
+    if (dbFile.existsSync()) {
+      await dbFile.copy(outputFile.path);
+
+      // Rouvrir la base de données pour une utilisation ultérieure
+      initDatabase();
+    } else {
+      throw Exception('La base de données source n\'existe pas.');
     }
   }
   }
@@ -128,21 +124,39 @@ class DatabaseInit {
 
   Future<Utilisateur?> get() async {
     final List<Map<String, dynamic>> maps =
-        await _database!.query("Utilisateur", where: 'id = ?', whereArgs: [1]);
+    await _database!.query("Utilisateur", where: 'id = ?', whereArgs: [1]);
 
     if (maps.isNotEmpty) {
       Map<String, dynamic> map = maps.first;
+      print(map['updated_at']);
+
+      DateTime? updatedAt;
+      if (map['updated_at'] != null && map['updated_at'] != "") {
+        updatedAt = DateTime.parse(map['updated_at']);
+      }
+
       return Utilisateur(
         id: map['ID'],
         episode: map['Episode'],
         saison: map['Saison'],
         created_at: DateTime.parse(map['created_at']),
-        updated_at: map['updated_at'] != null
-            ? DateTime.parse(map['updated_at'])
-            : null,
+        updated_at: updatedAt,
       );
     } else {
-      return null; // Media with the specified ID not found
+      return null; // Utilisateur avec l'ID spécifié non trouvé
+    }
+  }
+
+  DateTime? parseDate(String? dateStr) {
+    if (dateStr != null && dateStr.isNotEmpty) {
+      try {
+        return DateTime.parse(dateStr);
+      } catch (e) {
+        print('Erreur de parsing de la date: $e');
+        return null;
+      }
+    } else {
+      return null;
     }
   }
 
