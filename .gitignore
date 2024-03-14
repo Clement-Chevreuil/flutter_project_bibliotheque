@@ -42,3 +42,5 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/data/donnees.csv
+/lib/assets/datas/donnees.csv
