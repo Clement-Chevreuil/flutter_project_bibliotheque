@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'function_helper.dart';
+import 'package:csv/csv.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class InterfaceHelper extends StatefulWidget {
   String? nom;
@@ -62,6 +64,9 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
   String? statut;
   double? note = 0.0;
   Uint8List? imageBytes;
+  List<List<dynamic>> _filmsData = [];
+  List<String> _suggestions = [];
+
 
   _InterfaceHelperState({this.nom, this.note, this.statut, this.imageBytes});
   TextEditingController _controllerNom = TextEditingController(text: '');
@@ -77,6 +82,7 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
   @override
   void initState() {
     super.initState();
+    _loadFilmsData();
     print(nom);
     _controllerNom = TextEditingController(text: nom);
 
@@ -181,20 +187,41 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: TextField(
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 16.0,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: "Recherche...",
-                          hintStyle: TextStyle(
-                            color: Colors.black.withOpacity(0.5),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextField(
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 16.0,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: "Recherche...",
+                              hintStyle: TextStyle(
+                                color: Colors.black.withOpacity(0.5),
+                              ),
+                              border: InputBorder.none,
+                            ),
+                            controller: _controllerNom,
+                            onChanged: (value) => updateNom(value),
                           ),
-                          border: InputBorder.none,
-                        ),
-                        controller: _controllerNom,
-                        onChanged: (value) => {updateNom(value)},
+                          SizedBox(height: 10),
+                          Container(
+                            height: 200, // Taille fixe souhaitée
+                            child: ListView.builder(
+                              itemCount: _suggestions.length,
+                              itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () => onSuggestionClicked(_suggestions[index]),
+                                child: ListTile(
+                                  title: Text(_suggestions[index]),
+                                ),
+                              );
+                              },
+                            ),
+                          ),
+
+                        ],
                       ),
                     ),
                     IconButton(
@@ -340,6 +367,11 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
   void updateNom(String newNom) {
     setState(() {
       widget.nom = newNom;
+      _suggestions = _filmsData
+          .where((film) =>
+          film[0].toString().toLowerCase().startsWith(newNom.toLowerCase()))
+          .map((film) => film[0].toString())
+          .toList();
     });
   }
 
@@ -368,4 +400,22 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
       widget.image = null;
     });
   }
+
+  Future<void> _loadFilmsData() async {
+    final String raw = await rootBundle.loadString('data/donnees.csv');
+    List<List<dynamic>> parsed = CsvToListConverter().convert(raw);
+    setState(() {
+      _filmsData = parsed;
+    });
+    print(_filmsData);
+    print("hey");
+  }
+
+  void onSuggestionClicked(String suggestion) {
+    setState(() {
+      _controllerNom.text = suggestion;
+      updateNom(suggestion);
+    });
+  }
+
 }

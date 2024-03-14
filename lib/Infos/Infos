@@ -1,0 +1,51 @@
+lib/
+|-- domain/
+|   |-- entities/
+|   |   |-- genre.dart
+|   |   |-- media.dart
+|   |   |-- saison.dart
+|   |   |-- episode.dart
+|   |   |-- utilisateur.dart
+|   |
+|   |-- repositories/
+|       |-- genre_repository.dart
+|       |-- media_repository.dart
+|       |-- saison_repository.dart
+|       |-- episode_repository.dart
+|       |-- utilisateur_repository.dart
+|
+|-- data/
+|   |-- datasources/
+|   |   |-- local/
+|   |       |-- database_init.dart
+|   |       |-- database_genre.dart
+|   |       |-- database_media.dart
+|   |       |-- database_saison.dart
+|   |       |-- database_episode.dart
+|   |       |-- database_utilisateur.dart
+|   |
+|   |-- repositories/
+|       |-- genre_repository_impl.dart
+|       |-- media_repository_impl.dart
+|       |-- saison_repository_impl.dart
+|       |-- episode_repository_impl.dart
+|       |-- utilisateur_repository_impl.dart
+|
+|-- presentation/
+|   |-- screens/
+|   |   |-- genre_screen.dart
+|   |   |-- media_screen.dart
+|   |   |-- saison_screen.dart
+|   |   |-- episode_screen.dart
+|   |   |-- utilisateur_screen.dart
+|   |
+|   |-- widgets/
+|       |-- genre_item.dart
+|       |-- media_item.dart
+|       |-- saison_item.dart
+|       |-- episode_item.dart
+|       |-- utilisateur_item.dart
+|
+|-- utils/
+    |-- constants.dart
+    |-- helpers.dart
