@@ -4,6 +4,8 @@ import 'package:flutter_project_n1/Database/database_genre.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
 import 'package:flutter_project_n1/Database/database_media.dart';
 import 'package:flutter_project_n1/Interfaces/genres_index.dart';
+import 'package:flutter_project_n1/Logic/build_check_buttons.dart';
+import 'package:flutter_project_n1/Logic/build_radio_buttons.dart';
 import 'package:flutter_project_n1/Logic/pagination_builder.dart';
 import 'package:flutter_project_n1/Model/media.dart';
 import 'package:flutter_project_n1/constants/const.dart';
@@ -32,6 +34,7 @@ class _MediaIndexState extends State<MediaIndex> {
   TextEditingController _controllerNom = TextEditingController(text: '');
 
   List<String> GenresList = [];
+  List<String> StatutList = AppConst.StatutList;
 
   String? statut;
 
@@ -65,8 +68,7 @@ class _MediaIndexState extends State<MediaIndex> {
     super.initState();
     tableName = mediaParam1!;
     selectedStatut = statut;
-    loadMedia(currentPage, selectedStatut, selectedOrder, selectedGenres,
-        _controllerNom.text, selectedOrderAscDesc);
+    loadMedia();
     loadPageButtons();
 
     _databaseInit = DatabaseInit();
@@ -88,8 +90,7 @@ class _MediaIndexState extends State<MediaIndex> {
             ),
           );
           if (result != null) {
-            loadMedia(currentPage, selectedStatut, selectedOrder,
-                selectedGenres, _controllerNom.text, selectedOrderAscDesc);
+            loadMedia();
           }
         },
         mini: true,
@@ -134,13 +135,7 @@ class _MediaIndexState extends State<MediaIndex> {
                     color: Colors.black, // Icône en noir
                   ),
                   onPressed: () {
-                    loadMedia(
-                        currentPage,
-                        selectedStatut,
-                        selectedOrder,
-                        selectedGenres,
-                        _controllerNom.text,
-                        selectedOrderAscDesc);
+                    loadMedia();
                   },
                 ),
                 InkWell(
@@ -221,6 +216,17 @@ class _MediaIndexState extends State<MediaIndex> {
                                   ],
                                 ),
                                 const SizedBox(height: 8.0),
+                                new BuildRadioButtons().buildRadioButtons(
+                                  GenresList,
+                                  selectedGenres,
+                                  (selectedGenresReturn) {
+                                    selectedGenres = selectedGenresReturn;
+                                  },
+                                  () {
+                                    currentPage = 1;
+                                    loadMedia();
+                                  },
+                                ),
                               ]),
                             ),
                             // Espacement entre le texte et les boutons
@@ -250,6 +256,14 @@ class _MediaIndexState extends State<MediaIndex> {
                                 SizedBox(height: 8.0),
                               ]),
                             ),
+                            new BuildCheckButtons().buildCheckButtons(
+                                AppConst.StatutList, selectedStatut,
+                                (selectedStatutReturn) {
+                              selectedStatut = selectedStatutReturn;
+                            }, () {
+                              currentPage = 1;
+                              loadMedia();
+                            }),
                             Container(
                               margin: EdgeInsets.all(4.0),
                               // Marge autour du widget complet
@@ -385,13 +399,7 @@ class _MediaIndexState extends State<MediaIndex> {
                                             onPressed: () async {
                                               await DatabaseMedia(tableName)
                                                   .deleteMedia(book);
-                                              loadMedia(
-                                                  currentPage,
-                                                  selectedStatut,
-                                                  selectedOrder,
-                                                  selectedGenres,
-                                                  _controllerNom.text,
-                                                  selectedOrderAscDesc);
+                                              loadMedia();
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
                                                 const SnackBar(
@@ -426,13 +434,7 @@ class _MediaIndexState extends State<MediaIndex> {
                       setState(() {
                         currentPage = pageSelectedReturned;
                       });
-                      loadMedia(
-                          currentPage,
-                          selectedStatut,
-                          selectedOrder,
-                          selectedGenres,
-                          _controllerNom.text,
-                          selectedOrderAscDesc);
+                      loadMedia();
                     },
                   )
                 : SizedBox(), // Affiche les boutons si pageMax n'est pas nulle
@@ -443,21 +445,15 @@ class _MediaIndexState extends State<MediaIndex> {
   }
 
   //FONCTIONS
-  void loadMedia(
-      int pageParam,
-      String? selectedStatutParam,
-      String? selectedOrderParam,
-      Set<String> selectedGenresParam,
-      String nomParam,
-      String selectedOrderAscDescParam) async {
+  void loadMedia() async {
     bdMedia.changeTable(tableName);
     List<Media> updatedMediaList = await bdMedia.getMedias(
-        pageParam,
-        selectedStatutParam,
-        selectedOrderParam,
-        selectedGenresParam,
-        nomParam,
-        selectedOrderAscDescParam);
+        currentPage,
+        selectedStatut,
+        selectedOrder,
+        selectedGenres,
+        _controllerNom.text,
+        selectedOrderAscDesc);
     setState(() {
       books.clear();
       books.addAll(
@@ -478,44 +474,9 @@ class _MediaIndexState extends State<MediaIndex> {
     }
   }
 
-  // Fonction pour créer les boutons en fonction du nombre de pages
-  Widget buildPageButtonsGenres() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(GenresList.length, (i) {
-          final genre = GenresList[i];
-          final isSelected = selectedGenres.contains(genre);
-
-          return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  currentPage = 1;
-                  setState(() {
-                    if (isSelected) {
-                      selectedGenres.remove(genre);
-                    } else {
-                      selectedGenres.add(genre);
-                    }
-                  });
-                  loadMedia(
-                      currentPage,
-                      selectedStatut,
-                      selectedOrder,
-                      selectedGenres,
-                      _controllerNom.text,
-                      selectedOrderAscDesc);
-                },
-                // style: ElevatedButton.styleFrom(
-                //   primary: isSelected ? Colors.blue : null,
-                // ),
-                child: Text(genre),
-              ));
-        }),
-      ),
-    );
+  Future<void> fetchData() async {
+    GenresList = await bdGenre.getGenresList(tableName, "");
+    setState(() {});
   }
 
   Widget buildPageButtonsStatut() {
@@ -541,25 +502,15 @@ class _MediaIndexState extends State<MediaIndex> {
                     selectedStatut = statut;
                   }
                 });
-                loadMedia(currentPage, selectedStatut, selectedOrder,
-                    selectedGenres, _controllerNom.text, selectedOrderAscDesc);
+                loadMedia();
               },
-              // style: ElevatedButton.styleFrom(
-              //   primary: isSelected
-              //       ? Colors.blue
-              //       : null, // Fond bleu si sélectionné
-              // ),
+
               child: Text(statut!),
             ),
           );
         }),
       ),
     );
-  }
-
-  Future<void> fetchData() async {
-    GenresList = await bdGenre.getGenresList(tableName, "");
-    setState(() {});
   }
 
   Widget buildPageButtonsOrders() {
@@ -591,13 +542,7 @@ class _MediaIndexState extends State<MediaIndex> {
                           selectedOrder = order;
                         }
                       });
-                      loadMedia(
-                          currentPage,
-                          selectedStatut,
-                          selectedOrder,
-                          selectedGenres,
-                          _controllerNom.text,
-                          selectedOrderAscDesc);
+                      loadMedia();
                     },
                     // style: ElevatedButton.styleFrom(
                     //   primary: isSelected
@@ -636,8 +581,7 @@ class _MediaIndexState extends State<MediaIndex> {
                     selectedOrderAscDesc = order;
                   }
                 });
-                loadMedia(currentPage, selectedStatut, selectedOrder,
-                    selectedGenres, _controllerNom.text, selectedOrderAscDesc);
+                loadMedia();
               },
               // style: ElevatedButton.styleFrom(
               //   primary: isSelected

@@ -41,7 +41,7 @@ class AppConst {
     "Ascendant",
     "Descendant",
   ];
-  static const List<String> StatutList = [
+  static List<String> StatutList = [
     "Fini",
     "En cours",
     "Abandonnee",
