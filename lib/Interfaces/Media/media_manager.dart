@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../Database/database_media.dart';
-import '../Database/database_genre.dart';
-import '../Database/database_init.dart';
-import '../Database/database_saison.dart';
-import '../Database/database_episode.dart';
-import '../Model/media.dart';
-import '../Model/saison.dart';
-import '../Model/episode.dart';
-import '../Model/utilisateur.dart';
-import '../Logic/function_helper.dart';
-import '../Logic/interface_helper.dart';
-import 'genres_index.dart';
+import 'package:flutter_project_n1/Database/database_episode.dart';
+import 'package:flutter_project_n1/Database/database_genre.dart';
+import 'package:flutter_project_n1/Database/database_init.dart';
+import 'package:flutter_project_n1/Database/database_media.dart';
+import 'package:flutter_project_n1/Database/database_saison.dart';
+import 'package:flutter_project_n1/Interfaces/genres_index.dart';
+import 'package:flutter_project_n1/Logic/download_image.dart';
+import 'package:flutter_project_n1/Logic/interface_helper.dart';
+import 'package:flutter_project_n1/Model/episode.dart';
+import 'package:flutter_project_n1/Model/media.dart';
+import 'package:flutter_project_n1/Model/saison.dart';
+import 'package:flutter_project_n1/Model/utilisateur.dart';
+
 
 class MediaManager extends StatefulWidget {
   final Media? mediaParam;
@@ -30,7 +31,7 @@ class _MediaManagerState extends State<MediaManager> {
   final bdSaison = DatabaseSaison();
   final bdEpisode = DatabaseEpisode();
   late DatabaseInit _databaseInit;
-  FunctionHelper help = new FunctionHelper();
+  DownloadImage downloadImage = new DownloadImage();
   Media? mediaParam;
   String? tableName;
   int? id = null;
@@ -88,13 +89,13 @@ class _MediaManagerState extends State<MediaManager> {
   Widget build(BuildContext context) {
     if (!isInitComplete) {
       // Attendre que l'initialisation soit terminée
-      return CircularProgressIndicator(); // Ou tout autre indicateur de chargement
+      return const CircularProgressIndicator(); // Ou tout autre indicateur de chargement
     }
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Media Manager'),
+        title: const Text('Media Manager'),
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -109,14 +110,14 @@ class _MediaManagerState extends State<MediaManager> {
                     interfaceHelper!,
                     if (id == null)
                       Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Card(
                           elevation:
                               4.0, // Ajoutez une élévation à la Card si vous le souhaitez
                           child: Column(children: [
                             if (utilisateur?.saison == 1)
                               ExpansionTile(
-                                title: Text("Saison - Episodes"),
+                                title: const Text("Saison - Episodes"),
                                 initiallyExpanded:
                                     false, // Vous pouvez changer ceci selon vos besoins
 
@@ -124,7 +125,7 @@ class _MediaManagerState extends State<MediaManager> {
                                   TextField(
                                     controller: _controllerSaison,
                                     keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
+                                    decoration: const InputDecoration(
                                       labelText:
                                           'Enter a number between 1 and 100',
                                     ),
@@ -152,7 +153,7 @@ class _MediaManagerState extends State<MediaManager> {
                                           itemCount: _textControllers.length,
                                           itemBuilder: (context, index) {
                                             return Padding(
-                                              padding: EdgeInsets.all(16.0),
+                                              padding: const EdgeInsets.all(16.0),
                                               child: TextField(
                                                 controller:
                                                     _textControllers[index],
@@ -168,7 +169,7 @@ class _MediaManagerState extends State<MediaManager> {
                                         ),
                                       ),
                                     ),
-                                  SizedBox(
+                                  const SizedBox(
                                     height: 20,
                                   )
                                 ],
@@ -185,7 +186,7 @@ class _MediaManagerState extends State<MediaManager> {
                             title: Row(
                               // Centre les éléments horizontalement
                               children: [
-                                Text(
+                                const Text(
                                   'Genre :',
                                   style: TextStyle(
                                     fontSize: 16, // Taille du texte
@@ -207,7 +208,6 @@ class _MediaManagerState extends State<MediaManager> {
                                         ),
                                       );
                                       if (result != null) {
-                                        print("lol");
                                         fetchData();
                                       }
                                     }, // Remplacez null par votre fonction onPressed
@@ -275,39 +275,35 @@ class _MediaManagerState extends State<MediaManager> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         ElevatedButton(
                           onPressed: () async {
+
                             String? nom = await interfaceHelper!.getNom();
-                            Uint8List? imageBytes =
-                                await interfaceHelper!.getImage();
-                            String? selectedImageUrl =
-                                await interfaceHelper!.getImageLink();
+                            Uint8List? imageBytes = await interfaceHelper!.getImage();
+                            String? selectedImageUrl = await interfaceHelper!.getImageLink();
                             double? note = await interfaceHelper!.getNote();
                             String? statut = await interfaceHelper!.getStatut();
 
                             if (nom == null) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                     content: Text(
                                         'Veuillez remplir tous les champs requis')),
                               );
                               return;
                             }
-                            if (imageBytes == null &&
-                                selectedImageUrl != null) {
-                              imageBytes =
-                                  await help.downloadImage(selectedImageUrl!);
+                            if (imageBytes == null && selectedImageUrl != null) {
+                              imageBytes = await downloadImage.downloadImage(selectedImageUrl!);
                             }
                             if (imageBytes != null) {
-                              final imageSizeInBytes =
-                                  imageBytes!.lengthInBytes;
+                              final imageSizeInBytes = imageBytes!.lengthInBytes;
                               final imageSizeInKB = imageSizeInBytes / 1024;
                               final imageSizeInMB = imageSizeInKB / 1024;
 
                               if (imageSizeInMB > 2) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
+                                  const SnackBar(
                                       content: Text(
                                           'La taille est trop Grande veuillez choisir une image plus petite.')),
                                 );
@@ -346,7 +342,7 @@ class _MediaManagerState extends State<MediaManager> {
                               print(verif);
                               if (verif == 0) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
+                                  const SnackBar(
                                     content: Text(
                                         'Erreur lors de la création du media'),
                                   ),
@@ -354,17 +350,16 @@ class _MediaManagerState extends State<MediaManager> {
                                 return;
                               }
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                     content: Text('Media Update Successfully')),
                               );
                               Navigator.pop(context, book);
                             } else {
                               // Insert the book into the database
                               int idMedia = await bdMedia.insertMedia(book);
-                              print(idMedia);
                               if (idMedia == 0) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
+                                  const SnackBar(
                                     content: Text(
                                         'Erreur lors de la création du media'),
                                   ),
@@ -399,14 +394,14 @@ class _MediaManagerState extends State<MediaManager> {
                                 }
                               }
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                     content:
                                         Text('Media created successfully')),
                               );
                               Navigator.pop(context, "LoadMedia");
                             }
                           },
-                          child: id != null ? Text("Update") : Text("Create"),
+                          child: id != null ? const Text("Update") : const Text("Create"),
                         ),
                       ],
                     ),

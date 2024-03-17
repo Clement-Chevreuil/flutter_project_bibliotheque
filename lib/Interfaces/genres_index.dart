@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../Database/database_genre.dart';
-import '../Model/genre.dart';
+import 'package:flutter_project_n1/Database/database_genre.dart';
+import 'package:flutter_project_n1/Model/genre.dart';
+import 'package:flutter_project_n1/constants/const.dart';
 import 'package:getwidget/getwidget.dart';
 import '/Database/database_init.dart';
 
@@ -24,14 +25,6 @@ class _GenresIndexState extends State<GenresIndex> {
   TextEditingController _controllerGenre = TextEditingController(text: '');
   int selectedGenreIndex =
       -1; // Initialisez la variable à -1 pour indiquer qu'aucun élément n'est sélectionné au départ
-  List<String> _selectionsGenres = [
-    "Series",
-    "Animes",
-    "Games",
-    "Webtoons",
-    "Books",
-    "Movies"
-  ];
 
   String tableName = "Series";
   List<Genre> genres = [];
@@ -49,7 +42,7 @@ class _GenresIndexState extends State<GenresIndex> {
 
     if (mediaParam1 != null) {
       tableName = mediaParam1!;
-      selectedGenreIndex = _selectionsGenres
+      selectedGenreIndex = AppConst.sidebarItems
           .indexOf(mediaParam1!); // Trouvez l'index correspondant
     }
   }
@@ -62,17 +55,17 @@ class _GenresIndexState extends State<GenresIndex> {
           _showAddGenreDialog(context); // Affiche la popup
         },
         mini: true, // Réduit la taille du bouton
-        child: Icon(Icons
+        child: const Icon(Icons
             .add), // Icône du bouton flottant (vous pouvez la personnaliser)
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation
           .endFloat, // Position du bouton flottant (en bas à droite)
       //extendBody: true,
       appBar: AppBar(
-        title: Text('Genres'),
+        title: const Text('Genres'),
         centerTitle: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () {
             // Handle the back button click
             Navigator.pop(context,"update");
@@ -82,7 +75,7 @@ class _GenresIndexState extends State<GenresIndex> {
       body: Column(
         children: <Widget>[
           Container(
-            margin: EdgeInsets.all(16.0),
+            margin: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5.0),
               border: Border.all(
@@ -91,12 +84,12 @@ class _GenresIndexState extends State<GenresIndex> {
               ),
               color: Colors.transparent, // Fond transparent
             ),
-            padding: EdgeInsets.symmetric(horizontal: 10.0),
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.black, // Texte en noir
                       fontSize: 16.0, // Taille du texte
                     ),
@@ -112,7 +105,7 @@ class _GenresIndexState extends State<GenresIndex> {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.search,
                     color: Colors.black, // Icône en noir
                   ),
@@ -126,13 +119,13 @@ class _GenresIndexState extends State<GenresIndex> {
           Wrap(
             spacing: 0.0,
             runSpacing: 0.0,
-            children: _selectionsGenres.asMap().entries.map((entry) {
+            children: AppConst.sidebarItems.asMap().entries.map((entry) {
               int index = entry.key;
               String item = entry.value;
               return Container(
                 width: 100.0,
                 height: 40.0,
-                margin: EdgeInsets.all(2.0),
+                margin: const EdgeInsets.all(2.0),
                 child: ElevatedButton(
                   onPressed: () {
                     setState(() {
@@ -142,10 +135,9 @@ class _GenresIndexState extends State<GenresIndex> {
                       } else {
                         selectedGenreIndex = index;
                       }
-                      tableName = _selectionsGenres[index];
+                      tableName = AppConst.sidebarItems[index];
                       loadGenres();
                     });
-                    print("Genre sélectionné : ${_selectionsGenres[index]}");
                   },
                   // style: ElevatedButton.styleFrom(
                   //   shape: RoundedRectangleBorder(
@@ -173,7 +165,7 @@ class _GenresIndexState extends State<GenresIndex> {
               future: bdGenres.getGenres(tableName, _controllerNom.text),
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data == null) {
-                  return Center(
+                  return const Center(
                     child: Text('Aucun Genre.'),
                   );
                 } else {
@@ -185,7 +177,7 @@ class _GenresIndexState extends State<GenresIndex> {
                       if (index < genres.length) {
                         Genre genre = genres[index];
                         return Container(
-                          margin: EdgeInsets.symmetric(
+                          margin: const EdgeInsets.symmetric(
                               horizontal: 16.0,
                               vertical: 5.0), // Espace autour de la Card
                           child: Card(
@@ -225,13 +217,13 @@ class _GenresIndexState extends State<GenresIndex> {
                                     },
                                   ),
                                   IconButton(
-                                    icon: Icon(Icons.delete),
+                                    icon: const Icon(Icons.delete),
                                     onPressed: () async {
                                       await DatabaseGenre().delete(genre);
                                       loadGenres();
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
-                                        SnackBar(
+                                        const SnackBar(
                                             content: Text('Genre supprimé')),
                                       );
                                     },
@@ -242,7 +234,7 @@ class _GenresIndexState extends State<GenresIndex> {
                           ),
                         );
                       } else {
-                        return SizedBox(height: 50);
+                        return const SizedBox(height: 50);
                       }
                     },
                   );
@@ -280,10 +272,10 @@ class _GenresIndexState extends State<GenresIndex> {
                 "Entrez les informations du genre pour $mediaParam1 :",
                 style: TextStyle(fontSize: 18.0),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextField(
                 controller: _controllerGenre,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: "Nom du genre",
                 ),
               ),
@@ -293,7 +285,7 @@ class _GenresIndexState extends State<GenresIndex> {
                   if (_controllerGenre.text == "") {
                     // Affichez un message d'erreur car _controllerGenre est nul
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                         content: Text("Erreur : _controllerGenre est nul"),
                       ),
                     );
@@ -309,7 +301,7 @@ class _GenresIndexState extends State<GenresIndex> {
                         if(verif == 0)
                               {
                                  ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
+                                  const SnackBar(
                                     content: Text('Erreur lors de la création du genre'),
                                   ),
                                 );
@@ -321,7 +313,7 @@ class _GenresIndexState extends State<GenresIndex> {
                         if(verif == 0)
                               {
                                  ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
+                                  const SnackBar(
                                     content: Text('Erreur lors de la création du genre'),
                                   ),
                                 );
@@ -334,7 +326,7 @@ class _GenresIndexState extends State<GenresIndex> {
                    
                   }
                 },
-                child: idUpdate != null ? Text("Update") : Text("Ajouter"),
+                child: idUpdate != null ? const Text("Update") : const Text("Ajouter"),
               ),
             ],
           ),

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_project_n1/Database/database_genre.dart';
+import 'package:flutter_project_n1/Database/database_init.dart';
+import 'package:flutter_project_n1/Database/database_media.dart';
+import 'package:flutter_project_n1/Interfaces/genres_index.dart';
+import 'package:flutter_project_n1/Logic/pagination_builder.dart';
+import 'package:flutter_project_n1/Model/media.dart';
+import 'package:flutter_project_n1/constants/const.dart';
 import 'package:getwidget/getwidget.dart';
 import 'media_manager.dart';
 import 'dart:typed_data';
-import '../Database/database_media.dart';
-import '../Database/database_genre.dart';
-import '../Database/database_init.dart';
-import '../Model/media.dart';
 import 'package:intl/intl.dart';
-import 'genres_index.dart';
 
 class MediaIndex extends StatefulWidget {
   String mediaParam1;
@@ -29,41 +31,7 @@ class _MediaIndexState extends State<MediaIndex> {
   bool isAdvancedSearchVisible = false;
   TextEditingController _controllerNom = TextEditingController(text: '');
 
-  List<IconData> itemIcons = [
-    Icons.movie,
-    Icons.movie,
-    Icons.movie,
-    Icons.movie,
-    Icons.movie,
-    Icons.movie
-  ]; // Ajoutez ici les icônes correspondantes
-
   List<String> GenresList = [];
-
-  final List<String> sidebarItems = [
-    "Series",
-    "Animes",
-    "Games",
-    "Webtoons",
-    "Books",
-    "Movies"
-  ];
-  final List<String> OrderList = [
-    "ID",
-    "Note",
-    "Nom",
-    "AJOUT",
-  ];
-  final List<String> OrderListAscDesc = [
-    "Ascendant",
-    "Descendant",
-  ];
-  final List<String> StatutList = [
-    "Fini",
-    "En cours",
-    "Abandonnee",
-    "Envie",
-  ];
 
   String? statut;
 
@@ -82,9 +50,10 @@ class _MediaIndexState extends State<MediaIndex> {
   List<Media> books = [];
 
   int? pageMax = 1;
-  int page = 1;
+  int currentPage = 1;
   int index = 2;
   Set<String> selectedGenres = Set();
+
   // instantiate the controller in your state
 
   _MediaIndexState({
@@ -96,18 +65,12 @@ class _MediaIndexState extends State<MediaIndex> {
     super.initState();
     tableName = mediaParam1!;
     selectedStatut = statut;
-    loadMedia();
+    loadMedia(currentPage, selectedStatut, selectedOrder, selectedGenres,
+        _controllerNom.text, selectedOrderAscDesc);
     loadPageButtons();
 
     _databaseInit = DatabaseInit();
     fetchData();
-  }
-
-  void changeTableName(String newTableName) {
-    setState(() {
-      tableName = newTableName;
-      loadMedia(); // Chargez les médias avec le nouveau tableName
-    });
   }
 
   @override
@@ -125,7 +88,8 @@ class _MediaIndexState extends State<MediaIndex> {
             ),
           );
           if (result != null) {
-            loadMedia();
+            loadMedia(currentPage, selectedStatut, selectedOrder,
+                selectedGenres, _controllerNom.text, selectedOrderAscDesc);
           }
         },
         mini: true,
@@ -149,7 +113,7 @@ class _MediaIndexState extends State<MediaIndex> {
               children: [
                 Expanded(
                   child: TextField(
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.black, // Texte en noir
                       fontSize: 16.0, // Taille du texte
                     ),
@@ -165,12 +129,18 @@ class _MediaIndexState extends State<MediaIndex> {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.search,
                     color: Colors.black, // Icône en noir
                   ),
                   onPressed: () {
-                    loadMedia();
+                    loadMedia(
+                        currentPage,
+                        selectedStatut,
+                        selectedOrder,
+                        selectedGenres,
+                        _controllerNom.text,
+                        selectedOrderAscDesc);
                   },
                 ),
                 InkWell(
@@ -182,7 +152,7 @@ class _MediaIndexState extends State<MediaIndex> {
                   },
                   child: Container(
                     padding: EdgeInsets.all(8.0),
-                    child: Icon(
+                    child: const Icon(
                       Icons.sort,
                       color: Colors.black, // Icône en noir
                     ),
@@ -192,29 +162,107 @@ class _MediaIndexState extends State<MediaIndex> {
             ),
           ),
           AnimatedContainer(
-              height: isAdvancedSearchVisible
-                  ? null
-                  : 0, // Utilisez null pour la hauteur pour permettre l'animation
-              duration: Duration(milliseconds: 300), // Durée de l'animation
+              height: isAdvancedSearchVisible ? null : 0,
+              // Utilisez null pour la hauteur pour permettre l'animation
+              duration: Duration(milliseconds: 300),
+              // Durée de l'animation
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: 16.0,
-                    vertical:
-                        8.0), // Ajustez la quantité de padding selon vos préférences
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                // Ajustez la quantité de padding selon vos préférences
                 child: Card(
                   elevation:
                       4.0, // Ajoutez une élévation à la Card si vous le souhaitez
                   child: Column(
                     children: [
                       Padding(
-                        padding: EdgeInsets.all(
-                            16.0), // Ajoutez du padding à l'intérieur de la Card
+                        padding: const EdgeInsets.all(16.0),
+                        // Ajoutez du padding à l'intérieur de la Card
                         child: Column(
                           children: [
-                            buildPageButtonsGenres(),
-                            buildPageButtonsOrders(),
-                            buildPageButtonsStatut(),
-                            buildPageButtonsOrdersAscDesc(),
+                            Container(
+                              margin: EdgeInsets.all(4.0),
+                              // Marge autour du widget complet
+                              child: Column(children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  // Centre les éléments horizontalement
+                                  children: [
+                                    const Text(
+                                      'Genre :',
+                                      style: TextStyle(
+                                        fontSize: 16, // Taille du texte
+                                        fontWeight:
+                                            FontWeight.bold, // Texte en gras
+                                      ),
+                                    ),
+                                    Container(
+                                      transform:
+                                          Matrix4.translationValues(0, -6.0, 0),
+                                      // Translation vers le haut
+                                      child: IconButton(
+                                        onPressed: () async {
+                                          var result = await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => GenresIndex(
+                                                mediaParam1: tableName,
+                                              ),
+                                            ),
+                                          );
+                                          if (result != null) {
+                                            fetchData();
+                                          }
+                                        },
+                                        // Remplacez null par votre fonction onPressed
+                                        icon: const Icon(Icons.settings),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8.0),
+                              ]),
+                            ),
+                            // Espacement entre le texte et les boutons
+                            Container(
+                              margin: EdgeInsets.all(4.0),
+                              // Marge autour du widget complet
+                              child: const Column(children: [
+                                Text(
+                                  "Ordre :",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ]),
+                            ),
+                            const SizedBox(height: 8.0),
+                            Container(
+                              margin: const EdgeInsets.all(4.0),
+                              // Marge autour du widget complet
+                              child: const Column(children: [
+                                Text(
+                                  "Statut :",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 8.0),
+                              ]),
+                            ),
+                            Container(
+                              margin: EdgeInsets.all(4.0),
+                              // Marge autour du widget complet
+                              child: const Column(children: [
+                                Text(
+                                  "Sens :",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 8.0),
+                              ]),
+                            ),
                           ],
                         ),
                       ),
@@ -224,11 +272,16 @@ class _MediaIndexState extends State<MediaIndex> {
               )),
           Expanded(
             child: FutureBuilder<List<Media>>(
-              future: bdMedia.getMedias(page, selectedStatut, selectedOrder,
-                  selectedGenres, _controllerNom.text, selectedOrderAscDesc),
+              future: bdMedia.getMedias(
+                  currentPage,
+                  selectedStatut,
+                  selectedOrder,
+                  selectedGenres,
+                  _controllerNom.text,
+                  selectedOrderAscDesc),
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data == null) {
-                  return Center(
+                  return const Center(
                     child: Text('Aucun livre enregistré.'),
                   );
                 } else {
@@ -255,7 +308,7 @@ class _MediaIndexState extends State<MediaIndex> {
                               print('Card Clicked');
                             },
                             child: Container(
-                              margin: EdgeInsets.symmetric(
+                              margin: const EdgeInsets.symmetric(
                                   horizontal: 16.0,
                                   vertical: 5.0), // Espace autour de la Card
                               child: Card(
@@ -332,10 +385,16 @@ class _MediaIndexState extends State<MediaIndex> {
                                             onPressed: () async {
                                               await DatabaseMedia(tableName)
                                                   .deleteMedia(book);
-                                              loadMedia();
+                                              loadMedia(
+                                                  currentPage,
+                                                  selectedStatut,
+                                                  selectedOrder,
+                                                  selectedGenres,
+                                                  _controllerNom.text,
+                                                  selectedOrderAscDesc);
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
-                                                SnackBar(
+                                                const SnackBar(
                                                     content:
                                                         Text('Livre supprimé')),
                                               );
@@ -358,26 +417,47 @@ class _MediaIndexState extends State<MediaIndex> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.all(20.0), // Ajoutez le padding souhaité
+            padding: const EdgeInsets.all(20.0), // Ajoutez le padding souhaité
             child: pageMax != null
-                ? buildPageButtons(pageMax!)
+                ? new PaginationBuilder().paginationBuilder(
+                    pageMax!,
+                    currentPage,
+                    (pageSelectedReturned) {
+                      setState(() {
+                        currentPage = pageSelectedReturned;
+                      });
+                      loadMedia(
+                          currentPage,
+                          selectedStatut,
+                          selectedOrder,
+                          selectedGenres,
+                          _controllerNom.text,
+                          selectedOrderAscDesc);
+                    },
+                  )
                 : SizedBox(), // Affiche les boutons si pageMax n'est pas nulle
-          ),
+          )
         ],
       ),
     );
   }
 
   //FONCTIONS
-  void loadMedia() async {
+  void loadMedia(
+      int pageParam,
+      String? selectedStatutParam,
+      String? selectedOrderParam,
+      Set<String> selectedGenresParam,
+      String nomParam,
+      String selectedOrderAscDescParam) async {
     bdMedia.changeTable(tableName);
     List<Media> updatedMediaList = await bdMedia.getMedias(
-        page,
-        selectedStatut,
-        selectedOrder,
-        selectedGenres,
-        _controllerNom.text,
-        selectedOrderAscDesc);
+        pageParam,
+        selectedStatutParam,
+        selectedOrderParam,
+        selectedGenresParam,
+        nomParam,
+        selectedOrderAscDescParam);
     setState(() {
       books.clear();
       books.addAll(
@@ -399,213 +479,80 @@ class _MediaIndexState extends State<MediaIndex> {
   }
 
   // Fonction pour créer les boutons en fonction du nombre de pages
-  Widget buildPageButtons(int pageCount) {
-    // Assurez-vous qu'il y a au moins deux boutons à afficher
-    if (pageCount < 2) {
-      return SizedBox();
-    }
-
-    // Définissez le nombre total de boutons à afficher autour de la page actuelle (toujours 7)
-    int totalButtons = 7;
-    int pageMin = 2;
-    int pageMax = 2;
-    // Calculez les bornes inférieures et supérieures pour afficher les boutons
-    int lowerBound = page - pageMin;
-    int upperBound = page + pageMax;
-
-    // Ajustez les bornes pour s'assurer qu'il y a toujours 7 boutons
-    if (lowerBound < 1) {
-      lowerBound = 1;
-      upperBound = lowerBound + totalButtons - 2;
-    }
-    if (upperBound > pageCount) {
-      upperBound = pageCount;
-      lowerBound = upperBound - totalButtons + 2;
-    }
-    if (page == 3) {
-      upperBound += 1;
-    }
-
-    if (page == pageCount - 2) {
-      lowerBound -= 1;
-    }
-
-    // Générez les boutons en fonction des bornes inférieures et supérieures
-    List<Widget> buttons = [];
-
-    for (int i = lowerBound; i <= upperBound; i++) {
-      buttons.add(buildButton(i));
-    }
-
+  Widget buildPageButtonsGenres() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          if (lowerBound > 1) buildButton(1), // Bouton de la page minimum
-          ...buttons, // Boutons centraux
-          if (upperBound < pageCount)
-            buildButton(pageCount), // Bouton de la page maximum
-        ],
-      ),
-    );
-  }
+        children: List.generate(GenresList.length, (i) {
+          final genre = GenresList[i];
+          final isSelected = selectedGenres.contains(genre);
 
-  Widget buildButton(int pageNumber) {
-    final isSelected =
-        pageNumber == page; // Vérifiez si le bouton est sélectionné
-
-    return SizedBox(
-      width: 36.0, // Largeur fixe
-      height: 36.0, // Hauteur fixe
-      child: TextButton(
-        onPressed: () {
-          // Mettez à jour la page sélectionnée
-          setState(() {
-            page = pageNumber;
-          });
-          loadMedia();
-        },
-        style: TextButton.styleFrom(
-          padding: EdgeInsets.zero, // Aucun remplissage autour du texte
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0.0), // Bordures carrées
-          ),
-          backgroundColor:
-              isSelected ? Colors.blue : Colors.transparent, // Couleur de fond
-        ),
-        child: Text(
-          '$pageNumber',
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black, // Couleur du texte
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Fonction pour créer les boutons en fonction du nombre de pages
-  Widget buildPageButtonsGenres() {
-    return Container(
-      margin: EdgeInsets.all(4.0), // Marge autour du widget complet
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment:
-                MainAxisAlignment.center, // Centre les éléments horizontalement
-            children: [
-              Text(
-                'Genre :',
-                style: TextStyle(
-                  fontSize: 16, // Taille du texte
-                  fontWeight: FontWeight.bold, // Texte en gras
-                ),
-              ),
-              Container(
-                transform: Matrix4.translationValues(
-                    0, -6.0, 0), // Translation vers le haut
-                child: IconButton(
-                  onPressed: () async {
-                    var result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => GenresIndex(
-                          mediaParam1: tableName,
-                        ),
-                      ),
-                    );
-                    if (result != null) {
-                      print("lol");
-                      fetchData();
+          return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  currentPage = 1;
+                  setState(() {
+                    if (isSelected) {
+                      selectedGenres.remove(genre);
+                    } else {
+                      selectedGenres.add(genre);
                     }
-                  }, // Remplacez null par votre fonction onPressed
-                  icon: Icon(Icons.settings),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8.0), // Espacement entre le texte et les boutons
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(GenresList.length, (i) {
-                final genre = GenresList[i];
-                final isSelected = selectedGenres.contains(genre);
-
-                return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        page = 1;
-                        setState(() {
-                          if (isSelected) {
-                            selectedGenres.remove(genre);
-                          } else {
-                            selectedGenres.add(genre);
-                          }
-                        });
-                        loadMedia();
-                      },
-                      // style: ElevatedButton.styleFrom(
-                      //   primary: isSelected ? Colors.blue : null,
-                      // ),
-                      child: Text(genre),
-                    ));
-              }),
-            ),
-          ),
-        ],
+                  });
+                  loadMedia(
+                      currentPage,
+                      selectedStatut,
+                      selectedOrder,
+                      selectedGenres,
+                      _controllerNom.text,
+                      selectedOrderAscDesc);
+                },
+                // style: ElevatedButton.styleFrom(
+                //   primary: isSelected ? Colors.blue : null,
+                // ),
+                child: Text(genre),
+              ));
+        }),
       ),
     );
   }
 
   Widget buildPageButtonsStatut() {
-    return Container(
-      margin: EdgeInsets.all(4.0), // Marge autour du widget complet
-      child: Column(
-        children: [
-          Text(
-            "Statut :",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8.0), // Espacement entre le texte et les boutons
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(StatutList.length, (i) {
-                statut = StatutList[i];
-                final isSelected = statut ==
-                    selectedStatut; // Vérifiez si le bouton est sélectionné
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      page = 1;
-                      // Mettez à jour la valeur sélectionnée et rechargez les médias
-                      setState(() {
-                        if (isSelected) {
-                          // Si le bouton est déjà sélectionné, annulez la sélection
-                          selectedStatut = null;
-                        } else {
-                          selectedStatut = statut;
-                        }
-                      });
-                      loadMedia();
-                    },
-                    // style: ElevatedButton.styleFrom(
-                    //   primary: isSelected
-                    //       ? Colors.blue
-                    //       : null, // Fond bleu si sélectionné
-                    // ),
-                    child: Text(statut!),
-                  ),
-                );
-              }),
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: List.generate(AppConst.StatutList.length, (i) {
+          statut = AppConst.StatutList[i];
+          final isSelected =
+              statut == selectedStatut; // Vérifiez si le bouton est sélectionné
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.0),
+            child: ElevatedButton(
+              onPressed: () {
+                currentPage = 1;
+                // Mettez à jour la valeur sélectionnée et rechargez les médias
+                setState(() {
+                  if (isSelected) {
+                    // Si le bouton est déjà sélectionné, annulez la sélection
+                    selectedStatut = null;
+                  } else {
+                    selectedStatut = statut;
+                  }
+                });
+                loadMedia(currentPage, selectedStatut, selectedOrder,
+                    selectedGenres, _controllerNom.text, selectedOrderAscDesc);
+              },
+              // style: ElevatedButton.styleFrom(
+              //   primary: isSelected
+              //       ? Colors.blue
+              //       : null, // Fond bleu si sélectionné
+              // ),
+              child: Text(statut!),
             ),
-          ),
-        ],
+          );
+        }),
       ),
     );
   }
@@ -620,30 +567,37 @@ class _MediaIndexState extends State<MediaIndex> {
       margin: EdgeInsets.all(4.0), // Marge autour du widget complet
       child: Column(
         children: [
-          Text(
+          const Text(
             "Ordre :",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 8.0), // Espacement entre le texte et les boutons
+          const SizedBox(height: 8.0),
+          // Espacement entre le texte et les boutons
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: List.generate(OrderList.length, (i) {
-                final order = OrderList[i];
+              children: List.generate(AppConst.OrderList.length, (i) {
+                final order = AppConst.OrderList[i];
                 final isSelected = order == selectedOrder;
 
                 return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: ElevatedButton(
                     onPressed: () {
-                      page = 1;
+                      currentPage = 1;
                       // Mettez à jour la valeur sélectionnée et rechargez les médias
                       setState(() {
                         if (!isSelected) {
                           selectedOrder = order;
                         }
                       });
-                      loadMedia();
+                      loadMedia(
+                          currentPage,
+                          selectedStatut,
+                          selectedOrder,
+                          selectedGenres,
+                          _controllerNom.text,
+                          selectedOrderAscDesc);
                     },
                     // style: ElevatedButton.styleFrom(
                     //   primary: isSelected
@@ -662,47 +616,38 @@ class _MediaIndexState extends State<MediaIndex> {
   }
 
   Widget buildPageButtonsOrdersAscDesc() {
-    return Container(
-      margin: EdgeInsets.all(4.0), // Marge autour du widget complet
-      child: Column(
-        children: [
-          Text(
-            "Sens :",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8.0), // Espacement entre le texte et les boutons
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(OrderListAscDesc.length, (i) {
-                final order = OrderListAscDesc[i];
-                final isSelected = order == selectedOrderAscDesc;
+    return
+        // Espacement entre le texte et les boutons
+        SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: List.generate(AppConst.OrderListAscDesc.length, (i) {
+          final order = AppConst.OrderListAscDesc[i];
+          final isSelected = order == selectedOrderAscDesc;
 
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      page = 1;
-                      // Mettez à jour la valeur sélectionnée et rechargez les médias
-                      setState(() {
-                        if (!isSelected) {
-                          selectedOrderAscDesc = order;
-                        }
-                      });
-                      loadMedia();
-                    },
-                    // style: ElevatedButton.styleFrom(
-                    //   primary: isSelected
-                    //       ? Colors.blue
-                    //       : null, // Fond bleu si sélectionné
-                    // ),
-                    child: Text(order),
-                  ),
-                );
-              }),
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.0),
+            child: ElevatedButton(
+              onPressed: () {
+                currentPage = 1;
+                // Mettez à jour la valeur sélectionnée et rechargez les médias
+                setState(() {
+                  if (!isSelected) {
+                    selectedOrderAscDesc = order;
+                  }
+                });
+                loadMedia(currentPage, selectedStatut, selectedOrder,
+                    selectedGenres, _controllerNom.text, selectedOrderAscDesc);
+              },
+              // style: ElevatedButton.styleFrom(
+              //   primary: isSelected
+              //       ? Colors.blue
+              //       : null, // Fond bleu si sélectionné
+              // ),
+              child: Text(order),
             ),
-          ),
-        ],
+          );
+        }),
       ),
     );
   }

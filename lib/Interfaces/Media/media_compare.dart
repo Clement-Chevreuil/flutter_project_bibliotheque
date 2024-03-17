@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_project_n1/Database/database_genre.dart';
+import 'package:flutter_project_n1/Database/database_init.dart';
+import 'package:flutter_project_n1/Database/database_media.dart';
+import 'package:flutter_project_n1/Database/database_reader.dart';
+import 'package:flutter_project_n1/Model/genre.dart';
+import 'package:flutter_project_n1/Model/media.dart';
+import 'package:flutter_project_n1/Model/media_dual.dart';
+import 'package:flutter_project_n1/constants/const.dart';
 import 'package:getwidget/getwidget.dart';
 import 'dart:typed_data';
-import '../Database/database_media.dart';
-import '../Database/database_genre.dart';
-import '../Database/database_reader.dart';
-import '../Database/database_init.dart';
-import '../Model/media.dart';
-import '../Model/media_dual.dart';
-import '../Model/genre.dart';
 
 class MediaCompare extends StatefulWidget {
   final String? mediaParam1;
@@ -23,22 +24,11 @@ class MediaCompare extends StatefulWidget {
 class _MediaCompareState extends State<MediaCompare> {
   late DatabaseInit _databaseInit;
   final String? mediaParam1;
-  final TextEditingController _controller = TextEditingController();
   TextEditingController _controllerNom = TextEditingController(text: '');
-  TextEditingController _controllerGenre = TextEditingController(text: '');
   String? pathNewDb = null;
   int selectedGenreIndex = -1;
   int? idUpdate = null;
   List<MediaDual> mediaCompareList = [];
-  List<String> _selectionsGenres = [
-    "Series",
-    "Animes",
-    "Games",
-    "Webtoons",
-    "Books",
-    "Movies"
-  ];
-
   List<MediaDual> compare = [];
   String tableName = "Series";
   List<Genre> genres = [];
@@ -59,8 +49,8 @@ class _MediaCompareState extends State<MediaCompare> {
 
     if (mediaParam1 != null) {
       tableName = mediaParam1!;
-      selectedGenreIndex = _selectionsGenres
-          .indexOf(mediaParam1!); // Trouvez l'index correspondant
+      selectedGenreIndex = AppConst.sidebarItems
+          .indexOf(mediaParam1!);
     }
 
     LoadDatas();
@@ -86,7 +76,7 @@ class _MediaCompareState extends State<MediaCompare> {
               children: [
                 Expanded(
                   child: TextField(
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.black, // Texte en noir
                       fontSize: 16.0, // Taille du texte
                     ),
@@ -114,7 +104,7 @@ class _MediaCompareState extends State<MediaCompare> {
           Wrap(
             spacing: 0.0,
             runSpacing: 0.0,
-            children: _selectionsGenres.asMap().entries.map((entry) {
+            children: AppConst.sidebarItems.asMap().entries.map((entry) {
               int index = entry.key;
               String item = entry.value;
               return Container(
@@ -130,7 +120,7 @@ class _MediaCompareState extends State<MediaCompare> {
                       } else {
                         selectedGenreIndex = index;
                       }
-                      tableName = _selectionsGenres[index];
+                      tableName = AppConst.sidebarItems[index];
                     });
                     bdMedia.changeTable(tableName);
                     LoadDatas();

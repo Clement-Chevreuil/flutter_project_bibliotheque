@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../Database/database_init.dart';
-import '../Model/utilisateur.dart';
-import '../Logic/function_helper.dart';
-import '../Logic/interface_helper.dart';
+import 'package:flutter_project_n1/Database/database_init.dart';
+import 'package:flutter_project_n1/Logic/interface_helper.dart';
+import 'package:flutter_project_n1/Model/utilisateur.dart';
+
 
 class UtilisateurManager extends StatefulWidget {
   UtilisateurManager();
@@ -14,7 +14,6 @@ class UtilisateurManager extends StatefulWidget {
 class _UtilisateurManagerState extends State<UtilisateurManager> {
   InterfaceHelper? interfaceHelper;
   late DatabaseInit _databaseInit;
-  FunctionHelper databaseHelper = new FunctionHelper();
   _UtilisateurManagerState();
   bool isInitComplete = false;
   Utilisateur? utilisateur;
@@ -32,7 +31,7 @@ class _UtilisateurManagerState extends State<UtilisateurManager> {
   @override
   Widget build(BuildContext context) {
     if (!isInitComplete) {
-      return CircularProgressIndicator();
+      return const CircularProgressIndicator();
     }
     return Scaffold(
       backgroundColor: Colors.white,
@@ -75,7 +74,7 @@ class _UtilisateurManagerState extends State<UtilisateurManager> {
                   onPressed: () async {
                     DatabaseInit.update(utilisateur!);
                   },
-                  child: Text("Valider")),
+                  child: const Text("Valider")),
             ],
           ),
         ),

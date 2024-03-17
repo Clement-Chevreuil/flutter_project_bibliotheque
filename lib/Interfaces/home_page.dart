@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_project_n1/Interfaces/media_dashboard.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart' as p;
-import 'dart:io';
-import '../Database/database_init.dart';
-import 'media_index.dart';
+import 'package:flutter_project_n1/Database/database_init.dart';
+import 'package:flutter_project_n1/Interfaces/Media/media_dashboard.dart';
+import 'package:flutter_project_n1/Interfaces/Media/media_index.dart';
+import 'package:flutter_project_n1/Logic/replace_database.dart';
+import 'package:flutter_project_n1/constants/const.dart';
 
 void main() {
   runApp(MyApp());
@@ -28,44 +25,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
   bool activeMediaIndex = true;
-  int _currentIndex = 0;
   late DatabaseInit _databaseInit;
-
-  final home = new MediaIndex("Series",null);
-
-  final List<String> sidebarItems = [
-    "Series",
-    "Animes",
-    "Games",
-    "Webtoons",
-    "Books",
-    "Movies"
-  ];
-
-  final List<String> ItemsTitle = [
-    "Dashboard",
-    "Series",
-    "Animes",
-    "Games",
-    "Webtoons",
-    "Books",
-    "Movies",
-    "Compare",
-    "Parametres",
-  ];
 
   String? mediaIndexStatut = null;
 
-  List<IconData> itemIcons = [
-    Icons.movie,
-    Icons.movie,
-    Icons.movie,
-    Icons.movie,
-    Icons.movie,
-    Icons.movie
-  ];
+  final home = new MediaIndex("Series",null);
   String selectedTableName = "Series";
+
+  static int _currentPage = 0;
+  PageController _pageController = PageController();
 
   void initState() {
     super.initState();
@@ -73,8 +43,6 @@ class _HomePageState extends State<HomePage> {
     
   }
 
-  static int _currentPage = 0;
-  PageController _pageController = PageController();
   @override
   void dispose() {
     _pageController.dispose();
@@ -93,7 +61,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(ItemsTitle[_currentPage]),
+        title: Text(AppConst.ItemsTitle[_currentPage]),
       ),
       drawer: Drawer(
         child: Column(
@@ -102,7 +70,7 @@ class _HomePageState extends State<HomePage> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: <Widget>[
-                  DrawerHeader(
+                  const DrawerHeader(
                     decoration: BoxDecoration(
                       color: Colors.blue,
                     ),
@@ -116,29 +84,29 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                  for (int i = 0; i < sidebarItems.length; i++)
+                  for (int i = 0; i < AppConst.sidebarItems.length; i++)
                     TextButton(
                       style: ButtonStyle(
                         shape: MaterialStateProperty.all(
-                          RoundedRectangleBorder(
+                          const RoundedRectangleBorder(
                             borderRadius: BorderRadius.zero,
                           ),
                         ),
-                        backgroundColor: sidebarItems[i] == selectedTableName
+                        backgroundColor: AppConst.sidebarItems[i] == selectedTableName
                             ? MaterialStateProperty.all(Colors.transparent)
                             : MaterialStateProperty.all(Colors.transparent),
                       ),
                       onPressed: () {
                         setState(() {
-                          selectedTableName = sidebarItems[i];
+                          selectedTableName = AppConst.sidebarItems[i];
                           _changePage(i + 1, null);
                         });
                         Navigator.pop(context);
                       },
                       child: Text(
-                        sidebarItems[i],
+                        AppConst.sidebarItems[i],
                         style: TextStyle(
-                          fontWeight: sidebarItems[i] == selectedTableName
+                          fontWeight: AppConst.sidebarItems[i] == selectedTableName
                               ? FontWeight.bold
                               : FontWeight.normal,
                           color: Colors.black,
@@ -160,7 +128,7 @@ class _HomePageState extends State<HomePage> {
                       });
                       Navigator.pop(context);
                     },
-                    child: Text("Dashboard"),
+                    child: const Text("Dashboard"),
                   ),
                   // TextButton(
                   //   onPressed: () {
@@ -187,14 +155,14 @@ class _HomePageState extends State<HomePage> {
                       Navigator.pop(context);
                       _databaseInit.exportDatabaseWithUserChoice();
                     },
-                    child: Text("Exporter BDD"),
+                    child: const Text("Exporter BDD"),
                   ),
                   TextButton(
                     onPressed: () {
-                      replaceDatabase();
+                      ReplaceDatabse.replaceDatabase(_databaseInit);
                       Navigator.pop(context);
                     },
-                    child: Text("Remplacer BDD"),
+                    child: const Text("Remplacer BDD"),
                   ),
                   
                 ],
@@ -205,7 +173,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: PageView(
         controller: _pageController,
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         onPageChanged: (page) {
           setState(() {
             _currentPage = page;
@@ -226,41 +194,5 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future replaceDatabase() async {
-    try {
-      // Sélectionner un fichier depuis l'appareil
-      FilePickerResult? result =
-          await FilePicker.platform.pickFiles(type: FileType.any);
 
-      if (result != null) {
-        // Récupérer le fichier sélectionné
-        final file = File(result.files.single.path!);
-
-        String sourceDBPath = p.join(await getDatabasesPath(), "maBDD2.db");
-        File sourceFile = File(sourceDBPath);
-
-        // Supprimer l'ancien fichier de base de données s'il existe
-        if (await sourceFile.exists()) {
-          await sourceFile.delete();
-        }
-
-        _databaseInit.closeDatabase();
-        final appDirectory = await getDatabasesPath();
-        final databasePath =
-            '${appDirectory}/maBDD3.db'; // Changement de nom ici
-        await file.copy(databasePath);
-        _databaseInit.initDatabase("maBDD3.db");
-        //loadMedia();
-
-        return sourceFile.path;
-      } else {
-        // L'utilisateur a annulé la sélection du fichier
-        return null;
-      }
-    } catch (e) {
-      print(e);
-      // Gérer l'erreur de remplacement du fichier de base de données
-      return null;
-    }
-  }
 }

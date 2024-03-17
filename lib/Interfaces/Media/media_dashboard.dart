@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '/Chart/LineChartSample2.dart';
+import 'package:flutter_project_n1/Database/database_genre.dart';
+import 'package:flutter_project_n1/Database/database_init.dart';
+import 'package:flutter_project_n1/Database/database_media.dart';
+import 'package:flutter_project_n1/Logic/line_chart_sample.dart';
+import 'package:flutter_project_n1/Model/media.dart';
+import 'package:flutter_project_n1/constants/const.dart';
 import 'package:intl/intl.dart';
-import '../Database/database_media.dart';
-import '../Database/database_genre.dart';
-import '../Database/database_init.dart';
-import '../Model/media.dart';
 
 class MediaDashboard extends StatefulWidget {
   final Function(int, String?) onPageChanged;
@@ -22,31 +23,6 @@ class _MediaDashboardState extends State<MediaDashboard> {
   List<String> GenresList = [];
 
   List<Media>? mostRecentRecords;
-
-  final List<String> sidebarItems = [
-    "Series",
-    "Animes",
-    "Games",
-    "Webtoons",
-    "Books",
-    "Movies"
-  ];
-
-  List<String> _selectionsGenres = [
-    "Series",
-    "Animes",
-    "Games",
-    "Webtoons",
-    "Books",
-    "Movies"
-  ];
-
-  List<Map<String, dynamic>> mediaData = [
-    {"label": "Fini", "countKey": "countFini"},
-    {"label": "En Cours", "countKey": "countEnCours"},
-    {"label": "Abandonnee", "countKey": "countAbandonner"},
-    {"label": "Envie", "countKey": "countEnvieDeRegarder"},
-  ];
 
   int selectMediaPage = 1;
 
@@ -91,7 +67,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: sidebarItems.asMap().entries.map((entry) {
+              children: AppConst.sidebarItems.asMap().entries.map((entry) {
                 final index = entry.key;
                 final item = entry.value;
                 return InkWell(
@@ -140,7 +116,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
           Wrap(
             spacing: 0.0,
             runSpacing: 0.0,
-            children: _selectionsGenres.asMap().entries.map((entry) {
+            children: AppConst.sidebarItems.asMap().entries.map((entry) {
               int index = entry.key;
               String item = entry.value;
               return Container(
@@ -156,7 +132,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
                       } else {
                         selectedGenreIndex = index;
                       }
-                      tableName = _selectionsGenres[index];
+                      tableName = AppConst.sidebarItems[index];
                       if (tableName == "Series") {
                         selectMediaPage = 1;
                       }
@@ -178,7 +154,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
                       bdMedia.changeTable(tableName);
                       getLoadPage();
                     });
-                    print("Genre sélectionné : ${_selectionsGenres[index]}");
+                    print("Genre sélectionné : ${AppConst.sidebarItems[index]}");
                   },
                   // style: ElevatedButton.styleFrom(
                   //     shape: RoundedRectangleBorder(
@@ -208,7 +184,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
               children: [
                 Container(
                   alignment: Alignment.centerLeft,
-                  child: Text(_selectionsGenres[0]),
+                  child: Text(AppConst.sidebarItems[0]),
                 ),
                 Row(
                   children: [
@@ -218,7 +194,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
                       child: Wrap(
                         spacing: 5.0, // gap between adjacent chips
                         runSpacing: 5.0, // gap between lines
-                        children: mediaData.map((data) {
+                        children: AppConst.mediaData.map((data) {
                           return InkWell(
                             onTap: () {
                               widget.onPageChanged(
@@ -228,6 +204,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
                               width: 120.0,
                               height: 80.0,
                               child: Card(
+                                elevation: 9.0,
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -236,7 +213,6 @@ class _MediaDashboardState extends State<MediaDashboard> {
                                         .toString()),
                                   ],
                                 ),
-                                elevation: 9.0,
                               ),
                             ),
                           );
@@ -254,8 +230,8 @@ class _MediaDashboardState extends State<MediaDashboard> {
                               child: countDate != null &&
                                       countDate! != [] &&
                                       countDate!.isNotEmpty
-                                  ? LineChartSample2(data: countDate!)
-                                  : Text(
+                                  ? LineChartSample(data: countDate!)
+                                  : const Text(
                                       'No Data'), // Replace 'Loading data...' with your desired text
                             ),
                           ),
@@ -273,7 +249,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
               children: [
                 Container(
                   alignment: Alignment.centerLeft,
-                  child: Text("Last Created/Updated"),
+                  child: const Text("Last Created/Updated"),
                 ),
               ],
             ),
@@ -286,7 +262,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
                 if (!snapshot.hasData ||
                     snapshot.data == null ||
                     snapshot.data?.length == 0) {
-                  return Center(
+                  return const Center(
                     child: Text('Aucun Media.'),
                   );
                 } else {
@@ -298,7 +274,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
                       if (index < mostRecentRecords!.length) {
                         Media media = mostRecentRecords![index];
                         return Container(
-                          margin: EdgeInsets.symmetric(
+                          margin: const EdgeInsets.symmetric(
                               horizontal: 16.0,
                               vertical: 5.0), // Espace autour de la Card
                           child: Card(
@@ -323,11 +299,11 @@ class _MediaDashboardState extends State<MediaDashboard> {
                                             ),
                                           ),
                                           if (media.updated_at != null)
-                                            Expanded(
+                                            const Expanded(
                                               child: Text("Update"),
                                             )
                                           else
-                                            Expanded(
+                                            const Expanded(
                                               child: Text("Create"),
                                             ),
                                           if (media.updated_at != null)
@@ -346,7 +322,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
                           ),
                         );
                       } else {
-                        return SizedBox(height: 50);
+                        return const SizedBox(height: 50);
                       }
                     },
                   );
@@ -360,7 +336,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
               children: [
                 Container(
                   alignment: Alignment.centerLeft,
-                  child: Text("Evolutions de vos Genres"),
+                  child: const Text("Evolutions de vos Genres"),
                 ),
               ],
             ),
@@ -376,7 +352,6 @@ class _MediaDashboardState extends State<MediaDashboard> {
     mostRecentRecords = await bdMedia.getMostRecentRecords();
     countDate = await bdMedia.getCountByDate();
     bdMedia.getMostViewedGenresByMonth();
-    print(countDate);
     setState(() {});
   }
 }

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_project_n1/Database/database_init.dart';
+import 'package:flutter_project_n1/Database/database_saison.dart';
+import 'package:flutter_project_n1/Interfaces/Episode/episode_index.dart';
+import 'package:flutter_project_n1/Interfaces/Saison/saison_manager.dart';
+import 'package:flutter_project_n1/Model/saison.dart';
 import 'package:getwidget/getwidget.dart';
-import 'saison_manager.dart';
 import 'dart:typed_data';
-import '../Database/database_saison.dart';
-import '../Database/database_init.dart';
-import '../Model/saison.dart';
-import 'episode_index.dart';
+
 
 class SaisonIndex extends StatefulWidget {
   final String? mediaParam1;
@@ -49,7 +50,7 @@ class _SaisonIndexState extends State<SaisonIndex> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Saison Manager'),
+        title: const Text('Saison Manager'),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -64,7 +65,7 @@ class _SaisonIndexState extends State<SaisonIndex> {
           );
         },
         mini: true,
-        child: Icon(Icons
+        child: const Icon(Icons
             .add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation
@@ -76,7 +77,7 @@ class _SaisonIndexState extends State<SaisonIndex> {
               future: bdSaison.getAll(idSaison!, mediaParam1!),
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data == null) {
-                  return Center(
+                  return const Center(
                     child: Text('Aucun livre enregistré.'),
                   );
                 } else {

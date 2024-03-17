@@ -1,13 +1,13 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../Database/database_init.dart';
-import '../Database/database_saison.dart';
-import '../Database/database_episode.dart';
-import '../Model/saison.dart';
-import '../Model/episode.dart';
-import '../Logic/function_helper.dart';
-import '../Logic/interface_helper.dart';
+import 'package:flutter_project_n1/Database/database_episode.dart';
+import 'package:flutter_project_n1/Database/database_init.dart';
+import 'package:flutter_project_n1/Database/database_saison.dart';
+import 'package:flutter_project_n1/Logic/download_image.dart';
+import 'package:flutter_project_n1/Logic/interface_helper.dart';
+import 'package:flutter_project_n1/Model/episode.dart';
+import 'package:flutter_project_n1/Model/saison.dart';
 
 class SaisonManager extends StatefulWidget {
   final Saison? mediaParam;
@@ -42,7 +42,7 @@ class _SaisonManagerState extends State<SaisonManager> {
   bool isInitComplete = false;
   InterfaceHelper? interfaceHelper;
   String? selectedImageUrl;
-  FunctionHelper databaseHelper = new FunctionHelper();
+  DownloadImage downloadImage = new DownloadImage();
   _SaisonManagerState({this.mediaParam, this.tableName});
 
   @override
@@ -158,7 +158,7 @@ class _SaisonManagerState extends State<SaisonManager> {
 
                       if (imageBytes == null &&
                           selectedImageUrl != null) {
-                        imageBytes = await databaseHelper
+                        imageBytes = await downloadImage
                             .downloadImage(selectedImageUrl!);
                       }
 

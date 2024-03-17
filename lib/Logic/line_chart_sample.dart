@@ -1,16 +1,16 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
-class LineChartSample2 extends StatefulWidget {
+class LineChartSample extends StatefulWidget {
   final List<Map<String, dynamic>> data;
 
-   const LineChartSample2({Key? key, required this.data}) : super(key: key);
+   const LineChartSample({Key? key, required this.data}) : super(key: key);
 
   @override
-  State<LineChartSample2> createState() => _LineChartSample2State();
+  State<LineChartSample> createState() => _LineChartSampleState();
 }
 
-class _LineChartSample2State extends State<LineChartSample2> {
+class _LineChartSampleState extends State<LineChartSample> {
   List<Color> gradientColors = [
     AppColors.contentColorCyan,
     AppColors.contentColorBlue,

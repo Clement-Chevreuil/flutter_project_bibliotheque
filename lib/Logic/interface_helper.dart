@@ -1,10 +1,11 @@
 import 'dart:typed_data';
+import 'package:flutter_project_n1/Logic/open_image_picker.dart';
+import 'package:flutter_project_n1/Logic/search_images.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:toggle_switch/toggle_switch.dart';
-import 'function_helper.dart';
 
 class InterfaceHelper extends StatefulWidget {
   String? nom;
@@ -67,7 +68,8 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
   TextEditingController _controllerNom = TextEditingController(text: '');
   String _selectedValue = "Fini";
 
-  FunctionHelper help = new FunctionHelper();
+  OpenImagePicker openImagePicker = new OpenImagePicker();
+  SearchImages searchImages = new SearchImages();
   bool isImagePickerActive = false;
   final picker = ImagePicker();
   String? selectedImageUrl;
@@ -108,7 +110,7 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
       children: [
         GestureDetector(
           onTap: () {
-            help
+            openImagePicker
                 .openImagePicker(isImagePickerActive, picker)
                 .then((value) => setState(() {
                       this.imageBytes = Uint8List.fromList(value!);
@@ -159,7 +161,7 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
         ),
         Card(
           color: Colors.blue,
-          margin: EdgeInsets.symmetric(
+          margin: const EdgeInsets.symmetric(
             horizontal: 16.0,
             vertical: 8.0,
           ),
@@ -182,7 +184,7 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
                   children: [
                     Expanded(
                       child: TextField(
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.black,
                           fontSize: 16.0,
                         ),
@@ -198,7 +200,7 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
                       ),
                     ),
                     IconButton(
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.search,
                         color: Colors.black,
                       ),
@@ -210,7 +212,7 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
               RatingBar.builder(
                 minRating: 0,
                 itemSize: 46,
-                itemBuilder: (context, _) => Icon(
+                itemBuilder: (context, _) => const Icon(
                   Icons.star,
                   color: Colors.black,
                 ),
@@ -231,7 +233,7 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
                       minHeight: 40.0,
                       cornerRadius: 5.0,
                       inactiveFgColor: Colors.white,
-                      activeBgColors: [
+                      activeBgColors: const [
                         [Colors.white54],
                         [Colors.white54],
                         [Colors.white54],
@@ -239,7 +241,7 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
                       ],
                       initialLabelIndex: initialIndexToggle,
                       totalSwitches: 4,
-                      customIcons: [
+                      customIcons: const [
                         Icon(
                           Icons.hourglass_empty,
                           size: 20.0,
@@ -265,7 +267,6 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
                           "Envie",
                         ];
                         _selectedValue = StatutList[index!];
-                        print(_selectedValue);
                         updateStatut(_selectedValue);
                       },
                     ),
@@ -281,7 +282,7 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
 
   //FONCTIONS
   Future<void> _loadImagesAndShowPopup() async {
-    await help.searchImages(_controllerNom.text).then((value) => setState(() {
+    await searchImages.searchImages(_controllerNom.text).then((value) => setState(() {
           imageUrls = value!;
         }));
     _showImagePopup(context);
