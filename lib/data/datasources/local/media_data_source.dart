@@ -1,12 +1,12 @@
+import 'package:flutter_project_n1/data/datacontrol/database_init.dart';
+import 'package:flutter_project_n1/data/models/media.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:typed_data';
 
-import '../datacontrol/database_init.dart';
-import '../models/media.dart';
 
-class DatabaseMedia {
+class MediaDataSource {
   String table;
-  DatabaseMedia(this.table);
+  MediaDataSource(this.table);
 
   final List<String> tableNames = [
     "Series",

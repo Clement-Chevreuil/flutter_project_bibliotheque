@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_project_n1/Function/ReplaceDatabase.dart';
-import '../../data/datacontrol/database_init.dart';
+import 'package:flutter_project_n1/data/datacontrol/database_init.dart';
 import 'media_dashboard.dart';
 import 'media_index.dart';
 
@@ -99,7 +99,7 @@ class _HomePageState extends State<HomePage> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: <Widget>[
-                  DrawerHeader(
+                  const DrawerHeader(
                     decoration: BoxDecoration(
                       color: Colors.blue,
                     ),
@@ -117,7 +117,7 @@ class _HomePageState extends State<HomePage> {
                     TextButton(
                       style: ButtonStyle(
                         shape: MaterialStateProperty.all(
-                          RoundedRectangleBorder(
+                          const RoundedRectangleBorder(
                             borderRadius: BorderRadius.zero,
                           ),
                         ),
@@ -157,7 +157,7 @@ class _HomePageState extends State<HomePage> {
                       });
                       Navigator.pop(context);
                     },
-                    child: Text("Dashboard"),
+                    child: const Text("Dashboard"),
                   ),
                   // TextButton(
                   //   onPressed: () {
@@ -184,14 +184,14 @@ class _HomePageState extends State<HomePage> {
                       Navigator.pop(context);
                       _databaseInit.exportDatabaseWithUserChoice();
                     },
-                    child: Text("Exporter BDD"),
+                    child: const Text("Exporter BDD"),
                   ),
                   TextButton(
                     onPressed: () {
                       replaceDatabase.replaceDatabase(_databaseInit);
                       Navigator.pop(context);
                     },
-                    child: Text("Remplacer BDD"),
+                    child: const Text("Remplacer BDD"),
                   ),
                 ],
               ),
@@ -201,7 +201,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: PageView(
         controller: _pageController,
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         onPageChanged: (page) {
           setState(() {
             _currentPage = page;

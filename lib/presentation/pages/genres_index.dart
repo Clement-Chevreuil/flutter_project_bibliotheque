@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../data/datacontrol/database_init.dart';
-import '../../data/datasources/database_genre.dart';
-import '../../data/models/genre.dart';
 import 'package:getwidget/getwidget.dart';
 
 class GenresIndex extends StatefulWidget {

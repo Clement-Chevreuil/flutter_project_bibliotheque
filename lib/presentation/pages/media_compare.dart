@@ -2,14 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:getwidget/getwidget.dart';
 import 'dart:typed_data';
-import '../../data/datacontrol/database_init.dart';
-import '../../data/datacontrol/database_reader.dart';
-import '../../data/datasources/database_genre.dart';
-import '../../data/datasources/database_media.dart';
-import '../../data/models/genre.dart';
-import '../../data/models/media.dart';
-import '../../data/models/media_dual.dart';
-
 
 class MediaCompare extends StatefulWidget {
   final String? mediaParam1;

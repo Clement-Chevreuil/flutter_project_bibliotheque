@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_project_n1/data/datasources/database_episode.dart';
+import 'package:flutter_project_n1/data/datacontrol/database_init.dart';
 import 'package:getwidget/getwidget.dart';
 import 'dart:typed_data';
-import '../../data/datacontrol/database_init.dart';
-import '../../data/models/episode.dart';
 import 'episode_manager.dart';
 
 class EpisodeIndex extends StatefulWidget {
@@ -89,7 +87,7 @@ class _EpisodeIndexState extends State<EpisodeIndex> {
                               print('Card Clicked');
                             },
                             child:Container(
-                          margin: EdgeInsets.symmetric(
+                          margin: const EdgeInsets.symmetric(
                               horizontal: 16.0,
                               vertical: 5.0), // Espace autour de la Card
                           child: Card(

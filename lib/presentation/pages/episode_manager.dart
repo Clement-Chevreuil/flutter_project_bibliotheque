@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../data/datacontrol/database_init.dart';
-import '../../data/datasources/database_episode.dart';
-import '../../Logic/function_helper.dart';
-import '../../Logic/interface_helper.dart';
-import '../../data/models/episode.dart';
 
 
 class EpisodeManager extends StatefulWidget {

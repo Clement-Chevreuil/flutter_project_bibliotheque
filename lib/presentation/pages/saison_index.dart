@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:getwidget/getwidget.dart';
-import '../../data/datacontrol/database_init.dart';
-import '../../data/datasources/database_saison.dart';
-import '../../data/models/saison.dart';
 import 'episode_index.dart';
 import 'saison_manager.dart';
 import 'dart:typed_data';

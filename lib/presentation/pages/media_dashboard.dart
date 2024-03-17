@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../Logic/LineChartSample2.dart';
 import 'package:intl/intl.dart';
-import '../../data/datacontrol/database_init.dart';
-import '../../data/datasources/database_genre.dart';
-import '../../data/datasources/database_media.dart';
-import '../../data/models/media.dart';
 
 class MediaDashboard extends StatefulWidget {
   final Function(int, String?) onPageChanged;

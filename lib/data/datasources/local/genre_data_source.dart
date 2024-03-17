@@ -1,9 +1,10 @@
-import '../datacontrol/database_init.dart';
+import 'package:flutter_project_n1/data/datacontrol/database_init.dart';
+import 'package:flutter_project_n1/data/models/genre.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../models/genre.dart';
 
-class DatabaseGenre {
+
+class GenreDataSource {
 
   String defaultName = "maBDD3.db";
   final dbProvider = DatabaseInit.database;

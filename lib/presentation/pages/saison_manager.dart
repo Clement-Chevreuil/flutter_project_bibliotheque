@@ -1,13 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../data/datacontrol/database_init.dart';
-import '../../data/datasources/database_episode.dart';
-import '../../data/datasources/database_saison.dart';
-import '../../data/models/episode.dart';
-import '../../Logic/function_helper.dart';
-import '../../Logic/interface_helper.dart';
-import '../../data/models/saison.dart';
 
 class SaisonManager extends StatefulWidget {
   final Saison? mediaParam;

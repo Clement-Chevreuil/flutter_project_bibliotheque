@@ -1,33 +1,30 @@
+import 'package:flutter_project_n1/data/datacontrol/database_init.dart';
+import 'package:flutter_project_n1/data/models/episode.dart';
 import 'package:sqflite/sqflite.dart';
-import '../datacontrol/database_init.dart';
-import '../models/saison.dart';
 
-class DatabaseSaison {
-  DatabaseSaison();
-
-  static Database? _database;
+class EpisodeDataSource {
+  EpisodeDataSource();
   final dbProvider = DatabaseInit.database;
 
   //CRUD
 
-  Future<int> insert(Saison book) async {
+  Future<void> insert(Episode book) async {
     book.created_at =  DateTime.now();
     book.updated_at =  null;
     final db = await dbProvider;
-    int id = await db.insert(
-      "Saison",
+    await db.insert(
+      "Episode",
       book.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    return id;
   }
 
-  Future<void> update(Saison book) async {
+  Future<void> update(Episode book) async {
   book.updated_at = DateTime.now();
   final db = await dbProvider;
   
   await db.update(
-    "Saison",
+    "Episode",
     book.toMap(),
     where: "id = ?",
     whereArgs: [book.id],
@@ -35,23 +32,23 @@ class DatabaseSaison {
   );
 }
 
-  Future<void> delete(Saison book) async {
+  Future<void> delete(Episode book) async {
     final db = await dbProvider;
     await db.delete(
-      "Saison",
+      "Episode",
       where: 'ID = ?',
       whereArgs: [book.id],
     );
   }
 
-    Future<Saison?> get(int id) async {
+    Future<Episode?> get(int id) async {
     final db = await dbProvider;
     final List<Map<String, dynamic>> maps =
-        await db.query("Saison", where: 'id = ?', whereArgs: [id]);
+        await db.query("Episode", where: 'id = ?', whereArgs: [id]);
 
     if (maps.isNotEmpty) {
       Map<String, dynamic> map = maps.first;
-      return Saison(
+      return Episode(
           id: map['ID'],
           nom: map['Nom'],
           image: map['Image'],
@@ -67,18 +64,17 @@ class DatabaseSaison {
     }
   }
 
-  Future<List<Saison>> getAll(int idMedia, String table) async {
+  Future<List<Episode>> getAll(int idSaison) async {
     final db = await dbProvider;
-    List<String> whereConditions = [];
     List<dynamic> whereValues = [];
 
     final List<Map<String, dynamic>> maps = await db.rawQuery(
-      'SELECT * FROM Saison WHERE ID_Media = $idMedia AND Media = "$table"',
+      'SELECT e.ID, e.Nom, e.Image, e.Note, e.statut, e.Avis, e.description, e.created_at, e.updated_at FROM Episode e, Saison s WHERE e.ID_Saison = s.ID AND e.ID_Saison = $idSaison',
       whereValues,
     );
 
     return List.generate(maps.length, (i) {
-            return Saison(
+            return Episode(
         id: maps[i]['ID'],
         nom: maps[i]['Nom'],
         image: maps[i]['Image'],
@@ -86,7 +82,7 @@ class DatabaseSaison {
         statut: maps[i]['Statut'],
         avis: maps[i]['Avis'],
         description: maps[i]['Description'],
-        created_at :  maps[i]['updated_at'] != null ?  DateTime.parse(maps[i]['created_at']) : null,
+        created_at :  maps[i]['created'] != null ?  DateTime.parse(maps[i]['created_at']) : null,
         updated_at :  maps[i]['updated_at'] != null ? DateTime.parse(maps[i]['updated_at']) : null,
       );
     });

@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_project_n1/data/datacontrol/database_init.dart';
 import 'package:getwidget/getwidget.dart';
 import 'dart:typed_data';
 import 'package:intl/intl.dart';
-import '../../data/datacontrol/database_init.dart';
-import '../../data/datasources/database_genre.dart';
-import '../../data/datasources/database_media.dart';
-import '../../data/models/media.dart';
 import 'genres_index.dart';
 import 'media_manager.dart';
 
@@ -182,7 +179,7 @@ class _MediaIndexState extends State<MediaIndex> {
                   },
                   child: Container(
                     padding: EdgeInsets.all(8.0),
-                    child: Icon(
+                    child: const Icon(
                       Icons.sort,
                       color: Colors.black, // Icône en noir
                     ),
@@ -197,7 +194,7 @@ class _MediaIndexState extends State<MediaIndex> {
                   : 0, // Utilisez null pour la hauteur pour permettre l'animation
               duration: Duration(milliseconds: 300), // Durée de l'animation
               child: Padding(
-                padding: EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                     horizontal: 16.0,
                     vertical:
                         8.0), // Ajustez la quantité de padding selon vos préférences
@@ -207,7 +204,7 @@ class _MediaIndexState extends State<MediaIndex> {
                   child: Column(
                     children: [
                       Padding(
-                        padding: EdgeInsets.all(
+                        padding: const EdgeInsets.all(
                             16.0), // Ajoutez du padding à l'intérieur de la Card
                         child: Column(
                           children: [
@@ -228,7 +225,7 @@ class _MediaIndexState extends State<MediaIndex> {
                   selectedGenres, _controllerNom.text, selectedOrderAscDesc),
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data == null) {
-                  return Center(
+                  return const Center(
                     child: Text('Aucun livre enregistré.'),
                   );
                 } else {
@@ -255,7 +252,7 @@ class _MediaIndexState extends State<MediaIndex> {
                               print('Card Clicked');
                             },
                             child: Container(
-                              margin: EdgeInsets.symmetric(
+                              margin: const EdgeInsets.symmetric(
                                   horizontal: 16.0,
                                   vertical: 5.0), // Espace autour de la Card
                               child: Card(
@@ -487,14 +484,14 @@ class _MediaIndexState extends State<MediaIndex> {
   // Fonction pour créer les boutons en fonction du nombre de pages
   Widget buildPageButtonsGenres() {
     return Container(
-      margin: EdgeInsets.all(4.0), // Marge autour du widget complet
+      margin: const EdgeInsets.all(4.0), // Marge autour du widget complet
       child: Column(
         children: [
           Row(
             mainAxisAlignment:
                 MainAxisAlignment.center, // Centre les éléments horizontalement
             children: [
-              Text(
+              const Text(
                 'Genre :',
                 style: TextStyle(
                   fontSize: 16, // Taille du texte
@@ -515,7 +512,6 @@ class _MediaIndexState extends State<MediaIndex> {
                       ),
                     );
                     if (result != null) {
-                      print("lol");
                       fetchData();
                     }
                   }, // Remplacez null par votre fonction onPressed
@@ -524,7 +520,7 @@ class _MediaIndexState extends State<MediaIndex> {
               ),
             ],
           ),
-          SizedBox(height: 8.0), // Espacement entre le texte et les boutons
+          const SizedBox(height: 8.0), // Espacement entre le texte et les boutons
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -534,7 +530,7 @@ class _MediaIndexState extends State<MediaIndex> {
                 final isSelected = selectedGenres.contains(genre);
 
                 return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: ElevatedButton(
                       onPressed: () {
                         page = 1;
@@ -562,14 +558,14 @@ class _MediaIndexState extends State<MediaIndex> {
 
   Widget buildPageButtonsStatut() {
     return Container(
-      margin: EdgeInsets.all(4.0), // Marge autour du widget complet
+      margin: const EdgeInsets.all(4.0), // Marge autour du widget complet
       child: Column(
         children: [
-          Text(
+          const Text(
             "Statut :",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 8.0), // Espacement entre le texte et les boutons
+          const SizedBox(height: 8.0), // Espacement entre le texte et les boutons
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -620,11 +616,11 @@ class _MediaIndexState extends State<MediaIndex> {
       margin: EdgeInsets.all(4.0), // Marge autour du widget complet
       child: Column(
         children: [
-          Text(
+          const Text(
             "Ordre :",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 8.0), // Espacement entre le texte et les boutons
+          const SizedBox(height: 8.0), // Espacement entre le texte et les boutons
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -666,11 +662,11 @@ class _MediaIndexState extends State<MediaIndex> {
       margin: EdgeInsets.all(4.0), // Marge autour du widget complet
       child: Column(
         children: [
-          Text(
+          const Text(
             "Sens :",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 8.0), // Espacement entre le texte et les boutons
+          const SizedBox(height: 8.0), // Espacement entre le texte et les boutons
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -679,7 +675,7 @@ class _MediaIndexState extends State<MediaIndex> {
                 final isSelected = order == selectedOrderAscDesc;
 
                 return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: ElevatedButton(
                     onPressed: () {
                       page = 1;

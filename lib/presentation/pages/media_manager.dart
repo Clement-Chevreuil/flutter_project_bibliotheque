@@ -1,16 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../data/datacontrol/database_init.dart';
-import '../../data/datasources/database_episode.dart';
-import '../../Logic/function_helper.dart';
-import '../../Logic/interface_helper.dart';
-import '../../data/datasources/database_genre.dart';
-import '../../data/datasources/database_media.dart';
-import '../../data/datasources/database_saison.dart';
-import '../../data/models/episode.dart';
-import '../../data/models/media.dart';
-import '../../data/models/saison.dart';
-import '../../data/models/utilisateur.dart';
 import 'genres_index.dart';
 
 class MediaManager extends StatefulWidget {

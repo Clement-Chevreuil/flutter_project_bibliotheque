@@ -1,9 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../Logic/function_helper.dart';
-import '../../Logic/interface_helper.dart';
-import '../../data/datacontrol/database_init.dart';
-import '../../data/models/utilisateur.dart';
-
 class UtilisateurManager extends StatefulWidget {
   UtilisateurManager();
 

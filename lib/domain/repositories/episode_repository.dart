@@ -1,5 +1,5 @@
 import 'package:flutter_project_n1/data/models/episode.dart';
-import 'package:flutter_project_n1/data/repositories/episode_repository_impl.dart';
+import 'package:flutter_project_n1/data/repositories/local/episode_repository_impl.dart';
 
 abstract class EpisodeRepository  {
   Future<void> addEpisode(Episode episode);
