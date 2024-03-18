@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
-import 'package:flutter_project_n1/Logic/interface_helper.dart';
+import 'package:flutter_project_n1/Logic/Interfaces/interface_helper.dart';
 import 'package:flutter_project_n1/Model/utilisateur.dart';
 
 

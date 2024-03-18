@@ -5,13 +5,14 @@ import 'package:flutter_project_n1/Database/database_genre.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
 import 'package:flutter_project_n1/Database/database_media.dart';
 import 'package:flutter_project_n1/Database/database_saison.dart';
+import 'package:flutter_project_n1/Exceptions/add_media_exceptions.dart';
+import 'package:flutter_project_n1/Gestions/Medias/save_media_gestion.dart';
 import 'package:flutter_project_n1/Interfaces/genres_index.dart';
-import 'package:flutter_project_n1/Logic/download_image.dart';
-import 'package:flutter_project_n1/Logic/interface_helper.dart';
-import 'package:flutter_project_n1/Model/episode.dart';
+import 'package:flutter_project_n1/Logic/Images/download_image.dart';
+import 'package:flutter_project_n1/Logic/Interfaces/interface_helper.dart';
 import 'package:flutter_project_n1/Model/media.dart';
-import 'package:flutter_project_n1/Model/saison.dart';
 import 'package:flutter_project_n1/Model/utilisateur.dart';
+import 'package:flutter_project_n1/Validations/add_media_validation.dart';
 
 
 class MediaManager extends StatefulWidget {
@@ -46,6 +47,7 @@ class _MediaManagerState extends State<MediaManager> {
 
   _MediaManagerState({this.mediaParam, this.tableName});
   InterfaceHelper? interfaceHelper;
+
   @override
   void initState() {
     super.initState();
@@ -279,127 +281,69 @@ class _MediaManagerState extends State<MediaManager> {
                         ElevatedButton(
                           onPressed: () async {
 
-                            String? nom = await interfaceHelper!.getNom();
-                            Uint8List? imageBytes = await interfaceHelper!.getImage();
-                            String? selectedImageUrl = await interfaceHelper!.getImageLink();
-                            double? note = await interfaceHelper!.getNote();
-                            String? statut = await interfaceHelper!.getStatut();
 
-                            if (nom == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        'Veuillez remplir tous les champs requis')),
-                              );
-                              return;
-                            }
-                            if (imageBytes == null && selectedImageUrl != null) {
-                              imageBytes = await downloadImage.downloadImage(selectedImageUrl!);
-                            }
-                            if (imageBytes != null) {
-                              final imageSizeInBytes = imageBytes!.lengthInBytes;
-                              final imageSizeInKB = imageSizeInBytes / 1024;
-                              final imageSizeInMB = imageSizeInKB / 1024;
-
-                              if (imageSizeInMB > 2) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'La taille est trop Grande veuillez choisir une image plus petite.')),
-                                );
-                                return;
-                              }
-                            } else {
-                              final ByteData data = await rootBundle
-                                  .load('images/default_image.jpeg');
-                              final List<int> bytes = data.buffer.asUint8List();
-                              imageBytes = Uint8List.fromList(bytes);
-                            }
-
-                            // Create a Media instance with the data from UI
-                            Media book = Media(
-                                nom: nom,
-                                image:
-                                    imageBytes, // Uint8List from the image picker
-                                note: note == null ? 0 : note!.toInt(),
-                                statut: statut,
-                                genres: _selectionsGenresSelected);
-
-                            List<int> intList =
-                                _textControllers.map((controller) {
-                              int parsedValue =
-                                  int.tryParse(controller.text) ?? 0;
+                            List<int> intList = _textControllers.map((controller)
+                            {
+                              int parsedValue = int.tryParse(controller.text) ?? 0;
                               return parsedValue;
                             }).toList();
 
-                            book.updateSaisonEpisode(intList);
+                            double noteInterface = await interfaceHelper!.getNote();
 
-                            if (id != null) {
-                              book.id = id;
+                            Media media = Media(
+                              id: id,
+                              nom: await interfaceHelper!.getNom(),
+                              note: noteInterface.toInt(),
+                              statut:  await interfaceHelper!.getStatut(),
+                              genres: _selectionsGenresSelected,
+                              image: await interfaceHelper!.getImage(),
+                              selectedImageUrl: await interfaceHelper!.getImageLink(),
+                              saison_episode: intList,
+                              table: tableName,
+                            );
+
+                            try
+                            {
+                              AddMediaValidation.addMediaValidation(media);
                             }
-                            if (mediaParam != null) {
-                              int? verif = await bdMedia.updateMedia(book);
-                              print(verif);
-                              if (verif == 0) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        'Erreur lors de la création du media'),
-                                  ),
-                                );
-                                return;
+                            catch (e)
+                            {
+                              if (e is AddMediaException)
+                              {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                   content: Text(e.message),
+                                   backgroundColor: Colors.red,
+                                 ));
                               }
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Media Update Successfully')),
-                              );
-                              Navigator.pop(context, book);
-                            } else {
-                              // Insert the book into the database
-                              int idMedia = await bdMedia.insertMedia(book);
-                              if (idMedia == 0) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        'Erreur lors de la création du media'),
-                                  ),
-                                );
-                                return;
+                              else
+                              {
+                                print('An unexpected error occurred: $e');
                               }
-                              if (id == null) {
-                                List<int> idSaison = [];
-
-                                final ByteData data = await rootBundle
-                                    .load('images/default_image.jpeg');
-                                final List<int> bytes =
-                                    data.buffer.asUint8List();
-                                Uint8List imageBytesTest =
-                                    Uint8List.fromList(bytes);
-
-                                for (int i = 1; i < intList.length + 1; i++) {
-                                  Saison saison = new Saison();
-                                  saison.id_media = idMedia;
-                                  saison.nom = "Saison " + i.toString();
-                                  saison.image = imageBytesTest;
-                                  saison.media = tableName;
-                                  int idSaison = await bdSaison.insert(saison);
-
-                                  for (int j = 0; j < intList[i - 1]; j++) {
-                                    Episode episode = new Episode();
-                                    episode.id_saison = idSaison;
-                                    episode.nom = "Episode " + j.toString();
-                                    episode.image = imageBytesTest;
-                                    await bdEpisode.insert(episode);
-                                  }
-                                }
-                              }
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content:
-                                        Text('Media created successfully')),
-                              );
-                              Navigator.pop(context, "LoadMedia");
                             }
+
+                            try
+                            {
+                              SaveMediaGestion.saveMediaGestion(media);
+                              Navigator.pop(context, media);
+                            }
+                            catch (e)
+                            {
+                              if (e is AddMediaException)
+                              {
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                  content: Text(e.message),
+                                  backgroundColor: Colors.red,
+                                ));
+                              }
+                              else
+                              {
+                                print('An unexpected error occurred: $e');
+                              }
+                            }
+
+
+
+
                           },
                           child: id != null ? const Text("Update") : const Text("Create"),
                         ),

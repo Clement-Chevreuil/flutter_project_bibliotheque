@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_project_n1/Database/database_episode.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
 import 'package:flutter_project_n1/Database/database_saison.dart';
-import 'package:flutter_project_n1/Logic/download_image.dart';
-import 'package:flutter_project_n1/Logic/interface_helper.dart';
+import 'package:flutter_project_n1/Logic/Images/download_image.dart';
+import 'package:flutter_project_n1/Logic/Interfaces/interface_helper.dart';
 import 'package:flutter_project_n1/Model/episode.dart';
 import 'package:flutter_project_n1/Model/saison.dart';
 

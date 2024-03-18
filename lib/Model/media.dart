@@ -9,9 +9,11 @@ class Media {
   String? statut;
   List<String>? genres;
   DateTime? created_at; 
-  DateTime? updated_at; 
+  DateTime? updated_at;
+  String? table;
 
-  List<int> saison_episode = [];
+  String? selectedImageUrl;
+  List<int>? saison_episode = [];
 
   Media({
     this.id,
@@ -22,12 +24,10 @@ class Media {
     this.genres,
     this.created_at,
     this.updated_at,
+    this.selectedImageUrl,
+    this.saison_episode,
+    this.table,
   });
-
-  void updateSaisonEpisode(List<int> saison_episode) 
-  {
-    this.saison_episode = saison_episode; 
-  }
 
   
 

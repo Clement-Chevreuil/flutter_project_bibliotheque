@@ -4,9 +4,9 @@ import 'package:flutter_project_n1/Database/database_genre.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
 import 'package:flutter_project_n1/Database/database_media.dart';
 import 'package:flutter_project_n1/Interfaces/genres_index.dart';
-import 'package:flutter_project_n1/Logic/build_check_buttons.dart';
-import 'package:flutter_project_n1/Logic/build_radio_buttons.dart';
-import 'package:flutter_project_n1/Logic/pagination_builder.dart';
+import 'package:flutter_project_n1/Logic/Interfaces/build_check_buttons.dart';
+import 'package:flutter_project_n1/Logic/Interfaces/build_radio_buttons.dart';
+import 'package:flutter_project_n1/Logic/Interfaces/pagination_builder.dart';
 import 'package:flutter_project_n1/Model/media.dart';
 import 'package:flutter_project_n1/constants/const.dart';
 import 'package:getwidget/getwidget.dart';
@@ -104,10 +104,10 @@ class _MediaIndexState extends State<MediaIndex> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5.0),
               border: Border.all(
-                color: Colors.black, // Couleur du bord en noir
-                width: 1.0, // Bordure plus fine
+                color: Colors.black,
+                width: 1.0,
               ),
-              color: Colors.transparent, // Fond transparent
+              color: Colors.transparent,
             ),
             padding: EdgeInsets.symmetric(horizontal: 10.0),
             child: Row(
@@ -115,8 +115,8 @@ class _MediaIndexState extends State<MediaIndex> {
                 Expanded(
                   child: TextField(
                     style: const TextStyle(
-                      color: Colors.black, // Texte en noir
-                      fontSize: 16.0, // Taille du texte
+                      color: Colors.black,
+                      fontSize: 16.0,
                     ),
                     decoration: InputDecoration(
                       hintText: "Recherche...",
@@ -158,30 +158,24 @@ class _MediaIndexState extends State<MediaIndex> {
           ),
           AnimatedContainer(
               height: isAdvancedSearchVisible ? null : 0,
-              // Utilisez null pour la hauteur pour permettre l'animation
               duration: Duration(milliseconds: 300),
-              // Durée de l'animation
               child: Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                // Ajustez la quantité de padding selon vos préférences
                 child: Card(
                   elevation:
-                      4.0, // Ajoutez une élévation à la Card si vous le souhaitez
+                      4.0,
                   child: Column(
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(16.0),
-                        // Ajoutez du padding à l'intérieur de la Card
                         child: Column(
                           children: [
                             Container(
                               margin: EdgeInsets.all(4.0),
-                              // Marge autour du widget complet
                               child: Column(children: [
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
-                                  // Centre les éléments horizontalement
                                   children: [
                                     const Text(
                                       'Genre :',
@@ -194,7 +188,6 @@ class _MediaIndexState extends State<MediaIndex> {
                                     Container(
                                       transform:
                                           Matrix4.translationValues(0, -6.0, 0),
-                                      // Translation vers le haut
                                       child: IconButton(
                                         onPressed: () async {
                                           var result = await Navigator.push(
@@ -209,14 +202,13 @@ class _MediaIndexState extends State<MediaIndex> {
                                             fetchData();
                                           }
                                         },
-                                        // Remplacez null par votre fonction onPressed
                                         icon: const Icon(Icons.settings),
                                       ),
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 8.0),
-                                new BuildRadioButtons().buildRadioButtons(
+                                new BuildCheckButtons().buildCheckButtons(
                                   GenresList,
                                   selectedGenres,
                                   (selectedGenresReturn) {
@@ -229,7 +221,6 @@ class _MediaIndexState extends State<MediaIndex> {
                                 ),
                               ]),
                             ),
-                            // Espacement entre le texte et les boutons
                             Container(
                               margin: EdgeInsets.all(4.0),
                               // Marge autour du widget complet
@@ -242,6 +233,14 @@ class _MediaIndexState extends State<MediaIndex> {
                                 ),
                               ]),
                             ),
+                            new BuildRadioButtons().buildRadioButtons(
+                                AppConst.OrderList, selectedOrder, false,
+                                    (selectedOrderReturn) {
+                                  selectedOrder = selectedOrderReturn;
+                                }, () {
+                              currentPage = 1;
+                              loadMedia();
+                            }),
                             const SizedBox(height: 8.0),
                             Container(
                               margin: const EdgeInsets.all(4.0),
@@ -256,8 +255,9 @@ class _MediaIndexState extends State<MediaIndex> {
                                 SizedBox(height: 8.0),
                               ]),
                             ),
-                            new BuildCheckButtons().buildCheckButtons(
-                                AppConst.StatutList, selectedStatut,
+                            //Statut
+                            new BuildRadioButtons().buildRadioButtons(
+                                AppConst.StatutList, selectedStatut, true,
                                 (selectedStatutReturn) {
                               selectedStatut = selectedStatutReturn;
                             }, () {
@@ -277,6 +277,14 @@ class _MediaIndexState extends State<MediaIndex> {
                                 SizedBox(height: 8.0),
                               ]),
                             ),
+                            new BuildRadioButtons().buildRadioButtons(
+                                AppConst.OrderListAscDesc, selectedOrderAscDesc, false,
+                                    (selectedOrderAscDescReturn) {
+                                  selectedOrderAscDesc = selectedOrderAscDescReturn!;
+                                }, () {
+                              currentPage = 1;
+                              loadMedia();
+                            }),
                           ],
                         ),
                       ),
@@ -477,122 +485,5 @@ class _MediaIndexState extends State<MediaIndex> {
   Future<void> fetchData() async {
     GenresList = await bdGenre.getGenresList(tableName, "");
     setState(() {});
-  }
-
-  Widget buildPageButtonsStatut() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(AppConst.StatutList.length, (i) {
-          statut = AppConst.StatutList[i];
-          final isSelected =
-              statut == selectedStatut; // Vérifiez si le bouton est sélectionné
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4.0),
-            child: ElevatedButton(
-              onPressed: () {
-                currentPage = 1;
-                // Mettez à jour la valeur sélectionnée et rechargez les médias
-                setState(() {
-                  if (isSelected) {
-                    // Si le bouton est déjà sélectionné, annulez la sélection
-                    selectedStatut = null;
-                  } else {
-                    selectedStatut = statut;
-                  }
-                });
-                loadMedia();
-              },
-
-              child: Text(statut!),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget buildPageButtonsOrders() {
-    return Container(
-      margin: EdgeInsets.all(4.0), // Marge autour du widget complet
-      child: Column(
-        children: [
-          const Text(
-            "Ordre :",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8.0),
-          // Espacement entre le texte et les boutons
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: List.generate(AppConst.OrderList.length, (i) {
-                final order = AppConst.OrderList[i];
-                final isSelected = order == selectedOrder;
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      currentPage = 1;
-                      // Mettez à jour la valeur sélectionnée et rechargez les médias
-                      setState(() {
-                        if (!isSelected) {
-                          selectedOrder = order;
-                        }
-                      });
-                      loadMedia();
-                    },
-                    // style: ElevatedButton.styleFrom(
-                    //   primary: isSelected
-                    //       ? Colors.blue
-                    //       : null, // Fond bleu si sélectionné
-                    // ),
-                    child: Text(order),
-                  ),
-                );
-              }),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildPageButtonsOrdersAscDesc() {
-    return
-        // Espacement entre le texte et les boutons
-        SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: List.generate(AppConst.OrderListAscDesc.length, (i) {
-          final order = AppConst.OrderListAscDesc[i];
-          final isSelected = order == selectedOrderAscDesc;
-
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4.0),
-            child: ElevatedButton(
-              onPressed: () {
-                currentPage = 1;
-                // Mettez à jour la valeur sélectionnée et rechargez les médias
-                setState(() {
-                  if (!isSelected) {
-                    selectedOrderAscDesc = order;
-                  }
-                });
-                loadMedia();
-              },
-              // style: ElevatedButton.styleFrom(
-              //   primary: isSelected
-              //       ? Colors.blue
-              //       : null, // Fond bleu si sélectionné
-              // ),
-              child: Text(order),
-            ),
-          );
-        }),
-      ),
-    );
   }
 }

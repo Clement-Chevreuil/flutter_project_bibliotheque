@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
 import 'package:flutter_project_n1/Interfaces/Media/media_dashboard.dart';
 import 'package:flutter_project_n1/Interfaces/Media/media_index.dart';
-import 'package:flutter_project_n1/Logic/replace_database.dart';
+import 'package:flutter_project_n1/Logic/Database/replace_database.dart';
 import 'package:flutter_project_n1/constants/const.dart';
 
 void main() {

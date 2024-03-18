@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 class BuildCheckButtons{
+
   Widget buildCheckButtons(
       List<String> list,
-      String? selected,
-      void Function(String?) updateSelectedList,
+      Set<String> selected,
+      void Function(Set<String>) updateSelectedList,
       void Function() reloadDataFunction,
       ) {
     return SingleChildScrollView(
@@ -12,8 +13,8 @@ class BuildCheckButtons{
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(list.length, (index) {
-          final select = list[index];
-          final isSelected = selected == select;
+          final genre = list[index];
+          final isSelected = selected.contains(genre);
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -21,9 +22,9 @@ class BuildCheckButtons{
               onPressed: () {
                 // Mettre à jour les genres sélectionnés
                 if (isSelected) {
-                  selected = null;
+                  selected.remove(genre);
                 } else {
-                  selected = select;
+                  selected.add(genre);
                 }
                 updateSelectedList(selected);
                 // Charger les médias avec les nouveaux genres sélectionnés
@@ -34,11 +35,13 @@ class BuildCheckButtons{
                     ? MaterialStateProperty.all<Color>(Colors.blue)
                     : null,
               ),
-              child: Text(select),
+              child: Text(genre),
             ),
           );
         }),
       ),
     );
   }
+
+
 }

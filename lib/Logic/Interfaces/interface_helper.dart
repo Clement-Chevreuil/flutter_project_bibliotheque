@@ -1,6 +1,6 @@
 import 'dart:typed_data';
-import 'package:flutter_project_n1/Logic/open_image_picker.dart';
-import 'package:flutter_project_n1/Logic/search_images.dart';
+import 'package:flutter_project_n1/Logic/Images/open_image_picker.dart';
+import 'package:flutter_project_n1/Logic/Images/search_images.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

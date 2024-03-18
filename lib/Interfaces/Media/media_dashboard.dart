@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_project_n1/Database/database_genre.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
 import 'package:flutter_project_n1/Database/database_media.dart';
-import 'package:flutter_project_n1/Logic/line_chart_sample.dart';
+import 'package:flutter_project_n1/Logic/Interfaces/line_chart_sample.dart';
 import 'package:flutter_project_n1/Model/media.dart';
 import 'package:flutter_project_n1/constants/const.dart';
 import 'package:intl/intl.dart';
