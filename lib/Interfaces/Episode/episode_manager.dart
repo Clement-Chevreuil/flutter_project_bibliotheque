@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_project_n1/Database/database_episode.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
-import 'package:flutter_project_n1/Logic/Images/download_image.dart';
+import 'package:flutter_project_n1/Exceptions/my_exceptions.dart';
+import 'package:flutter_project_n1/Gestions/save_episode_gestion.dart';
+import 'package:flutter_project_n1/Logic/Images/url_picture_gestionnary.dart';
 import 'package:flutter_project_n1/Logic/Interfaces/interface_helper.dart';
 import 'package:flutter_project_n1/Model/episode.dart';
+import 'package:flutter_project_n1/Validations/save_episode_validation.dart';
 import 'package:image_picker/image_picker.dart';
 
 class EpisodeManager extends StatefulWidget {
@@ -32,7 +35,6 @@ class _EpisodeManagerState extends State<EpisodeManager> {
   List<String> imageUrls = [];
 
   late DatabaseInit _databaseInit;
-  DownloadImage downloadImage = new DownloadImage();
 
   _EpisodeManagerState({this.episode, this.idSaison});
 
@@ -100,66 +102,45 @@ class _EpisodeManagerState extends State<EpisodeManager> {
                   const SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: () async {
-                      String? nom = await interfaceHelper!.getNom();
-                      Uint8List? imageBytes = await interfaceHelper!.getImage();
-                      String? selectedImageUrl =
-                          await interfaceHelper!.getImageLink();
-                      double? note = await interfaceHelper!.getNote();
-                      String? statut = await interfaceHelper!.getStatut();
-                      if (nom == null) {
+                      double noteInterface = await interfaceHelper!.getNote();
+
+                      Episode episode = Episode(
+                        image: await interfaceHelper!.getImage(),
+                        nom: await interfaceHelper!.getNom(),
+                        note:  noteInterface.toInt(),
+                        statut: await interfaceHelper!.getStatut(),
+                        selectedImageUrl: await interfaceHelper!.getImageLink(),
+
+                      );
+
+                      try
+                      {
+                        SaveEpisodeValidation.saveEpisodeValidation(episode);
+                        episode.image = await urlPictureGestionnary(episode.image, episode.selectedImageUrl, context);
+                        saveEpisodeGestion(episode);
+
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text(
-                                  'Veuillez remplir tous les champs requis')),
+                          const SnackBar(content: Text('Episode created successfully')),
                         );
-                        return;
+
+                        Navigator.pop(context, episode);
                       }
-
-                      if (imageBytes == null && selectedImageUrl != null) {
-                        imageBytes = await downloadImage
-                            .downloadImage(selectedImageUrl!);
-                      }
-
-                      if (imageBytes != null) {
-                        final imageSizeInBytes = imageBytes!.lengthInBytes;
-                        final imageSizeInKB = imageSizeInBytes / 1024;
-                        final imageSizeInMB = imageSizeInKB / 1024;
-
-                        if (imageSizeInMB > 2) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'La taille est trop Grande veuillez choisir une image plus petite.')),
-                          );
-                          return;
+                      catch (e)
+                      {
+                        if (e is myException)
+                        {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(e.message),
+                            backgroundColor: Colors.red,
+                          ));
                         }
-                      } else {
-                        final ByteData data =
-                            await rootBundle.load('images/default_image.jpeg');
-                        final List<int> bytes = data.buffer.asUint8List();
-                        imageBytes = Uint8List.fromList(bytes);
-                      }
+                        else
+                        {
+                          print('An unexpected error occurred: $e');
+                        }
+                      };
 
-                      Episode book = Episode(
-                        nom: nom,
-                        image: imageBytes,
-                        note: note!.toInt(),
-                        avis: _avisController.text,
-                        description: _descriptionController.text,
-                        statut: statut,
-                      );
 
-                      if (id != null) {
-                        book.id = id;
-                      }
-                      if (episode != null) {
-                        await bdEpisode.update(book);
-                      } else {
-                        await bdEpisode.insert(book);
-                      }
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Episode created successfully')),
-                      );
                       Navigator.of(context).pop();
                     },
                     child: const Text("Create"),

@@ -2,18 +2,17 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_project_n1/Exceptions/my_exceptions.dart';
 
 import 'download_image.dart';
 
-class UrlPictureGestionnary {
-  DownloadImage downloadImage = new DownloadImage();
 
-  Future<Uint8List?> urlPictureGestionnary(Uint8List? imageBytes, String? selectedImageUrl, BuildContext context) async
+  Future<Uint8List> urlPictureGestionnary(Uint8List? imageBytes, String? selectedImageUrl, BuildContext context) async
   {
 
     if (imageBytes == null && selectedImageUrl != null)
     {
-      imageBytes = await downloadImage.downloadImage(selectedImageUrl!);
+      imageBytes = await DownloadImage(selectedImageUrl!);
     }
 
     if (imageBytes != null)
@@ -23,12 +22,7 @@ class UrlPictureGestionnary {
       final imageSizeInMB = imageSizeInKB / 1024;
 
       if (imageSizeInMB > 2) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text(
-                  'La taille est trop Grande veuillez choisir une image plus petite.')),
-        );
-
+        throw myException('Please fill in all fields');
       }
     }
 
@@ -41,4 +35,3 @@ class UrlPictureGestionnary {
 
     return imageBytes;
   }
-}

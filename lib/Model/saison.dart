@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:flutter_project_n1/Model/episode.dart';
 import 'package:intl/intl.dart';
 
 class Saison {
@@ -13,7 +14,10 @@ class Saison {
   String? description;
   String? avis;
   DateTime? created_at; 
-  DateTime? updated_at; 
+  DateTime? updated_at;
+  String? selectedImageUrl;
+  List<Episode>? listEpisode;
+  List<int>? episode;
 
   Saison({
     this.id,
@@ -27,20 +31,11 @@ class Saison {
     this.avis,
     this.created_at,
     this.updated_at,
+    this.selectedImageUrl,
+    this.listEpisode,
+    this.episode
   });
 
-    Saison.withoutId({
-    this.id_media,
-    this.media,
-    this.nom,
-    this.image,
-    this.note,
-    this.statut,
-    this.description,
-    this.avis,
-    this.created_at,
-    this.updated_at,
-  });
 
   Map<String, dynamic> toMap() {
     return {

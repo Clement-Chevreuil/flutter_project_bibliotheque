@@ -208,7 +208,7 @@ class _MediaIndexState extends State<MediaIndex> {
                                   ],
                                 ),
                                 const SizedBox(height: 8.0),
-                                new BuildCheckButtons().buildCheckButtons(
+                                buildCheckButtons(
                                   GenresList,
                                   selectedGenres,
                                   (selectedGenresReturn) {
@@ -233,7 +233,7 @@ class _MediaIndexState extends State<MediaIndex> {
                                 ),
                               ]),
                             ),
-                            new BuildRadioButtons().buildRadioButtons(
+                            buildRadioButtons(
                                 AppConst.OrderList, selectedOrder, false,
                                     (selectedOrderReturn) {
                                   selectedOrder = selectedOrderReturn;
@@ -256,7 +256,7 @@ class _MediaIndexState extends State<MediaIndex> {
                               ]),
                             ),
                             //Statut
-                            new BuildRadioButtons().buildRadioButtons(
+                            buildRadioButtons(
                                 AppConst.StatutList, selectedStatut, true,
                                 (selectedStatutReturn) {
                               selectedStatut = selectedStatutReturn;
@@ -277,7 +277,7 @@ class _MediaIndexState extends State<MediaIndex> {
                                 SizedBox(height: 8.0),
                               ]),
                             ),
-                            new BuildRadioButtons().buildRadioButtons(
+                            buildRadioButtons(
                                 AppConst.OrderListAscDesc, selectedOrderAscDesc, false,
                                     (selectedOrderAscDescReturn) {
                                   selectedOrderAscDesc = selectedOrderAscDescReturn!;
@@ -352,7 +352,6 @@ class _MediaIndexState extends State<MediaIndex> {
                                               90, // Ajustez la largeur de l'image
                                         ),
                                       ),
-                                      // Informations sur le livre à droite
                                       Expanded(
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(
@@ -361,7 +360,6 @@ class _MediaIndexState extends State<MediaIndex> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              // Titre du livre aligné verticalement avec les autres informations
                                               GFTypography(
                                                 text: book.nom ?? '',
                                                 type: GFTypographyType.typo5,
@@ -379,7 +377,6 @@ class _MediaIndexState extends State<MediaIndex> {
                                           ),
                                         ),
                                       ),
-                                      // Boutons légèrement décalés vers la gauche
                                       Column(
                                         children: [
                                           IconButton(
@@ -435,7 +432,7 @@ class _MediaIndexState extends State<MediaIndex> {
           Padding(
             padding: const EdgeInsets.all(20.0), // Ajoutez le padding souhaité
             child: pageMax != null
-                ? new PaginationBuilder().paginationBuilder(
+                ? paginationBuilder(
                     pageMax!,
                     currentPage,
                     (pageSelectedReturned) {

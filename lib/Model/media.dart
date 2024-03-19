@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:flutter_project_n1/Model/saison.dart';
 import 'package:intl/intl.dart';
 
 class Media {
@@ -11,8 +12,8 @@ class Media {
   DateTime? created_at; 
   DateTime? updated_at;
   String? table;
-
   String? selectedImageUrl;
+  List<Saison>? listSaison;
   List<int>? saison_episode = [];
 
   Media({

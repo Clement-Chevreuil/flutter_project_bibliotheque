@@ -1,17 +1,15 @@
-import 'dart:typed_data';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_project_n1/Database/database_episode.dart';
 import 'package:flutter_project_n1/Database/database_media.dart';
 import 'package:flutter_project_n1/Database/database_saison.dart';
-import 'package:flutter_project_n1/Exceptions/add_media_exceptions.dart';
+import 'package:flutter_project_n1/Exceptions/my_exceptions.dart';
 import 'package:flutter_project_n1/Model/episode.dart';
 import 'package:flutter_project_n1/Model/media.dart';
 import 'package:flutter_project_n1/Model/saison.dart';
 
-class SaveMediaGestion
-{
-  static Future<void> saveMediaGestion(Media media) async {
+
+   Future<void> saveMediaGestion(Media media) async {
+
     final bdMedia = DatabaseMedia("Series");
     final bdEpisode = DatabaseEpisode();
     final bdSaison = DatabaseSaison();
@@ -20,14 +18,14 @@ class SaveMediaGestion
     if (media.id != null) {
       int? verif = await bdMedia.updateMedia(media);
       if (verif == 0) {
-        throw AddMediaException('Erreur lors de la création du média');
+        throw myException('Erreur lors de la création du média');
       }
     }
 
     else {
       int idMedia = await bdMedia.insertMedia(media);
       if (idMedia == 0) {
-        throw AddMediaException('Erreur lors de la création du média');
+        throw myException('Erreur lors de la création du média');
       }
 
       if (media.id == null) {
@@ -58,4 +56,3 @@ class SaveMediaGestion
       }
     }
   }
-}

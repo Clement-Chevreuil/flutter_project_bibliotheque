@@ -4,10 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_project_n1/Database/database_episode.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
 import 'package:flutter_project_n1/Database/database_saison.dart';
-import 'package:flutter_project_n1/Logic/Images/download_image.dart';
+import 'package:flutter_project_n1/Exceptions/my_exceptions.dart';
+import 'package:flutter_project_n1/Gestions/save_saison_gestion.dart';
+import 'package:flutter_project_n1/Logic/Images/url_picture_gestionnary.dart';
 import 'package:flutter_project_n1/Logic/Interfaces/interface_helper.dart';
-import 'package:flutter_project_n1/Model/episode.dart';
 import 'package:flutter_project_n1/Model/saison.dart';
+import 'package:flutter_project_n1/Validations/save_saison_validation.dart';
 
 class SaisonManager extends StatefulWidget {
   final Saison? mediaParam;
@@ -32,7 +34,6 @@ class _SaisonManagerState extends State<SaisonManager> {
   Uint8List? imageBytes;
   List<bool> isSelected = List.generate(9, (index) => false);
   bool isImagePickerActive = false;
-  TextEditingController _controllerNom = TextEditingController(text: '');
   TextEditingController _avisController = TextEditingController(text: '');
   TextEditingController _descriptionController = TextEditingController(text: '');
   List<String> imageUrls = [];
@@ -42,7 +43,6 @@ class _SaisonManagerState extends State<SaisonManager> {
   bool isInitComplete = false;
   InterfaceHelper? interfaceHelper;
   String? selectedImageUrl;
-  DownloadImage downloadImage = new DownloadImage();
   _SaisonManagerState({this.mediaParam, this.tableName});
 
   @override
@@ -76,7 +76,7 @@ class _SaisonManagerState extends State<SaisonManager> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Saison Manager'),
+        title: const Text('Saison Manager'),
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -87,13 +87,13 @@ class _SaisonManagerState extends State<SaisonManager> {
               if (id == null)
                 Padding(
                   padding:
-                      EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                   child: Card(
                     elevation:
                         4.0, // Ajoutez une élévation à la Card si vous le souhaitez
                     child: Column(children: [
                       ExpansionTile(
-                        title: Text("Saison - Episodes"),
+                        title: const Text("Saison - Episodes"),
                         initiallyExpanded:
                             false, // Vous pouvez changer ceci selon vos besoins
 
@@ -101,11 +101,11 @@ class _SaisonManagerState extends State<SaisonManager> {
                           TextField(
                             controller: _textControllers,
                             keyboardType: TextInputType.number,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: 'Enter a number between 1 and 100',
                             ),
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 20,
                           )
                         ],
@@ -118,7 +118,7 @@ class _SaisonManagerState extends State<SaisonManager> {
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                 child: TextField(
                   controller: _avisController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Avis',
                   ),
                 ),
@@ -128,7 +128,7 @@ class _SaisonManagerState extends State<SaisonManager> {
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                 child: TextField(
                   controller: _descriptionController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Description',
                   ),
                 ),
@@ -136,97 +136,50 @@ class _SaisonManagerState extends State<SaisonManager> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   ElevatedButton(
                     onPressed: () async {
-                       String? nom = await interfaceHelper!.getNom();
-                        Uint8List? imageBytes =
-                            await interfaceHelper!.getImage();
-                        String? selectedImageUrl =
-                            await interfaceHelper!.getImageLink();
-                        double? note = await interfaceHelper!.getNote();
-                        String? statut = await interfaceHelper!.getStatut();
+                      double? note = await interfaceHelper!.getNote();
+                      Saison saison = Saison(
+                        nom: await interfaceHelper!.getNom(),
+                        image: await interfaceHelper!.getImage(),
+                        selectedImageUrl: await interfaceHelper!.getImageLink(),
+                        note: note.toInt(),
+                          statut: await interfaceHelper!.getStatut(),
+                      );
 
-                      if (nom == null ) {
+
+                      try
+                      {
+                        SaveSaisonValidation.saveSaisonValidation(saison);
+                        saison.image = await urlPictureGestionnary(saison.image, saison.selectedImageUrl, context);
+                        saveSaisonGestion(saison);
+
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(
-                                  'Veuillez remplir tous les champs requis')),
+                          const SnackBar(
+                              content: Text('Saison created successfully')),
                         );
-                        return; // Arrêtez ici si les champs requis sont null
+                        Navigator.pop(context, saison);
+
                       }
-
-                      if (imageBytes == null &&
-                          selectedImageUrl != null) {
-                        imageBytes = await downloadImage
-                            .downloadImage(selectedImageUrl!);
-                      }
-
-                      if (imageBytes != null) {
-                        final imageSizeInBytes =
-                            imageBytes!.lengthInBytes;
-                        final imageSizeInKB = imageSizeInBytes / 1024;
-                        final imageSizeInMB = imageSizeInKB / 1024;
-
-                        if (imageSizeInMB > 2) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                                content: Text(
-                                    'La taille est trop Grande veuillez choisir une image plus petite.')),
-                          );
-                          return;
+                      catch (e)
+                      {
+                        if (e is myException)
+                        {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(e.message),
+                            backgroundColor: Colors.red,
+                          ));
                         }
-                      } else {
-                        final ByteData data = await rootBundle
-                            .load('images/default_image.jpeg');
-                        final List<int> bytes = data.buffer.asUint8List();
-                        imageBytes = Uint8List.fromList(bytes);
-                      }
-
-                      Saison book = Saison(
-                        nom: nom,
-                        image: imageBytes,
-                        note: note!.toInt(),
-                        avis: _avisController.text,
-                        description: _descriptionController.text,
-                        statut: statut,
-                      );
-
-                      if (id != null) {
-                        book.id = id;
-                      }
-                      if (mediaParam != null) {
-                        await bdSaison.update(book);
-                      } else {
-                        // Insert the book into the database
-                        int idSaison = await bdSaison.insert(book);
-                        if (id == null) {
-                          final ByteData data = await rootBundle
-                              .load('images/default_image.jpeg');
-                          final List<int> bytes =
-                              data.buffer.asUint8List();
-                          Uint8List imageBytesTest =
-                              Uint8List.fromList(bytes);
-                          await bdSaison.insert(book);
-                          for (int j = 0;
-                              j < int.parse(_textControllers.text);
-                              j++) {
-                            Episode episode = new Episode();
-                            episode.id_saison = idSaison;
-                            episode.nom = "Episode " + j.toString();
-                            episode.image = imageBytesTest;
-                            await bdEpisode.insert(episode);
-                          }
+                        else
+                        {
+                          print('An unexpected error occurred: $e');
                         }
                       }
-                      // Show a success message
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text('Saison created successfully')),
-                      );
+
                       Navigator.of(context).pop();
                     },
-                    child: id != null ? Text("Update") : Text("Create"),
+                    child: id != null ? const Text("Update") : const Text("Create"),
                   ),
                 ],
               ),

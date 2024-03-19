@@ -12,7 +12,8 @@ class Episode {
   String? description;
   String? avis;
   DateTime? created_at; 
-  DateTime? updated_at; 
+  DateTime? updated_at;
+  String? selectedImageUrl;
 
   Episode({
     this.id,
@@ -25,6 +26,7 @@ class Episode {
     this.avis,
     this.created_at,
     this.updated_at,
+    this.selectedImageUrl,
   });
 
   Map<String, dynamic> toMap() {

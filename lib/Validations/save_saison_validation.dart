@@ -1,11 +1,11 @@
-import 'package:flutter_project_n1/Exceptions/add_media_exceptions.dart';
-import 'package:flutter_project_n1/Model/media.dart';
+import 'package:flutter_project_n1/Exceptions/my_exceptions.dart';
+import 'package:flutter_project_n1/Model/saison.dart';
 
-class AddMediaValidation {
+class SaveSaisonValidation {
 
-  static void addMediaValidation(Media media) {
-    if (media.nom == null || media.nom!.isEmpty) {
-      throw AddMediaException('Please fill in all fields');
+  static void saveSaisonValidation(Saison saison) {
+    if (saison.nom == null || saison.nom!.isEmpty) {
+      throw myException('Please fill in all fields');
     }
   }
 

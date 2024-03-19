@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
 
-class ExportDatabse {
 
-  String myBDD = 'maBDD3.db';
   Future<void> exportDatabase(BuildContext context) async {
+    String myBDD = 'maBDD3.db';
     try {
       // Get the source database file
       String sourceDBPath = p.join(await getDatabasesPath(), myBDD);
@@ -33,4 +32,3 @@ class ExportDatabse {
       print('Error exporting database: $e');
     }
   }
-}

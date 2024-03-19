@@ -5,14 +5,15 @@ import 'package:flutter_project_n1/Database/database_genre.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
 import 'package:flutter_project_n1/Database/database_media.dart';
 import 'package:flutter_project_n1/Database/database_saison.dart';
-import 'package:flutter_project_n1/Exceptions/add_media_exceptions.dart';
-import 'package:flutter_project_n1/Gestions/Medias/save_media_gestion.dart';
+import 'package:flutter_project_n1/Exceptions/my_exceptions.dart';
+import 'package:flutter_project_n1/Gestions/save_media_gestion.dart';
 import 'package:flutter_project_n1/Interfaces/genres_index.dart';
 import 'package:flutter_project_n1/Logic/Images/download_image.dart';
+import 'package:flutter_project_n1/Logic/Images/url_picture_gestionnary.dart';
 import 'package:flutter_project_n1/Logic/Interfaces/interface_helper.dart';
 import 'package:flutter_project_n1/Model/media.dart';
 import 'package:flutter_project_n1/Model/utilisateur.dart';
-import 'package:flutter_project_n1/Validations/add_media_validation.dart';
+import 'package:flutter_project_n1/Validations/save_media_validation.dart';
 
 
 class MediaManager extends StatefulWidget {
@@ -32,7 +33,6 @@ class _MediaManagerState extends State<MediaManager> {
   final bdSaison = DatabaseSaison();
   final bdEpisode = DatabaseEpisode();
   late DatabaseInit _databaseInit;
-  DownloadImage downloadImage = new DownloadImage();
   Media? mediaParam;
   String? tableName;
   int? id = null;
@@ -47,6 +47,22 @@ class _MediaManagerState extends State<MediaManager> {
 
   _MediaManagerState({this.mediaParam, this.tableName});
   InterfaceHelper? interfaceHelper;
+
+
+
+  Future<void> fetchData() async {
+    _selectionsGenres = await bdGenre.getGenresList(tableName, "");
+    setState(() {});
+    print(_selectionsGenres);
+    // Utilisez genresList comme vous le souhaitez ici
+  }
+
+  Future<Utilisateur?> getUtilisateur() async {
+    utilisateur = await DatabaseInit.utilisateur;
+    // Utilisez genresList comme vous le souhaitez ici
+  }
+
+
 
   @override
   void initState() {
@@ -180,7 +196,7 @@ class _MediaManagerState extends State<MediaManager> {
                         ),
                       ),
                     Padding(
-                      padding: EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(16.0),
                       child: Card(
                         elevation: 4.0,
                         child: Column(children: [
@@ -281,7 +297,6 @@ class _MediaManagerState extends State<MediaManager> {
                         ElevatedButton(
                           onPressed: () async {
 
-
                             List<int> intList = _textControllers.map((controller)
                             {
                               int parsedValue = int.tryParse(controller.text) ?? 0;
@@ -304,11 +319,14 @@ class _MediaManagerState extends State<MediaManager> {
 
                             try
                             {
-                              AddMediaValidation.addMediaValidation(media);
+                              SaveMediaValidation.saveMediaValidation(media);
+                              media.image = await urlPictureGestionnary(media.image, media.selectedImageUrl, context);
+                              saveMediaGestion(media);
+                              Navigator.pop(context, media);
                             }
                             catch (e)
                             {
-                              if (e is AddMediaException)
+                              if (e is myException)
                               {
                                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                    content: Text(e.message),
@@ -320,30 +338,6 @@ class _MediaManagerState extends State<MediaManager> {
                                 print('An unexpected error occurred: $e');
                               }
                             }
-
-                            try
-                            {
-                              SaveMediaGestion.saveMediaGestion(media);
-                              Navigator.pop(context, media);
-                            }
-                            catch (e)
-                            {
-                              if (e is AddMediaException)
-                              {
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                  content: Text(e.message),
-                                  backgroundColor: Colors.red,
-                                ));
-                              }
-                              else
-                              {
-                                print('An unexpected error occurred: $e');
-                              }
-                            }
-
-
-
-
                           },
                           child: id != null ? const Text("Update") : const Text("Create"),
                         ),
@@ -359,15 +353,5 @@ class _MediaManagerState extends State<MediaManager> {
     );
   }
 
-  Future<void> fetchData() async {
-    _selectionsGenres = await bdGenre.getGenresList(tableName, "");
-    setState(() {});
-    print(_selectionsGenres);
-    // Utilisez genresList comme vous le souhaitez ici
-  }
 
-  Future<Utilisateur?> getUtilisateur() async {
-    utilisateur = await DatabaseInit.utilisateur;
-    // Utilisez genresList comme vous le souhaitez ici
-  }
 }

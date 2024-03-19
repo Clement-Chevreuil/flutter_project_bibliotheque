@@ -4,7 +4,6 @@ import 'package:image_picker/image_picker.dart';
 
 
 
-class OpenImagePicker {
 
   Future<Uint8List?> openImagePicker(bool isImagePickerActive, ImagePicker picker) async {
     if (isImagePickerActive) {
@@ -25,4 +24,3 @@ class OpenImagePicker {
       isImagePickerActive = false; // Mark the image picker as not active
     }
   }
-}

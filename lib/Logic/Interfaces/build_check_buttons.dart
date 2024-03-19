@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-class BuildCheckButtons{
 
   Widget buildCheckButtons(
       List<String> list,
@@ -42,6 +41,3 @@ class BuildCheckButtons{
       ),
     );
   }
-
-
-}

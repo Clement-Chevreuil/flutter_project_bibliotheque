@@ -159,7 +159,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   TextButton(
                     onPressed: () {
-                      ReplaceDatabse.replaceDatabase(_databaseInit);
+                      replaceDatabase(_databaseInit);
                       Navigator.pop(context);
                     },
                     child: const Text("Remplacer BDD"),

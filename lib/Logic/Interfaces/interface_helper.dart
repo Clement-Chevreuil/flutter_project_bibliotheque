@@ -68,8 +68,6 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
   TextEditingController _controllerNom = TextEditingController(text: '');
   String _selectedValue = "Fini";
 
-  OpenImagePicker openImagePicker = new OpenImagePicker();
-  SearchImages searchImages = new SearchImages();
   bool isImagePickerActive = false;
   final picker = ImagePicker();
   String? selectedImageUrl;
@@ -110,8 +108,7 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
       children: [
         GestureDetector(
           onTap: () {
-            openImagePicker
-                .openImagePicker(isImagePickerActive, picker)
+            openImagePicker(isImagePickerActive, picker)
                 .then((value) => setState(() {
                       this.imageBytes = Uint8List.fromList(value!);
                       selectedImageUrl =
@@ -282,7 +279,7 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
 
   //FONCTIONS
   Future<void> _loadImagesAndShowPopup() async {
-    await searchImages.searchImages(_controllerNom.text).then((value) => setState(() {
+    await searchImages(_controllerNom.text).then((value) => setState(() {
           imageUrls = value!;
         }));
     _showImagePopup(context);

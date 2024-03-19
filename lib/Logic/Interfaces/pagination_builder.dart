@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class PaginationBuilder{
+
   // Fonction pour créer les boutons en fonction du nombre de pages
   Widget paginationBuilder(int pageCount, int page, Function(int) setPageFunction) {
     // Assurez-vous qu'il y a au moins deux boutons à afficher
@@ -83,4 +83,3 @@ class PaginationBuilder{
       ),
     );
   }
-}

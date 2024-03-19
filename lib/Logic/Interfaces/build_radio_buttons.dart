@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class BuildRadioButtons{
+
   Widget buildRadioButtons(
       List<String> list,
       String? selected,
@@ -46,4 +46,3 @@ class BuildRadioButtons{
       ),
     );
   }
-}

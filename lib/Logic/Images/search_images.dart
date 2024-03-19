@@ -2,8 +2,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 
-class SearchImages {
-
   Future<List<String>?> searchImages(String searchTerm) async {
     List<String> imageUrls;
     final apiKey = 'AIzaSyCK0hAKBHu6fQhlKTOtBj2LbKNTuniLNmA';
@@ -53,4 +51,3 @@ class SearchImages {
       return null;
     }
   }
-}

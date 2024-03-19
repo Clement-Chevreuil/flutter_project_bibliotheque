@@ -3,10 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 
-class DownloadImage {
+Future<Uint8List?> DownloadImage(String imageUrl)  async{
 
   String myBDD = 'maBDD3.db';
-  Future<Uint8List?> downloadImage(String imageUrl) async {
     Uint8List? imageBytes;
     try {
       final response = await http.get(Uri.parse(imageUrl));
@@ -23,5 +22,4 @@ class DownloadImage {
       print('Erreur lors du téléchargement de l\'image : $e');
       return null; // Erreur lors du téléchargement de l'image
     }
-  }
 }
