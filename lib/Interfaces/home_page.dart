@@ -1,46 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
-import 'package:flutter_project_n1/Interfaces/Media/media_dashboard.dart';
-import 'package:flutter_project_n1/Interfaces/Media/media_index.dart';
-import 'package:flutter_project_n1/Logic/Database/replace_database.dart';
-import 'package:flutter_project_n1/constants/const.dart';
-
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: HomePage(),
-    );
-  }
-}
+import 'package:flutter_project_n1/Interfaces/media/media_dashboard.dart';
+import 'package:flutter_project_n1/Interfaces/media/media_index.dart';
+import 'package:flutter_project_n1/constants/app_consts.dart';
+import 'package:flutter_project_n1/enums/categories_enum.dart';
+import 'package:flutter_project_n1/functions/database/replace_database.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_project_n1/providers/media_provider.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
-  _HomePageState createState() => _HomePageState();
-  
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-
   bool activeMediaIndex = true;
   late DatabaseInit _databaseInit;
 
-  String? mediaIndexStatut = null;
+  String? mediaIndexStatut;
 
-  final home = new MediaIndex("Series",null);
-  String selectedTableName = "Series";
+  final home = MediaIndex(CategoriesEnum.series.name);
+  String selectedCategories = CategoriesEnum.series.name;
 
-  static int _currentPage = 0;
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
 
+  @override
   void initState() {
     super.initState();
     _databaseInit = DatabaseInit();
-    
   }
 
   @override
@@ -49,19 +38,16 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void _changePage(int page, String? statut) {
-    setState(() {
-      mediaIndexStatut = statut;
-      _currentPage = page;
-      _pageController.jumpToPage(_currentPage);
-    });
+  void _changePage(int page) {
+    context.read<MediaProvider>().setCurrentPage(page);
+    _pageController.jumpToPage(page);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppConst.ItemsTitle[_currentPage]),
+        title: Text(context.watch<MediaProvider>().pageName),
       ),
       drawer: Drawer(
         child: Column(
@@ -84,31 +70,25 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                  for (int i = 0; i < AppConst.sidebarItems.length; i++)
+                  for (int i = 0; i < AppConsts.sidebarItems.length; i++)
                     TextButton(
                       style: ButtonStyle(
-                        shape: MaterialStateProperty.all(
+                        shape: WidgetStateProperty.all(
                           const RoundedRectangleBorder(
                             borderRadius: BorderRadius.zero,
                           ),
                         ),
-                        backgroundColor: AppConst.sidebarItems[i] == selectedTableName
-                            ? MaterialStateProperty.all(Colors.transparent)
-                            : MaterialStateProperty.all(Colors.transparent),
+                        backgroundColor: WidgetStateProperty.all(Colors.transparent),
                       ),
                       onPressed: () {
-                        setState(() {
-                          selectedTableName = AppConst.sidebarItems[i];
-                          _changePage(i + 1, null);
-                        });
+                        selectedCategories = AppConsts.sidebarItems[i];
+                        _changePage(i + 1);
                         Navigator.pop(context);
                       },
                       child: Text(
-                        AppConst.sidebarItems[i],
+                        AppConsts.sidebarItems[i],
                         style: TextStyle(
-                          fontWeight: AppConst.sidebarItems[i] == selectedTableName
-                              ? FontWeight.bold
-                              : FontWeight.normal,
+                          fontWeight: AppConsts.sidebarItems[i] == selectedCategories ? FontWeight.bold : FontWeight.normal,
                           color: Colors.black,
                         ),
                       ),
@@ -123,9 +103,9 @@ class _HomePageState extends State<HomePage> {
                   TextButton(
                     onPressed: () {
                       activeMediaIndex = false;
-                      setState(() {
-                        _changePage(0, null);
-                      });
+
+                      _changePage(0);
+
                       Navigator.pop(context);
                     },
                     child: const Text("Dashboard"),
@@ -133,9 +113,9 @@ class _HomePageState extends State<HomePage> {
                   // TextButton(
                   //   onPressed: () {
                   //     activeMediaIndex = false;
-                  //     setState(() {
+                  //
                   //       _changePage(8);
-                  //     });
+                  //
                   //     Navigator.pop(context);
                   //   },
                   //   child: Text("Parametres"),
@@ -143,9 +123,9 @@ class _HomePageState extends State<HomePage> {
                   // TextButton(
                   //   onPressed: () {
                   //     activeMediaIndex = false;
-                  //     setState(() {
+                  //
                   //       _changePage(7);
-                  //     });
+                  //
                   //     Navigator.pop(context);
                   //   },
                   //   child: Text("Compare Media With Other"),
@@ -164,7 +144,6 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: const Text("Remplacer BDD"),
                   ),
-                  
                 ],
               ),
             ),
@@ -175,24 +154,24 @@ class _HomePageState extends State<HomePage> {
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),
         onPageChanged: (page) {
-          setState(() {
-            _currentPage = page;
-          });
+          context.read<MediaProvider>().setCurrentPage(page);
         },
         children: <Widget>[
-          MediaDashboard(onPageChanged: (page, mediaIndexStatut) {_changePage(page, mediaIndexStatut); },),
-          MediaIndex("Series",mediaIndexStatut), //1
-          MediaIndex("Animes",mediaIndexStatut), //2
-          MediaIndex("Games",mediaIndexStatut), //3
-          MediaIndex("Webtoons",mediaIndexStatut), //4
-          MediaIndex("Books",mediaIndexStatut), //5
-          MediaIndex("Movies", mediaIndexStatut), //6
+          MediaDashboard(
+            onPageChanged: (page) {
+              _changePage(page);
+            },
+          ),
+          MediaIndex(CategoriesEnum.series.name), //1
+          MediaIndex(CategoriesEnum.animes.name), //2
+          MediaIndex(CategoriesEnum.games.name), //3
+          MediaIndex(CategoriesEnum.webtoons.name), //4
+          MediaIndex(CategoriesEnum.books.name), //5
+          MediaIndex(CategoriesEnum.movies.name), //6
           //MediaCompare(),
           //UtilisateurManager(),
         ],
       ),
     );
   }
-
-
 }

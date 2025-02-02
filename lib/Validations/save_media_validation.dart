@@ -1,8 +1,7 @@
-import 'package:flutter_project_n1/Exceptions/my_exceptions.dart';
-import 'package:flutter_project_n1/Model/media.dart';
+import 'package:flutter_project_n1/exeptions/my_exceptions.dart';
+import 'package:flutter_project_n1/models/media.dart';
 
 class SaveMediaValidation {
-
   static void saveMediaValidation(Media media) {
     if (media.nom == null || media.nom!.isEmpty) {
       throw myException('Please fill in all fields');

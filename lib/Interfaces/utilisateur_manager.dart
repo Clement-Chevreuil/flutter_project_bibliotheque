@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
-import 'package:flutter_project_n1/Logic/Interfaces/interface_helper.dart';
-import 'package:flutter_project_n1/Model/utilisateur.dart';
-
+import 'package:flutter_project_n1/interfaces/media/interface_helper.dart';
+import 'package:flutter_project_n1/models/utilisateur.dart';
 
 class UtilisateurManager extends StatefulWidget {
   UtilisateurManager();
@@ -40,36 +39,6 @@ class _UtilisateurManagerState extends State<UtilisateurManager> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Switch(
-                // This bool value toggles the switch.
-                value: (utilisateur!.saison == 1) ? true : false,
-                activeColor: Colors.red,
-                onChanged: (bool value) {
-                  // This is called when the user toggles the switch.
-                  setState(() {
-                    if (value == true) {
-                      utilisateur!.saison = 1;
-                    } else {
-                      utilisateur!.saison = 0;
-                    }
-                  });
-                },
-              ),
-              Switch(
-                // This bool value toggles the switch.
-                value: (utilisateur!.episode == 1) ? true : false,
-                activeColor: Colors.blue,
-                onChanged: (bool value) {
-                  // This is called when the user toggles the switch.
-                  setState(() {
-                    if (value == true) {
-                      utilisateur!.episode = 1;
-                    } else {
-                      utilisateur!.episode = 0;
-                    }
-                  });
-                },
-              ),
               ElevatedButton(
                   onPressed: () async {
                     DatabaseInit.update(utilisateur!);

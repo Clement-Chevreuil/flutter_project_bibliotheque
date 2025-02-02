@@ -1,4 +1,4 @@
-import '../Model/media.dart';
+import 'package:flutter_project_n1/models/media.dart';
 import 'package:sqflite/sqflite.dart';
 import 'database_init.dart';
 import 'dart:typed_data';
@@ -7,14 +7,7 @@ class DatabaseMedia {
   String table;
   DatabaseMedia(this.table);
 
-  final List<String> tableNames = [
-    "Series",
-    "Animes",
-    "Games",
-    "Webtoons",
-    "Books",
-    "Movies"
-  ];
+  final List<String> tableNames = ["Series", "Animes", "Games", "Webtoons", "Books", "Movies"];
   final dbProvider = DatabaseInit.database;
 
   Future<void> changeTable(String name) async {
@@ -24,8 +17,8 @@ class DatabaseMedia {
   //CRUD
 
   Future<int> insertMedia(Media book) async {
-    book.created_at =  DateTime.now();
-    book.updated_at =  null;
+    book.created_at = DateTime.now();
+    book.updated_at = null;
     final db = await dbProvider;
     int id = await db.insert(
       table,
@@ -36,27 +29,25 @@ class DatabaseMedia {
   }
 
   Future<int?> updateMedia(Media book) async {
-  print(book.created_at);
-  book.updated_at = DateTime.now();
-  final db = await dbProvider;
-  
-  int id = await db.update(
-    table,
-    {
-      'nom' : book.nom,
-      'image' : book.image, // Utilisez Uint8List pour stocker des données binaires
-      'note' : book.note,
-      'statut' : book.statut,
-      'genres' : book.genres?.join(', '),
-      'updated_at': book.updated_at?.toIso8601String(),
-    },
-    where: 'id = ?',
-    whereArgs: [book.id],
-    conflictAlgorithm: ConflictAlgorithm.ignore,
-  );
-  return id;
-  
-}
+    book.updated_at = DateTime.now();
+    final db = await dbProvider;
+
+    int id = await db.update(
+      table,
+      {
+        'nom': book.nom,
+        'image': book.image, // Utilisez Uint8List pour stocker des données binaires
+        'note': book.note,
+        'statut': book.statut,
+        'genres': book.genres?.join(', '),
+        'updated_at': book.updated_at?.toIso8601String(),
+      },
+      where: 'id = ?',
+      whereArgs: [book.id],
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+    return id;
+  }
 
   Future<void> deleteMedia(Media book) async {
     final db = await dbProvider;
@@ -67,24 +58,22 @@ class DatabaseMedia {
     );
   }
 
-    Future<Media?> getMediaWithId(int id) async {
+  Future<Media?> getMediaWithId(int id) async {
     final db = await dbProvider;
-    final List<Map<String, dynamic>> maps =
-        await db.query(table, where: 'id = ?', whereArgs: [id]);
+    final List<Map<String, dynamic>> maps = await db.query(table, where: 'id = ?', whereArgs: [id]);
 
     if (maps.isNotEmpty) {
       Map<String, dynamic> map = maps.first;
       return Media(
-          id: map['ID'],
-          nom: map['Nom'],
-          image: map['Image'],
-          note: map['Note'],
-          statut: map['Statut'],
-          genres:
-              map['Genres'] != null ? map['Genres'].split(',').toList() : null,
-          created_at :   DateTime.parse(map['created_at']),
-          updated_at :  map['updated_at'] != null ? DateTime.parse(map['updated_at']) : null,
-          );
+        id: map['ID'],
+        nom: map['Nom'],
+        image: map['Image'],
+        note: map['Note'],
+        statut: map['Statut'],
+        genres: map['Genres']?.split(',').toList(),
+        created_at: DateTime.parse(map['created_at']),
+        updated_at: map['updated_at'] != null ? DateTime.parse(map['updated_at']) : null,
+      );
     } else {
       return null; // Media with the specified ID not found
     }
@@ -94,12 +83,12 @@ class DatabaseMedia {
 
   Future<List<Media>> getMedias(int pageNumber, String? statut, String? order, Set<String>? genres, String search, String orderAscDesc) async {
     final db = await dbProvider;
-    int? count = await countPageMedia(statut, genres, search); // Get the total page count
+// Get the total page count
     int offset = (pageNumber - 1) * (10);
     List<String> whereConditions = [];
     List<dynamic> whereValues = [];
 
-    if (search != null && search.isNotEmpty) {
+    if (search.isNotEmpty) {
       whereConditions.add('Nom LIKE ?');
       whereValues.add('%$search%');
     }
@@ -114,21 +103,15 @@ class DatabaseMedia {
       whereValues.addAll(genres.toList());
     }
 
-    String whereClause = whereConditions.isNotEmpty
-        ? 'WHERE ${whereConditions.join(' AND ')}'
-        : '';
+    String whereClause = whereConditions.isNotEmpty ? 'WHERE ${whereConditions.join(' AND ')}' : '';
 
-    if(orderAscDesc == "Ascendant")
-    {
+    if (orderAscDesc == "Ascendant") {
       orderAscDesc = "ASC";
-    }
-    else
-    {
+    } else {
       orderAscDesc = "DESC";
     }
 
-    if(order == "AJOUT")
-    {
+    if (order == "AJOUT") {
       order = "created_at";
     }
     if (order != null) {
@@ -142,7 +125,6 @@ class DatabaseMedia {
       whereValues,
     );
 
-
     return List.generate(maps.length, (i) {
       return Media(
         id: maps[i]['ID'],
@@ -150,19 +132,16 @@ class DatabaseMedia {
         image: maps[i]['Image'],
         note: maps[i]['Note'],
         statut: maps[i]['Statut'],
-        genres: maps[i]['Genres'] != null
-            ? maps[i]['Genres'].split(', ').toList()
-            : null,
-
-        created_at :  maps[i]['created_at'] != null ?  DateTime.parse(maps[i]['created_at']) : null,
-        updated_at :  maps[i]['updated_at'] != null ? DateTime.parse(maps[i]['updated_at']) : null,
+        genres: maps[i]['Genres']?.split(', ').toList(),
+        created_at: maps[i]['created_at'] != null ? DateTime.parse(maps[i]['created_at']) : null,
+        updated_at: maps[i]['updated_at'] != null ? DateTime.parse(maps[i]['updated_at']) : null,
       );
     });
   }
 
-    Future<List<Media>> getMediasSimpleVersion() async {
+  Future<List<Media>> getMediasSimpleVersion() async {
     final db = await dbProvider;
-    List<String> whereConditions = [];
+
     List<dynamic> whereValues = [];
 
     final List<Map<String, dynamic>> maps = await db.rawQuery(
@@ -172,9 +151,8 @@ class DatabaseMedia {
 
     return List.generate(maps.length, (i) {
       return Media(
-        
         nom: maps[i]['Nom'],
-        image: maps[i]['Image'] is Uint8List ? maps[i]['Image'] : maps[i-1]['Image'],
+        image: maps[i]['Image'] is Uint8List ? maps[i]['Image'] : maps[i - 1]['Image'],
         note: maps[i]['Note'],
         statut: maps[i]['Statut'],
       );
@@ -182,12 +160,12 @@ class DatabaseMedia {
   }
 
   Future<int?> countPageMedia(String? statut, Set<String>? genres, String search) async {
-     List<String> whereConditions = [];
+    List<String> whereConditions = [];
     List<dynamic> whereValues = [];
 
     final db = await dbProvider;
 
-      if (search != null && search.isNotEmpty) {
+    if (search.isNotEmpty) {
       whereConditions.add('Nom LIKE ?');
       whereValues.add('%$search%');
     }
@@ -205,11 +183,12 @@ class DatabaseMedia {
     whereConditions.add('LENGTH(Image) <= ?');
     whereValues.add(2 * 1024 * 1024);
 
-    String whereClause = whereConditions.isNotEmpty
-        ? ' WHERE ${whereConditions.join(' AND ')}'
-        : '';
+    String whereClause = whereConditions.isNotEmpty ? ' WHERE ${whereConditions.join(' AND ')}' : '';
 
-    final result = await db.rawQuery('SELECT COUNT(*) as count FROM $table $whereClause', whereValues,);
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM $table $whereClause',
+      whereValues,
+    );
     int? count = Sqflite.firstIntValue(result);
 
     if (count != null) {
@@ -220,23 +199,22 @@ class DatabaseMedia {
     }
   }
 
-
   Future<Map<String, int>> getCountsForTables() async {
-  Map<String, int> counts = {};
+    Map<String, int> counts = {};
     final db = await dbProvider;
-  for (String tableName in tableNames) {
-    final result = await db.rawQuery('SELECT COUNT(*) FROM $tableName');
-    final counte = Sqflite.firstIntValue(result);
-    counts[tableName] = counte!;
+    for (String tableName in tableNames) {
+      final result = await db.rawQuery('SELECT COUNT(*) FROM $tableName');
+      final counte = Sqflite.firstIntValue(result);
+      counts[tableName] = counte!;
+    }
+
+    return counts;
   }
 
-  return counts;
-}
+  Future<Map<String, int>> getCountsByStatut() async {
+    Database db = await dbProvider;
 
-Future<Map<String, int>> getCountsByStatut() async {
-  Database db = await dbProvider;
-
-  List<Map<String, dynamic>> result = await db.rawQuery('''
+    List<Map<String, dynamic>> result = await db.rawQuery('''
     SELECT
       SUM(CASE WHEN statut = 'Fini' THEN 1 ELSE 0 END) AS countFini,
       SUM(CASE WHEN statut = 'En cours' THEN 1 ELSE 0 END) AS countEnCours,
@@ -245,48 +223,46 @@ Future<Map<String, int>> getCountsByStatut() async {
     FROM $table
   ''');
 
-  return {
-    'countFini': result[0]['countFini'] as int? ?? 0,
-    'countEnCours': result[0]['countEnCours'] as int? ?? 0,
-    'countAbandonner': result[0]['countAbandonner'] as int? ?? 0,
-    'countEnvieDeRegarder': result[0]['countEnvieDeRegarder'] as int? ?? 0,
-  };
-}
+    return {
+      'countFini': result[0]['countFini'] as int? ?? 0,
+      'countEnCours': result[0]['countEnCours'] as int? ?? 0,
+      'countAbandonner': result[0]['countAbandonner'] as int? ?? 0,
+      'countEnvieDeRegarder': result[0]['countEnvieDeRegarder'] as int? ?? 0,
+    };
+  }
 
-Future<List<Media>> getMostRecentRecords() async {
-  Database db = await dbProvider; // Replace dbProvider with your actual Database instance provider function
-  List<Map<String, dynamic>> maps = await db.rawQuery('''
+  Future<List<Media>> getMostRecentRecords() async {
+    Database db = await dbProvider; // Replace dbProvider with your actual Database instance provider function
+    List<Map<String, dynamic>> maps = await db.rawQuery('''
     SELECT *
     FROM $table
     ORDER BY DATETIME(created_at) DESC, DATETIME(updated_at) DESC
     LIMIT 6
   ''');
 
-   return List.generate(maps.length, (i) {
+    return List.generate(maps.length, (i) {
       return Media(
-        
         nom: maps[i]['Nom'],
         note: maps[i]['Note'],
-        created_at: maps[i]['created_at'] != null ?  DateTime.parse(maps[i]['created_at']) : null,
-        updated_at: maps[i]['updated_at'] != null ?  DateTime.parse(maps[i]['updated_at']) : null,
+        created_at: maps[i]['created_at'] != null ? DateTime.parse(maps[i]['created_at']) : null,
+        updated_at: maps[i]['updated_at'] != null ? DateTime.parse(maps[i]['updated_at']) : null,
       );
     });
-}
+  }
 
-Future<List<Map<String, dynamic>>> getCountByDate() async {
-  Database db = await dbProvider; // Remplacez dbProvider par votre fonction réelle pour obtenir une instance de Database
-  List<Map<String, dynamic>> result = await db.rawQuery('''
+  Future<List<Map<String, dynamic>>> getCountByDate() async {
+    Database db = await dbProvider; // Remplacez dbProvider par votre fonction réelle pour obtenir une instance de Database
+    List<Map<String, dynamic>> result = await db.rawQuery('''
     SELECT DATE(created_at) as date, COUNT(*) as count
     FROM $table
     GROUP BY date
   ''');
 
-  return result;
-}
+    return result;
+  }
 
-Future<List<Map<String, dynamic>>> getMostViewedGenresByMonth() async {
-    
-    Database db = await dbProvider; 
+  Future<List<Map<String, dynamic>>> getMostViewedGenresByMonth() async {
+    Database db = await dbProvider;
     List<Map<String, dynamic>> result = await db.rawQuery('''
       SELECT strftime('%Y-%m', created_at) as month,
              genres,
@@ -295,10 +271,6 @@ Future<List<Map<String, dynamic>>> getMostViewedGenresByMonth() async {
       GROUP BY month, genres
       ORDER BY month, count DESC
     ''');
-    print(result);
     return result;
   }
-
-
-
 }

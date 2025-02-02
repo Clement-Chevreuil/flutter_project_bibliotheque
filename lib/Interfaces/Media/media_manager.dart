@@ -1,73 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_project_n1/Database/database_episode.dart';
 import 'package:flutter_project_n1/Database/database_genre.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
 import 'package:flutter_project_n1/Database/database_media.dart';
-import 'package:flutter_project_n1/Database/database_saison.dart';
-import 'package:flutter_project_n1/Exceptions/my_exceptions.dart';
-import 'package:flutter_project_n1/Gestions/save_media_gestion.dart';
+import 'package:flutter_project_n1/exeptions/my_exceptions.dart';
+import 'package:flutter_project_n1/interfaces/media/interface_helper.dart';
+import 'package:flutter_project_n1/providers/save_media_gestion.dart';
 import 'package:flutter_project_n1/Interfaces/genres_index.dart';
-import 'package:flutter_project_n1/Logic/Images/download_image.dart';
-import 'package:flutter_project_n1/Logic/Images/url_picture_gestionnary.dart';
-import 'package:flutter_project_n1/Logic/Interfaces/interface_helper.dart';
-import 'package:flutter_project_n1/Model/media.dart';
-import 'package:flutter_project_n1/Model/utilisateur.dart';
+import 'package:flutter_project_n1/functions/images/url_picture_gestionnary.dart';
+import 'package:flutter_project_n1/models/media.dart';
+import 'package:flutter_project_n1/models/utilisateur.dart';
 import 'package:flutter_project_n1/Validations/save_media_validation.dart';
-
 
 class MediaManager extends StatefulWidget {
   final Media? mediaParam;
   final String? tableName;
 
-  MediaManager({this.mediaParam, required this.tableName});
+  const MediaManager({super.key, this.mediaParam, required this.tableName});
 
   @override
-  _MediaManagerState createState() =>
-      _MediaManagerState(mediaParam: mediaParam, tableName: tableName);
+  State<MediaManager> createState() => _MediaManagerState(mediaParam: mediaParam, tableName: tableName);
 }
 
 class _MediaManagerState extends State<MediaManager> {
   final bdMedia = DatabaseMedia("Series");
   final bdGenre = DatabaseGenre();
-  final bdSaison = DatabaseSaison();
-  final bdEpisode = DatabaseEpisode();
-  late DatabaseInit _databaseInit;
   Media? mediaParam;
   String? tableName;
-  int? id = null;
+  int? id;
   bool isInitComplete = false;
-  List<bool> _selections = [];
+  final List<bool> _selections = [];
   List<String> genres = [];
   List<String> _selectionsGenres = [];
-  List<String> _selectionsGenresSelected = [];
-  List<TextEditingController> _textControllers = [];
-  TextEditingController _controllerSaison = TextEditingController();
+  final List<String> _selectionsGenresSelected = [];
+  final List<TextEditingController> _textControllers = [];
   Utilisateur? utilisateur;
 
   _MediaManagerState({this.mediaParam, this.tableName});
   InterfaceHelper? interfaceHelper;
 
-
-
   Future<void> fetchData() async {
     _selectionsGenres = await bdGenre.getGenresList(tableName, "");
-    setState(() {});
-    print(_selectionsGenres);
-    // Utilisez genresList comme vous le souhaitez ici
   }
 
   Future<Utilisateur?> getUtilisateur() async {
     utilisateur = await DatabaseInit.utilisateur;
-    // Utilisez genresList comme vous le souhaitez ici
+    return null;
   }
-
-
 
   @override
   void initState() {
     super.initState();
-    _databaseInit = DatabaseInit();
+    DatabaseInit();
     fetchData().then((_) {
       for (String item in _selectionsGenres) {
         if (mediaParam != null && mediaParam!.genres != null) {
@@ -95,10 +79,8 @@ class _MediaManagerState extends State<MediaManager> {
         note = mediaParam!.note!.toDouble();
         statut = mediaParam!.statut!;
       }
-      interfaceHelper = InterfaceHelper(
-          nom: nom, note: note, statut: statut, image: imageBytes);
+      interfaceHelper = InterfaceHelper(nom: nom, note: note, statut: statut, image: imageBytes);
       isInitComplete = true;
-      setState(() {});
       getUtilisateur();
     });
   }
@@ -106,8 +88,7 @@ class _MediaManagerState extends State<MediaManager> {
   @override
   Widget build(BuildContext context) {
     if (!isInitComplete) {
-      // Attendre que l'initialisation soit terminée
-      return const CircularProgressIndicator(); // Ou tout autre indicateur de chargement
+      return const CircularProgressIndicator();
     }
 
     return Scaffold(
@@ -126,75 +107,6 @@ class _MediaManagerState extends State<MediaManager> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     interfaceHelper!,
-                    if (id == null)
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Card(
-                          elevation:
-                              4.0, // Ajoutez une élévation à la Card si vous le souhaitez
-                          child: Column(children: [
-                            if (utilisateur?.saison == 1)
-                              ExpansionTile(
-                                title: const Text("Saison - Episodes"),
-                                initiallyExpanded:
-                                    false, // Vous pouvez changer ceci selon vos besoins
-
-                                children: [
-                                  TextField(
-                                    controller: _controllerSaison,
-                                    keyboardType: TextInputType.number,
-                                    decoration: const InputDecoration(
-                                      labelText:
-                                          'Enter a number between 1 and 100',
-                                    ),
-                                    onChanged: (value) {
-                                      if (int.tryParse(value) != null) {
-                                        int number = int.parse(value);
-                                        if (number < 1 || number > 100) {
-                                          _controllerSaison.clear();
-                                        } else {
-                                          // Update the list of TextControllers based on the entered number
-                                          _textControllers = List.generate(
-                                            number,
-                                            (index) => TextEditingController(),
-                                          );
-                                        }
-                                      }
-                                      setState(() {}); // Refresh the UI
-                                    },
-                                  ),
-                                  if (utilisateur!.episode == 1)
-                                    SingleChildScrollView(
-                                      child: SizedBox(
-                                        height: 200,
-                                        child: ListView.builder(
-                                          itemCount: _textControllers.length,
-                                          itemBuilder: (context, index) {
-                                            return Padding(
-                                              padding: const EdgeInsets.all(16.0),
-                                              child: TextField(
-                                                controller:
-                                                    _textControllers[index],
-                                                keyboardType:
-                                                    TextInputType.text,
-                                                decoration: InputDecoration(
-                                                  labelText:
-                                                      "Nombre d'episode : $index",
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                  const SizedBox(
-                                    height: 20,
-                                  )
-                                ],
-                              ),
-                          ]),
-                        ),
-                      ),
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Card(
@@ -208,13 +120,11 @@ class _MediaManagerState extends State<MediaManager> {
                                   'Genre :',
                                   style: TextStyle(
                                     fontSize: 16, // Taille du texte
-                                    fontWeight:
-                                        FontWeight.bold, // Texte en gras
+                                    fontWeight: FontWeight.bold, // Texte en gras
                                   ),
                                 ),
                                 Container(
-                                  transform: Matrix4.translationValues(
-                                      0, -6.0, 0), // Translation vers le haut
+                                  transform: Matrix4.translationValues(0, -6.0, 0), // Translation vers le haut
                                   child: IconButton(
                                     onPressed: () async {
                                       var result = await Navigator.push(
@@ -229,7 +139,7 @@ class _MediaManagerState extends State<MediaManager> {
                                         fetchData();
                                       }
                                     }, // Remplacez null par votre fonction onPressed
-                                    icon: Icon(Icons.settings),
+                                    icon: const Icon(Icons.settings),
                                   ),
                                 ),
                               ],
@@ -244,37 +154,22 @@ class _MediaManagerState extends State<MediaManager> {
                                   return Container(
                                     width: 100.0,
                                     height: 40.0,
-                                    margin: EdgeInsets.all(2.0),
+                                    margin: const EdgeInsets.all(2.0),
                                     child: ElevatedButton(
                                       onPressed: () {
                                         setState(() {
-                                          _selections[index] =
-                                              !_selections[index];
+                                          _selections[index] = !_selections[index];
                                           if (_selections[index] == false) {
-                                            _selectionsGenresSelected.remove(
-                                                _selectionsGenres[index]);
+                                            _selectionsGenresSelected.remove(_selectionsGenres[index]);
                                           } else {
-                                            _selectionsGenresSelected
-                                                .add(_selectionsGenres[index]);
+                                            _selectionsGenresSelected.add(_selectionsGenres[index]);
                                           }
                                         });
-                                        print(_selectionsGenresSelected);
                                       },
-                                      // style: ElevatedButton.styleFrom(
-                                      //   shape: RoundedRectangleBorder(
-                                      //     borderRadius:
-                                      //         BorderRadius.circular(0.0),
-                                      //   ),
-                                      //   primary: _selections[index]
-                                      //       ? Colors.blue
-                                      //       : Colors.grey,
-                                      // ),
                                       child: Text(
                                         item,
                                         style: TextStyle(
-                                          color: _selections[index]
-                                              ? Colors.white
-                                              : Colors.black,
+                                          color: _selections[index] ? Colors.white : Colors.black,
                                           fontSize: 16.0,
                                         ),
                                       ),
@@ -282,7 +177,7 @@ class _MediaManagerState extends State<MediaManager> {
                                   );
                                 }).toList(),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 20,
                               )
                             ],
@@ -296,9 +191,7 @@ class _MediaManagerState extends State<MediaManager> {
                         const SizedBox(width: 10),
                         ElevatedButton(
                           onPressed: () async {
-
-                            List<int> intList = _textControllers.map((controller)
-                            {
+                            List<int> intList = _textControllers.map((controller) {
                               int parsedValue = int.tryParse(controller.text) ?? 0;
                               return parsedValue;
                             }).toList();
@@ -309,7 +202,7 @@ class _MediaManagerState extends State<MediaManager> {
                               id: id,
                               nom: await interfaceHelper!.getNom(),
                               note: noteInterface.toInt(),
-                              statut:  await interfaceHelper!.getStatut(),
+                              statut: await interfaceHelper!.getStatut(),
                               genres: _selectionsGenresSelected,
                               image: await interfaceHelper!.getImage(),
                               selectedImageUrl: await interfaceHelper!.getImageLink(),
@@ -317,26 +210,27 @@ class _MediaManagerState extends State<MediaManager> {
                               table: tableName,
                             );
 
-                            try
-                            {
+                            try {
                               SaveMediaValidation.saveMediaValidation(media);
+                              if (!context.mounted) {
+                                return;
+                              }
                               media.image = await urlPictureGestionnary(media.image, media.selectedImageUrl, context);
                               saveMediaGestion(media);
+                              if (!context.mounted) {
+                                return;
+                              }
                               Navigator.pop(context, media);
-                            }
-                            catch (e)
-                            {
-                              if (e is myException)
-                              {
+                            } catch (e) {
+                              if (e is myException) {
+                                if (!context.mounted) {
+                                  return;
+                                }
                                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                   content: Text(e.message),
-                                   backgroundColor: Colors.red,
-                                 ));
-                              }
-                              else
-                              {
-                                print('An unexpected error occurred: $e');
-                              }
+                                  content: Text(e.message),
+                                  backgroundColor: Colors.red,
+                                ));
+                              } else {}
                             }
                           },
                           child: id != null ? const Text("Update") : const Text("Create"),
@@ -352,6 +246,4 @@ class _MediaManagerState extends State<MediaManager> {
       ),
     );
   }
-
-
 }

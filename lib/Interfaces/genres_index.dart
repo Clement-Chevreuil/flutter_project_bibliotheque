@@ -1,49 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project_n1/Database/database_genre.dart';
-import 'package:flutter_project_n1/Model/genre.dart';
-import 'package:flutter_project_n1/constants/const.dart';
+import 'package:flutter_project_n1/constants/app_consts.dart';
+import 'package:flutter_project_n1/models/genre.dart';
 import 'package:getwidget/getwidget.dart';
 import '/Database/database_init.dart';
 
 class GenresIndex extends StatefulWidget {
   final String? mediaParam1;
 
-  GenresIndex({this.mediaParam1});
+  const GenresIndex({super.key, this.mediaParam1});
 
   @override
-  _GenresIndexState createState() =>
-      _GenresIndexState(mediaParam1: mediaParam1);
+  State<GenresIndex> createState() => _GenresIndexState(mediaParam1: mediaParam1);
 }
 
 class _GenresIndexState extends State<GenresIndex> {
   bool isAdvancedSearchVisible = false;
-  int? idUpdate = null;
+  int? idUpdate;
   final String? mediaParam1;
-  late DatabaseInit _databaseInit;
-  final TextEditingController _controller = TextEditingController();
-  TextEditingController _controllerNom = TextEditingController(text: '');
-  TextEditingController _controllerGenre = TextEditingController(text: '');
-  int selectedGenreIndex =
-      -1; // Initialisez la variable à -1 pour indiquer qu'aucun élément n'est sélectionné au départ
+  final TextEditingController _controllerNom = TextEditingController(text: '');
+  final TextEditingController _controllerGenre = TextEditingController(text: '');
+  int selectedGenreIndex = -1; // Initialisez la variable à -1 pour indiquer qu'aucun élément n'est sélectionné au départ
 
   String tableName = "Series";
   List<Genre> genres = [];
   final bdGenres = DatabaseGenre();
-  final GlobalKey<AnimatedListState> _listKey =
-      GlobalKey(); // Clé pour la ListView.builder
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey(); // Clé pour la ListView.builder
   // instantiate the controller in your state
 
   _GenresIndexState({this.mediaParam1});
 
+  @override
   void initState() {
     super.initState();
     loadGenres();
-    _databaseInit = DatabaseInit();
+    DatabaseInit();
 
     if (mediaParam1 != null) {
       tableName = mediaParam1!;
-      selectedGenreIndex = AppConst.sidebarItems
-          .indexOf(mediaParam1!); // Trouvez l'index correspondant
+      selectedGenreIndex = AppConsts.sidebarItems.indexOf(mediaParam1!); // Trouvez l'index correspondant
     }
   }
 
@@ -55,11 +50,9 @@ class _GenresIndexState extends State<GenresIndex> {
           _showAddGenreDialog(context); // Affiche la popup
         },
         mini: true, // Réduit la taille du bouton
-        child: const Icon(Icons
-            .add), // Icône du bouton flottant (vous pouvez la personnaliser)
+        child: const Icon(Icons.add), // Icône du bouton flottant (vous pouvez la personnaliser)
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation
-          .endFloat, // Position du bouton flottant (en bas à droite)
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // Position du bouton flottant (en bas à droite)
       //extendBody: true,
       appBar: AppBar(
         title: const Text('Genres'),
@@ -68,7 +61,7 @@ class _GenresIndexState extends State<GenresIndex> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             // Handle the back button click
-            Navigator.pop(context,"update");
+            Navigator.pop(context, "update");
           },
         ),
       ),
@@ -96,8 +89,7 @@ class _GenresIndexState extends State<GenresIndex> {
                     decoration: InputDecoration(
                       hintText: "Recherche...",
                       hintStyle: TextStyle(
-                        color: Colors.black
-                            .withOpacity(0.5), // Texte d'indication en noir
+                        color: Colors.black.withOpacity(0.5), // Texte d'indication en noir
                       ),
                       border: InputBorder.none,
                     ),
@@ -119,7 +111,7 @@ class _GenresIndexState extends State<GenresIndex> {
           Wrap(
             spacing: 0.0,
             runSpacing: 0.0,
-            children: AppConst.sidebarItems.asMap().entries.map((entry) {
+            children: AppConsts.sidebarItems.asMap().entries.map((entry) {
               int index = entry.key;
               String item = entry.value;
               return Container(
@@ -135,24 +127,14 @@ class _GenresIndexState extends State<GenresIndex> {
                       } else {
                         selectedGenreIndex = index;
                       }
-                      tableName = AppConst.sidebarItems[index];
+                      tableName = AppConsts.sidebarItems[index];
                       loadGenres();
                     });
                   },
-                  // style: ElevatedButton.styleFrom(
-                  //   shape: RoundedRectangleBorder(
-                  //     borderRadius: BorderRadius.circular(10.0),
-                  //   ),
-                  //   primary: selectedGenreIndex == index
-                  //       ? Colors.blue
-                  //       : Colors.grey, // Changez la couleur du bouton ici
-                  // ),
                   child: Text(
                     item,
                     style: TextStyle(
-                      color: selectedGenreIndex == index
-                          ? Colors.white
-                          : Colors.black,
+                      color: selectedGenreIndex == index ? Colors.white : Colors.black,
                       fontSize: 11.0,
                     ),
                   ),
@@ -177,24 +159,19 @@ class _GenresIndexState extends State<GenresIndex> {
                       if (index < genres.length) {
                         Genre genre = genres[index];
                         return Container(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 5.0), // Espace autour de la Card
+                          margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0), // Espace autour de la Card
                           child: Card(
                             elevation: 8.0,
                             child: Padding(
-                              padding: const EdgeInsets.all(
-                                  16.0), // Espace à l'intérieur de la Card
+                              padding: const EdgeInsets.all(16.0), // Espace à l'intérieur de la Card
                               child: Row(
                                 children: [
                                   // Informations sur le livre à droite
                                   Expanded(
                                     child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8.0),
+                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                       child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           // Titre du livre aligné verticalement avec les autres informations
                                           GFTypography(
@@ -208,12 +185,11 @@ class _GenresIndexState extends State<GenresIndex> {
                                   // Boutons légèrement décalés vers la gauche
 
                                   IconButton(
-                                    icon: Icon(Icons.edit),
+                                    icon: const Icon(Icons.edit),
                                     onPressed: () {
                                       idUpdate = genre.id;
                                       _controllerGenre.text = genre.nom!;
-                                      _showAddGenreDialog(
-                                          context); // Affiche la popup
+                                      _showAddGenreDialog(context); // Affiche la popup
                                     },
                                   ),
                                   IconButton(
@@ -221,10 +197,11 @@ class _GenresIndexState extends State<GenresIndex> {
                                     onPressed: () async {
                                       await DatabaseGenre().delete(genre);
                                       loadGenres();
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                            content: Text('Genre supprimé')),
+                                      if (!context.mounted) {
+                                        return;
+                                      }
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Genre supprimé')),
                                       );
                                     },
                                   ),
@@ -252,10 +229,8 @@ class _GenresIndexState extends State<GenresIndex> {
     List<Genre> updatedMediaList = await bdGenres.getGenres(tableName, _controllerNom.text);
     setState(() {
       genres.clear();
-      genres.addAll(
-          updatedMediaList); // Ajoutez les médias chargés depuis la base de données
-      _listKey.currentState
-          ?.setState(() {}); // Mettre à jour la ListView.builder
+      genres.addAll(updatedMediaList); // Ajoutez les médias chargés depuis la base de données
+      _listKey.currentState?.setState(() {}); // Mettre à jour la ListView.builder
     });
   }
 
@@ -270,7 +245,7 @@ class _GenresIndexState extends State<GenresIndex> {
             children: [
               Text(
                 "Entrez les informations du genre pour $mediaParam1 :",
-                style: TextStyle(fontSize: 18.0),
+                style: const TextStyle(fontSize: 18.0),
               ),
               const SizedBox(height: 20),
               TextField(
@@ -279,7 +254,7 @@ class _GenresIndexState extends State<GenresIndex> {
                   hintText: "Nom du genre",
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
                   if (_controllerGenre.text == "") {
@@ -290,40 +265,44 @@ class _GenresIndexState extends State<GenresIndex> {
                       ),
                     );
                   } else {
-                  
-                      Genre newGenre = Genre();
-                      newGenre.media = tableName;
-                      newGenre.nom = _controllerGenre.text;
-                      _controllerGenre.text = "";
-                      if (idUpdate != null) {
-                        newGenre.id = idUpdate;
-                        int? verif = await bdGenres.update(newGenre);
-                        if(verif == 0)
-                              {
-                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Erreur lors de la création du genre'),
-                                  ),
-                                );
-                                return;
-                              }
-                        idUpdate = null;
-                      } else {
-                        int? verif = await bdGenres.insert(newGenre);
-                        if(verif == 0)
-                              {
-                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Erreur lors de la création du genre'),
-                                  ),
-                                );
-                                return;
-                              }
+                    Genre newGenre = Genre();
+                    newGenre.media = tableName;
+                    newGenre.nom = _controllerGenre.text;
+                    _controllerGenre.text = "";
+                    if (idUpdate != null) {
+                      newGenre.id = idUpdate;
+                      int? verif = await bdGenres.update(newGenre);
+                      if (verif == 0) {
+                        if (!context.mounted) {
+                          return;
+                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Erreur lors de la création du genre'),
+                          ),
+                        );
+                        return;
                       }
+                      idUpdate = null;
+                    } else {
+                      int? verif = await bdGenres.insert(newGenre);
+                      if (verif == 0) {
+                        if (!context.mounted) {
+                          return;
+                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Erreur lors de la création du genre'),
+                          ),
+                        );
+                        return;
+                      }
+                    }
 
-                      setState(() {});
-                      Navigator.of(context).pop(); // Ferme la popup
-                   
+                    if (!context.mounted) {
+                      return;
+                    }
+                    Navigator.of(context).pop(); // Ferme la popup
                   }
                 },
                 child: idUpdate != null ? const Text("Update") : const Text("Ajouter"),

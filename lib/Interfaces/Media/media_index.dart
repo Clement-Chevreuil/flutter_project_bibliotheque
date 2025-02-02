@@ -1,78 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_project_n1/Database/database_genre.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
-import 'package:flutter_project_n1/Database/database_media.dart';
-import 'package:flutter_project_n1/Interfaces/genres_index.dart';
-import 'package:flutter_project_n1/Logic/Interfaces/build_check_buttons.dart';
-import 'package:flutter_project_n1/Logic/Interfaces/build_radio_buttons.dart';
-import 'package:flutter_project_n1/Logic/Interfaces/pagination_builder.dart';
-import 'package:flutter_project_n1/Model/media.dart';
-import 'package:flutter_project_n1/constants/const.dart';
-import 'package:getwidget/getwidget.dart';
+import 'package:flutter_project_n1/constants/app_consts.dart';
+import 'package:flutter_project_n1/interfaces/media/widgets/advanced_search.dart';
+import 'package:flutter_project_n1/interfaces/media/widgets/media_widget.dart';
+import 'package:flutter_project_n1/interfaces/widgets/pagination_builder.dart';
+import 'package:flutter_project_n1/models/media.dart';
+import 'package:flutter_project_n1/providers/media_provider.dart';
+import 'package:provider/provider.dart';
 import 'media_manager.dart';
-import 'dart:typed_data';
 import 'package:intl/intl.dart';
 
 class MediaIndex extends StatefulWidget {
-  String mediaParam1;
-  String? statut;
+  final String mediaParam1;
 
-  MediaIndex(this.mediaParam1, this.statut);
+  const MediaIndex(this.mediaParam1, {super.key});
 
   @override
-  _MediaIndexState createState() =>
-      _MediaIndexState(mediaParam1: mediaParam1, statut: statut);
+  State<MediaIndex> createState() => _MediaIndexState();
 }
 
 class _MediaIndexState extends State<MediaIndex> {
   final String? mediaParam1;
-  final TextEditingController _controller = TextEditingController();
-  late DatabaseInit _databaseInit;
+
   final DateFormat formatter = DateFormat('yyyy MM dd');
-  bool isAdvancedSearchVisible = false;
-  TextEditingController _controllerNom = TextEditingController(text: '');
+  final TextEditingController _controllerNom = TextEditingController();
 
-  List<String> GenresList = [];
-  List<String> StatutList = AppConst.StatutList;
+  List<String> statutList = AppConsts.statutList;
+  _MediaIndexState() : mediaParam1 = null;
 
-  String? statut;
-
-  final bdMedia = DatabaseMedia("Books");
-  final bdGenre = DatabaseGenre();
-
-  final GlobalKey<AnimatedListState> _listKey =
-      GlobalKey(); // Clé pour la ListView.builder
-
-  String? selectedOrder = "ID";
-  String selectedOrderAscDesc = "Ascendant";
-  String? selectedStatut = null;
-
-  static String tableName = "Books";
-
-  List<Media> books = [];
-
-  int? pageMax = 1;
-  int currentPage = 1;
-  int index = 2;
-  Set<String> selectedGenres = Set();
-
-  // instantiate the controller in your state
-
-  _MediaIndexState({
-    this.mediaParam1,
-    this.statut,
-  });
-
+  @override
   void initState() {
     super.initState();
-    tableName = mediaParam1!;
-    selectedStatut = statut;
-    loadMedia();
-    loadPageButtons();
-
-    _databaseInit = DatabaseInit();
-    fetchData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<MediaProvider>().setTableName(widget.mediaParam1);
+      context.read<MediaProvider>().loadMedia();
+      DatabaseInit();
+      context.read<MediaProvider>().genresData();
+    });
   }
 
   @override
@@ -85,22 +49,25 @@ class _MediaIndexState extends State<MediaIndex> {
             MaterialPageRoute(
               builder: (context) => MediaManager(
                 mediaParam: null,
-                tableName: tableName,
+                tableName: context.read<MediaProvider>().tableName,
               ),
             ),
           );
           if (result != null) {
-            loadMedia();
+            if (!context.mounted) {
+              return;
+            }
+            context.read<MediaProvider>().loadMedia();
           }
         },
         mini: true,
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: Column(
         children: <Widget>[
           Container(
-            margin: EdgeInsets.all(16.0),
+            margin: const EdgeInsets.all(16.0),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5.0),
               border: Border.all(
@@ -109,7 +76,7 @@ class _MediaIndexState extends State<MediaIndex> {
               ),
               color: Colors.transparent,
             ),
-            padding: EdgeInsets.symmetric(horizontal: 10.0),
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Row(
               children: [
                 Expanded(
@@ -121,32 +88,23 @@ class _MediaIndexState extends State<MediaIndex> {
                     decoration: InputDecoration(
                       hintText: "Recherche...",
                       hintStyle: TextStyle(
-                        color: Colors.black
-                            .withOpacity(0.5), // Texte d'indication en noir
+                        color: Colors.black.withOpacity(0.5), // Texte d'indication en noir
                       ),
                       border: InputBorder.none,
                     ),
+                    onChanged: (value) {
+                      context.read<MediaProvider>().setSearch(value);
+                      context.read<MediaProvider>().loadMedia();
+                    },
                     controller: _controllerNom,
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.search,
-                    color: Colors.black, // Icône en noir
-                  ),
-                  onPressed: () {
-                    loadMedia();
-                  },
-                ),
                 InkWell(
                   onTap: () {
-                    setState(() {
-                      isAdvancedSearchVisible =
-                          !isAdvancedSearchVisible; // Inversez la visibilité du bloc
-                    });
+                    context.read<MediaProvider>().toggleAdvancedSearchVisible();
                   },
                   child: Container(
-                    padding: EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: const Icon(
                       Icons.sort,
                       color: Colors.black, // Icône en noir
@@ -156,331 +114,31 @@ class _MediaIndexState extends State<MediaIndex> {
               ],
             ),
           ),
-          AnimatedContainer(
-              height: isAdvancedSearchVisible ? null : 0,
-              duration: Duration(milliseconds: 300),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Card(
-                  elevation:
-                      4.0,
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          children: [
-                            Container(
-                              margin: EdgeInsets.all(4.0),
-                              child: Column(children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Text(
-                                      'Genre :',
-                                      style: TextStyle(
-                                        fontSize: 16, // Taille du texte
-                                        fontWeight:
-                                            FontWeight.bold, // Texte en gras
-                                      ),
-                                    ),
-                                    Container(
-                                      transform:
-                                          Matrix4.translationValues(0, -6.0, 0),
-                                      child: IconButton(
-                                        onPressed: () async {
-                                          var result = await Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => GenresIndex(
-                                                mediaParam1: tableName,
-                                              ),
-                                            ),
-                                          );
-                                          if (result != null) {
-                                            fetchData();
-                                          }
-                                        },
-                                        icon: const Icon(Icons.settings),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8.0),
-                                buildCheckButtons(
-                                  GenresList,
-                                  selectedGenres,
-                                  (selectedGenresReturn) {
-                                    selectedGenres = selectedGenresReturn;
-                                  },
-                                  () {
-                                    currentPage = 1;
-                                    loadMedia();
-                                  },
-                                ),
-                              ]),
-                            ),
-                            Container(
-                              margin: EdgeInsets.all(4.0),
-                              // Marge autour du widget complet
-                              child: const Column(children: [
-                                Text(
-                                  "Ordre :",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ]),
-                            ),
-                            buildRadioButtons(
-                                AppConst.OrderList, selectedOrder, false,
-                                    (selectedOrderReturn) {
-                                  selectedOrder = selectedOrderReturn;
-                                }, () {
-                              currentPage = 1;
-                              loadMedia();
-                            }),
-                            const SizedBox(height: 8.0),
-                            Container(
-                              margin: const EdgeInsets.all(4.0),
-                              // Marge autour du widget complet
-                              child: const Column(children: [
-                                Text(
-                                  "Statut :",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(height: 8.0),
-                              ]),
-                            ),
-                            //Statut
-                            buildRadioButtons(
-                                AppConst.StatutList, selectedStatut, true,
-                                (selectedStatutReturn) {
-                              selectedStatut = selectedStatutReturn;
-                            }, () {
-                              currentPage = 1;
-                              loadMedia();
-                            }),
-                            Container(
-                              margin: EdgeInsets.all(4.0),
-                              // Marge autour du widget complet
-                              child: const Column(children: [
-                                Text(
-                                  "Sens :",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                SizedBox(height: 8.0),
-                              ]),
-                            ),
-                            buildRadioButtons(
-                                AppConst.OrderListAscDesc, selectedOrderAscDesc, false,
-                                    (selectedOrderAscDescReturn) {
-                                  selectedOrderAscDesc = selectedOrderAscDescReturn!;
-                                }, () {
-                              currentPage = 1;
-                              loadMedia();
-                            }),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )),
+          if (context.watch<MediaProvider>().isAdvancedSearchVisible) const AdvancedSearch(),
           Expanded(
-            child: FutureBuilder<List<Media>>(
-              future: bdMedia.getMedias(
-                  currentPage,
-                  selectedStatut,
-                  selectedOrder,
-                  selectedGenres,
-                  _controllerNom.text,
-                  selectedOrderAscDesc),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData || snapshot.data == null) {
-                  return const Center(
-                    child: Text('Aucun livre enregistré.'),
-                  );
-                } else {
-                  books = snapshot.data!;
-                  return ListView.builder(
-                    key: _listKey,
-                    itemCount: books.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index < books.length) {
-                        Media book = books[index];
-
-                        return GestureDetector(
-                            onTap: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) => SaisonIndex(
-                              //       mediaParam1: tableName,
-                              //       idSaison: book.id,
-                              //     ),
-                              //   ),
-                              // );
-                              // Handle the click on the Card here
-                              print('Card Clicked');
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(
-                                  horizontal: 16.0,
-                                  vertical: 5.0), // Espace autour de la Card
-                              child: Card(
-                                elevation: 8.0,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(
-                                      16.0), // Espace à l'intérieur de la Card
-                                  child: Row(
-                                    children: [
-                                      // Image du livre à gauche avec une taille ajustée
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 8.0),
-                                        child: Image.memory(
-                                          book.image ?? Uint8List(0),
-                                          height:
-                                              120, // Ajustez la hauteur de l'image
-                                          width:
-                                              90, // Ajustez la largeur de l'image
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8.0),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              GFTypography(
-                                                text: book.nom ?? '',
-                                                type: GFTypographyType.typo5,
-                                              ),
-                                              Text('Note: ${book.note ?? ''}'),
-                                              Text(
-                                                  'Statut: ${book.statut ?? ''}'),
-                                              Text(
-                                                  'Genres: ${book.genres?.join(', ') ?? ''}'),
-                                              Text(
-                                                  'Created_at: ${book.created_at != null ? formatter.format(book.created_at!) : ''}'),
-                                              Text(
-                                                  'Updated_at: ${book.updated_at != null ? formatter.format(book.updated_at!) : ''}'),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      Column(
-                                        children: [
-                                          IconButton(
-                                            icon: Icon(Icons.edit),
-                                            onPressed: () async {
-                                              var result = await Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      MediaManager(
-                                                    mediaParam: book,
-                                                    tableName: tableName,
-                                                  ),
-                                                ),
-                                              );
-                                              if (result != null) {
-                                                setState(() {
-                                                  book = result;
-                                                });
-                                              }
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: Icon(Icons.delete),
-                                            onPressed: () async {
-                                              await DatabaseMedia(tableName)
-                                                  .deleteMedia(book);
-                                              loadMedia();
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                    content:
-                                                        Text('Livre supprimé')),
-                                              );
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ));
-                      } else {
-                        return SizedBox(height: 50);
-                      }
-                    },
-                  );
-                }
-              },
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  for (Media media in context.watch<MediaProvider>().medias) MediaWidget(media: media),
+                ],
+              ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(20.0), // Ajoutez le padding souhaité
-            child: pageMax != null
+            padding: const EdgeInsets.all(20.0),
+            child: context.read<MediaProvider>().pageMax != null
                 ? paginationBuilder(
-                    pageMax!,
-                    currentPage,
+                    context.read<MediaProvider>().pageMax!,
+                    context.read<MediaProvider>().currentPage,
                     (pageSelectedReturned) {
-                      setState(() {
-                        currentPage = pageSelectedReturned;
-                      });
-                      loadMedia();
+                      context.read<MediaProvider>().setCurrentPageMedia(pageSelectedReturned);
+                      context.read<MediaProvider>().loadMedia();
                     },
                   )
-                : SizedBox(), // Affiche les boutons si pageMax n'est pas nulle
+                : const SizedBox(),
           )
         ],
       ),
     );
-  }
-
-  //FONCTIONS
-  void loadMedia() async {
-    bdMedia.changeTable(tableName);
-    List<Media> updatedMediaList = await bdMedia.getMedias(
-        currentPage,
-        selectedStatut,
-        selectedOrder,
-        selectedGenres,
-        _controllerNom.text,
-        selectedOrderAscDesc);
-    setState(() {
-      books.clear();
-      books.addAll(
-          updatedMediaList); // Ajoutez les médias chargés depuis la base de données
-      _listKey.currentState
-          ?.setState(() {}); // Mettre à jour la ListView.builder
-    });
-    loadPageButtons();
-  }
-
-  void loadPageButtons() async {
-    int? pageCount = await bdMedia.countPageMedia(
-        selectedStatut, selectedGenres, _controllerNom.text);
-    if (pageCount != null) {
-      setState(() {
-        pageMax = pageCount;
-      });
-    }
-  }
-
-  Future<void> fetchData() async {
-    GenresList = await bdGenre.getGenresList(tableName, "");
-    setState(() {});
   }
 }

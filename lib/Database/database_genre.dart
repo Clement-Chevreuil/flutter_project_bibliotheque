@@ -1,13 +1,11 @@
-import '../Model/genre.dart';
+import 'package:flutter_project_n1/models/genre.dart';
+
 import 'database_init.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseGenre {
-
   String defaultName = "maBDD3.db";
   final dbProvider = DatabaseInit.database;
-
-
 
   Future<int?> insert(Genre genre) async {
     final db = await dbProvider;
@@ -18,51 +16,47 @@ class DatabaseGenre {
     );
 
     return id;
-  
-
   }
 
   Future<int?> update(Genre genre) async {
-  final db = await dbProvider;
-
-
-  int id = await db.update(
-    "Genre",
-    genre.toMap(),
-    where: "ID = ?",
-    whereArgs: [genre.id],
-    conflictAlgorithm: ConflictAlgorithm.ignore,
-  );
-
-  return id;
-
-}
- 
-    Future<Genre?> getGenresWithID(int id) async {
     final db = await dbProvider;
-    final List<Map<String, dynamic>> maps =
-        await db.query("Genre", where: 'ID = ?', whereArgs: [id]);
+
+    int id = await db.update(
+      "Genre",
+      genre.toMap(),
+      where: "ID = ?",
+      whereArgs: [genre.id],
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+
+    return id;
+  }
+
+  Future<Genre?> getGenresWithID(int id) async {
+    final db = await dbProvider;
+    final List<Map<String, dynamic>> maps = await db.query("Genre", where: 'ID = ?', whereArgs: [id]);
 
     if (maps.isNotEmpty) {
       Map<String, dynamic> map = maps.first;
       return Genre(
-          id: map['ID'],
-          nom: map['Nom'],
-          media: map['Media'],);   
+        id: map['ID'],
+        nom: map['Nom'],
+        media: map['Media'],
+      );
     } else {
       return null; // Media with the specified ID not found
     }
   }
 
-    Future<List<Genre>> getGenres(String? table, String search) async {
+  Future<List<Genre>> getGenres(String? table, String search) async {
     final db = await dbProvider;
     String whereConditions = "";
     List<dynamic> whereValues = [];
 
-      whereConditions += ' WHERE Media LIKE ?';
-      whereValues.add('$table');
+    whereConditions += ' WHERE Media LIKE ?';
+    whereValues.add('$table');
 
-      if (search != null && search.isNotEmpty) {
+    if (search.isNotEmpty) {
       whereConditions += ' AND Nom LIKE ?';
       whereValues.add('%$search%');
     }
@@ -81,15 +75,15 @@ class DatabaseGenre {
     });
   }
 
-      Future<List<String>> getGenresList(String? table, String search) async {
+  Future<List<String>> getGenresList(String? table, String search) async {
     final db = await dbProvider;
     String whereConditions = "";
     List<dynamic> whereValues = [];
 
-      whereConditions += ' WHERE Media LIKE ?';
-      whereValues.add('$table');
+    whereConditions += ' WHERE Media LIKE ?';
+    whereValues.add('$table');
 
-      if (search != null && search.isNotEmpty) {
+    if (search != null && search.isNotEmpty) {
       whereConditions += ' AND Nom LIKE ?';
       whereValues.add('%$search%');
     }
@@ -103,7 +97,6 @@ class DatabaseGenre {
       return maps[i]['Nom'];
     });
   }
-
 
   Future<void> delete(Genre genre) async {
     final db = await dbProvider;
