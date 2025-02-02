@@ -17,8 +17,8 @@ class DatabaseMedia {
   //CRUD
 
   Future<int> insertMedia(Media book) async {
-    book.created_at = DateTime.now();
-    book.updated_at = null;
+    book.createdAt = DateTime.now();
+    book.updatedAt = null;
     final db = await dbProvider;
     int id = await db.insert(
       table,
@@ -29,7 +29,7 @@ class DatabaseMedia {
   }
 
   Future<int?> updateMedia(Media book) async {
-    book.updated_at = DateTime.now();
+    book.updatedAt = DateTime.now();
     final db = await dbProvider;
 
     int id = await db.update(
@@ -40,7 +40,7 @@ class DatabaseMedia {
         'note': book.note,
         'statut': book.statut,
         'genres': book.genres?.join(', '),
-        'updated_at': book.updated_at?.toIso8601String(),
+        'updated_at': book.updatedAt?.toIso8601String(),
       },
       where: 'id = ?',
       whereArgs: [book.id],
@@ -71,11 +71,11 @@ class DatabaseMedia {
         note: map['Note'],
         statut: map['Statut'],
         genres: map['Genres']?.split(',').toList(),
-        created_at: DateTime.parse(map['created_at']),
-        updated_at: map['updated_at'] != null ? DateTime.parse(map['updated_at']) : null,
+        createdAt: DateTime.parse(map['created_at']),
+        updatedAt: map['updated_at'] != null ? DateTime.parse(map['updated_at']) : null,
       );
     } else {
-      return null; // Media with the specified ID not found
+      return null;
     }
   }
 
@@ -133,8 +133,8 @@ class DatabaseMedia {
         note: maps[i]['Note'],
         statut: maps[i]['Statut'],
         genres: maps[i]['Genres']?.split(', ').toList(),
-        created_at: maps[i]['created_at'] != null ? DateTime.parse(maps[i]['created_at']) : null,
-        updated_at: maps[i]['updated_at'] != null ? DateTime.parse(maps[i]['updated_at']) : null,
+        createdAt: maps[i]['created_at'] != null ? DateTime.parse(maps[i]['created_at']) : null,
+        updatedAt: maps[i]['updated_at'] != null ? DateTime.parse(maps[i]['updated_at']) : null,
       );
     });
   }
@@ -232,7 +232,7 @@ class DatabaseMedia {
   }
 
   Future<List<Media>> getMostRecentRecords() async {
-    Database db = await dbProvider; // Replace dbProvider with your actual Database instance provider function
+    Database db = await dbProvider;
     List<Map<String, dynamic>> maps = await db.rawQuery('''
     SELECT *
     FROM $table
@@ -244,14 +244,14 @@ class DatabaseMedia {
       return Media(
         nom: maps[i]['Nom'],
         note: maps[i]['Note'],
-        created_at: maps[i]['created_at'] != null ? DateTime.parse(maps[i]['created_at']) : null,
-        updated_at: maps[i]['updated_at'] != null ? DateTime.parse(maps[i]['updated_at']) : null,
+        createdAt: maps[i]['created_at'] != null ? DateTime.parse(maps[i]['created_at']) : null,
+        updatedAt: maps[i]['updated_at'] != null ? DateTime.parse(maps[i]['updated_at']) : null,
       );
     });
   }
 
   Future<List<Map<String, dynamic>>> getCountByDate() async {
-    Database db = await dbProvider; // Remplacez dbProvider par votre fonction réelle pour obtenir une instance de Database
+    Database db = await dbProvider;
     List<Map<String, dynamic>> result = await db.rawQuery('''
     SELECT DATE(created_at) as date, COUNT(*) as count
     FROM $table

@@ -8,11 +8,10 @@ class Media {
   int? note;
   String? statut;
   List<String>? genres;
-  DateTime? created_at;
-  DateTime? updated_at;
+  DateTime? createdAt;
+  DateTime? updatedAt;
   String? table;
   String? selectedImageUrl;
-  List<int>? saison_episode = [];
 
   Media({
     this.id,
@@ -21,10 +20,9 @@ class Media {
     this.note,
     this.statut,
     this.genres,
-    this.created_at,
-    this.updated_at,
+    this.createdAt,
+    this.updatedAt,
     this.selectedImageUrl,
-    this.saison_episode,
     this.table,
   });
 
@@ -35,8 +33,8 @@ class Media {
       'note': note,
       'statut': statut,
       'genres': genres?.join(', ') ?? "",
-      'created_at': created_at != null ? DateFormat("yyyy-MM-dd HH:mm:ss").format(created_at!) : null,
-      'updated_at': updated_at != null ? DateFormat("yyyy-MM-dd HH:mm:ss").format(updated_at!) : null,
+      'created_at': createdAt != null ? DateFormat("yyyy-MM-dd HH:mm:ss").format(createdAt!) : null,
+      'updated_at': updatedAt != null ? DateFormat("yyyy-MM-dd HH:mm:ss").format(updatedAt!) : null,
     };
   }
 }

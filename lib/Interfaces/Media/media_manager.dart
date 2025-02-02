@@ -19,24 +19,23 @@ class MediaManager extends StatefulWidget {
   const MediaManager({super.key, this.mediaParam, required this.tableName});
 
   @override
-  State<MediaManager> createState() => _MediaManagerState(mediaParam: mediaParam, tableName: tableName);
+  State<MediaManager> createState() => _MediaManagerState();
 }
 
 class _MediaManagerState extends State<MediaManager> {
   final bdMedia = DatabaseMedia("Series");
   final bdGenre = DatabaseGenre();
-  Media? mediaParam;
-  String? tableName;
+  late Media? mediaParam;
+  late String? tableName;
   int? id;
   bool isInitComplete = false;
   final List<bool> _selections = [];
   List<String> genres = [];
   List<String> _selectionsGenres = [];
   final List<String> _selectionsGenresSelected = [];
-  final List<TextEditingController> _textControllers = [];
   Utilisateur? utilisateur;
 
-  _MediaManagerState({this.mediaParam, this.tableName});
+  _MediaManagerState();
   InterfaceHelper? interfaceHelper;
 
   Future<void> fetchData() async {
@@ -51,6 +50,8 @@ class _MediaManagerState extends State<MediaManager> {
   @override
   void initState() {
     super.initState();
+    mediaParam = widget.mediaParam;
+    tableName = widget.tableName;
     DatabaseInit();
     fetchData().then((_) {
       for (String item in _selectionsGenres) {
@@ -191,11 +192,6 @@ class _MediaManagerState extends State<MediaManager> {
                         const SizedBox(width: 10),
                         ElevatedButton(
                           onPressed: () async {
-                            List<int> intList = _textControllers.map((controller) {
-                              int parsedValue = int.tryParse(controller.text) ?? 0;
-                              return parsedValue;
-                            }).toList();
-
                             double noteInterface = await interfaceHelper!.getNote();
 
                             Media media = Media(
@@ -206,7 +202,6 @@ class _MediaManagerState extends State<MediaManager> {
                               genres: _selectionsGenresSelected,
                               image: await interfaceHelper!.getImage(),
                               selectedImageUrl: await interfaceHelper!.getImageLink(),
-                              saison_episode: intList,
                               table: tableName,
                             );
 
@@ -222,7 +217,7 @@ class _MediaManagerState extends State<MediaManager> {
                               }
                               Navigator.pop(context, media);
                             } catch (e) {
-                              if (e is myException) {
+                              if (e is MyException) {
                                 if (!context.mounted) {
                                   return;
                                 }

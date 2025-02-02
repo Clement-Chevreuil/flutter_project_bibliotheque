@@ -1,7 +1,6 @@
-class myException implements Exception {
-
+class MyException implements Exception {
   final String message;
-  myException(this.message);
+  MyException(this.message);
 
   @override
   String toString() {

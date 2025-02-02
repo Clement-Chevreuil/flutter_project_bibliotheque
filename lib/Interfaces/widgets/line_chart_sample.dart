@@ -99,7 +99,6 @@ class _LineChartSampleState extends State<LineChartSample> {
 
   LineChartData mainData(List<Map<String, dynamic>> data) {
     List<FlSpot> spots = data.asMap().entries.map((entry) {
-      print(entry.key.toDouble());
       double x = entry.key.toDouble(); // Replace 'date' with the actual key for the date in your map
       double y = entry.value['count'].toDouble(); // Replace 'count' with the actual key for the count in your map
       return FlSpot(x, y);

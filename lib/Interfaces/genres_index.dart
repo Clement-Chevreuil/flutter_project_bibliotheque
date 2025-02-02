@@ -11,13 +11,13 @@ class GenresIndex extends StatefulWidget {
   const GenresIndex({super.key, this.mediaParam1});
 
   @override
-  State<GenresIndex> createState() => _GenresIndexState(mediaParam1: mediaParam1);
+  State<GenresIndex> createState() => _GenresIndexState();
 }
 
 class _GenresIndexState extends State<GenresIndex> {
   bool isAdvancedSearchVisible = false;
   int? idUpdate;
-  final String? mediaParam1;
+  late String? mediaParam1;
   final TextEditingController _controllerNom = TextEditingController(text: '');
   final TextEditingController _controllerGenre = TextEditingController(text: '');
   int selectedGenreIndex = -1; // Initialisez la variable à -1 pour indiquer qu'aucun élément n'est sélectionné au départ
@@ -28,11 +28,10 @@ class _GenresIndexState extends State<GenresIndex> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey(); // Clé pour la ListView.builder
   // instantiate the controller in your state
 
-  _GenresIndexState({this.mediaParam1});
-
   @override
   void initState() {
     super.initState();
+    mediaParam1 = widget.mediaParam1;
     loadGenres();
     DatabaseInit();
 

@@ -20,15 +20,11 @@ class InterfaceHelper extends StatefulWidget {
     this.note,
     this.statut,
     this.image,
+    this.imageLink,
   });
 
   @override
-  _InterfaceHelperState createState() => _InterfaceHelperState(
-        nom: nom,
-        note: note,
-        statut: statut,
-        imageBytes: image,
-      );
+  State<InterfaceHelper> createState() => _InterfaceHelperState();
 
   Future<String> getNom() async {
     return nom!;
@@ -65,7 +61,7 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
   double? note = 0.0;
   Uint8List? imageBytes;
 
-  _InterfaceHelperState({this.nom, this.note, this.statut, this.imageBytes});
+  _InterfaceHelperState();
   TextEditingController _controllerNom = TextEditingController(text: '');
   String _selectedValue = "Fini";
 
@@ -78,7 +74,11 @@ class _InterfaceHelperState extends State<InterfaceHelper> {
   @override
   void initState() {
     super.initState();
-    _controllerNom = TextEditingController(text: nom);
+    _controllerNom = TextEditingController(text: widget.nom);
+    nom = widget.nom;
+    note = widget.note;
+    statut = widget.statut;
+    imageBytes = widget.image;
 
     if (statut == "En cours") {
       initialIndexToggle = 0;

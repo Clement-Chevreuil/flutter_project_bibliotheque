@@ -14,7 +14,7 @@ Future<Uint8List> urlPictureGestionnary(Uint8List? imageBytes, String? selectedI
     final imageSizeInMB = imageSizeInKB / 1024;
 
     if (imageSizeInMB > 2) {
-      throw myException('Please fill in all fields');
+      throw MyException('Please fill in all fields');
     }
   } else {
     final ByteData data = await rootBundle.load('images/default_image.jpeg');

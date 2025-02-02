@@ -33,14 +33,11 @@ class MyApp extends StatelessWidget {
   Future<void> requestStoragePermission() async {
     var status = await Permission.manageExternalStorage.request();
     if (status.isGranted) {
-      print("Permission accordée");
-      // L'autorisation est accordée, vous pouvez maintenant effectuer des opérations de stockage
+      return;
     } else if (status.isDenied) {
-      print("Permission refusée");
-      // L'utilisateur a refusé l'autorisation. Vous pouvez lui expliquer pourquoi cette autorisation est nécessaire et redemander.
+      return;
     } else if (status.isPermanentlyDenied) {
-      print("Permission définitivement refusée");
-      // L'utilisateur a définitivement refusé l'autorisation. Vous pouvez l'inviter à ouvrir les paramètres de l'application pour activer manuellement l'autorisation.
+      return;
     }
   }
 }

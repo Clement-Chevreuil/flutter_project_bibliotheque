@@ -1,7 +1,3 @@
-// lib/constants/colors.dart
-
-import 'package:flutter/material.dart';
-
 class AppConsts {
   static const List<String> sidebarItems = ["Series", "Animes", "Games", "Webtoons", "Books", "Movies"];
 
@@ -33,8 +29,6 @@ class AppConsts {
     "Abandonnee",
     "Envie",
   ];
-
-  static const List<IconData> itemIcons = [Icons.movie, Icons.movie, Icons.movie, Icons.movie, Icons.movie, Icons.movie];
 
   static const List<Map<String, dynamic>> mediaData = [
     {"label": "Fini", "countKey": "countFini"},

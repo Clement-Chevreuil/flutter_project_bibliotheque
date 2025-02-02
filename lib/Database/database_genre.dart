@@ -83,7 +83,7 @@ class DatabaseGenre {
     whereConditions += ' WHERE Media LIKE ?';
     whereValues.add('$table');
 
-    if (search != null && search.isNotEmpty) {
+    if (search.isNotEmpty) {
       whereConditions += ' AND Nom LIKE ?';
       whereValues.add('%$search%');
     }
