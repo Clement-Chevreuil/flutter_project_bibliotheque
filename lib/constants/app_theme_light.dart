@@ -6,6 +6,13 @@ class AppThemeLight {
   static ThemeData buildLightTheme() {
     return ThemeData(
       brightness: Brightness.light,
+      drawerTheme: const DrawerThemeData(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+        ),
+        backgroundColor: AppColor.primaryLight1,
+      ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
           backgroundColor: WidgetStateColor.resolveWith((states) {

@@ -42,7 +42,7 @@ class _MediaIndexState extends State<MediaIndex> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await Navigator.of(context).pushReplacementNamed(Routes.mediaCreate);
+          await Navigator.of(context).pushNamed(Routes.mediaCreate);
         },
         mini: true,
         child: const Icon(Icons.add),
@@ -50,53 +50,31 @@ class _MediaIndexState extends State<MediaIndex> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: Column(
         children: <Widget>[
-          Container(
-            margin: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5.0),
-              border: Border.all(
-                color: Colors.black,
-                width: 1.0,
-              ),
-              color: Colors.transparent,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontSize: 16.0,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: "Recherche...",
-                      hintStyle: TextStyle(
-                        color: Colors.black.withOpacity(0.5),
-                      ),
-                      border: InputBorder.none,
-                    ),
-                    onChanged: (value) {
-                      context.read<MediaProvider>().setSearch(value);
-                      context.read<MediaProvider>().loadMedia();
-                    },
-                    controller: _controllerNom,
-                  ),
-                ),
-                InkWell(
-                  onTap: () {
-                    context.read<MediaProvider>().toggleAdvancedSearchVisible();
+          SearchBar(
+            hintText: "Recherche...",
+            controller: _controllerNom,
+            onChanged: (value) {
+              context.read<MediaProvider>().setSearch(value);
+              context.read<MediaProvider>().loadMedia();
+            },
+            leading: const Icon(Icons.search, color: Colors.black),
+            trailing: [
+              if (_controllerNom.text.isNotEmpty)
+                IconButton(
+                  icon: const Icon(Icons.clear, color: Colors.black),
+                  onPressed: () {
+                    _controllerNom.clear();
+                    context.read<MediaProvider>().setSearch('');
+                    context.read<MediaProvider>().loadMedia();
                   },
-                  child: Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: const Icon(
-                      Icons.sort,
-                      color: Colors.black,
-                    ),
-                  ),
                 ),
-              ],
-            ),
+              IconButton(
+                icon: const Icon(Icons.sort, color: Colors.black),
+                onPressed: () {
+                  context.read<MediaProvider>().toggleAdvancedSearchVisible();
+                },
+              ),
+            ],
           ),
           if (context.watch<MediaProvider>().isAdvancedSearchVisible) const AdvancedSearch(),
           Expanded(

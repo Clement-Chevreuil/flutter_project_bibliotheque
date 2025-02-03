@@ -17,22 +17,18 @@ Widget buildRadioButtons(
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
-          child: ElevatedButton(
-            onPressed: () {
+          child: ChoiceChip(
+            label: Text(select),
+            selected: isSelected,
+            onSelected: (bool selected) {
               if (isSelected && nullable == true) {
-                selected = null;
+                selected = false;
+                updateSelectedList(null);
               } else {
-                selected = select;
+                updateSelectedList(select);
               }
-
-              updateSelectedList(selected);
-              // Charger les médias avec les nouveaux genres sélectionnés
               reloadDataFunction();
             },
-            style: ButtonStyle(
-              backgroundColor: isSelected ? WidgetStateProperty.all<Color>(Colors.blue) : null,
-            ),
-            child: Text(select),
           ),
         );
       }),

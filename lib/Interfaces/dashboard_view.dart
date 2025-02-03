@@ -46,7 +46,6 @@ class _DashboardViewState extends State<DashboardView> {
     if (!isInitComplete) {
       return const CircularProgressIndicator(); // Ou tout autre indicateur de chargement
     }
-
     return Scaffold(
       body: SingleChildScrollView(
         scrollDirection: Axis.vertical,
@@ -55,22 +54,20 @@ class _DashboardViewState extends State<DashboardView> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Container(
               alignment: Alignment.centerLeft,
-              child: const Text("All Category"),
+              child: Text(
+                "All Category",
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
             ),
           ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: CategoriesEnum.values.asMap().entries.map((entry) {
-                final index = entry.value.index;
-                final item = entry.value.name;
-                return InkWell(
+          Wrap(
+            children: [
+              for (var entry in CategoriesEnum.values.asMap().entries)
+                GestureDetector(
                   onTap: () {
-                    // Méthode pour naviguer vers la page "MediaCompare"
-                    widget.onPageChanged(index + 1); // Vous pouvez passer l'index de la page que vous souhaitez afficher
+                    widget.onPageChanged(entry.value.index + 1);
                   },
                   child: Container(
-                    //height: MediaQuery.of(context).size.height * 0.2,
                     constraints: const BoxConstraints(
                       maxHeight: 80.0,
                       maxWidth: 120.0,
@@ -82,20 +79,16 @@ class _DashboardViewState extends State<DashboardView> {
                       child: Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          // Aligns children center vertically
                           children: [
-                            Text(item, textAlign: TextAlign.center),
-                            // Optional: center text horizontally
-                            Text(count != null ? count![item].toString() : " 0", textAlign: TextAlign.center)
-                            // Optional: center text horizontally
+                            Text(entry.value.name, textAlign: TextAlign.center),
+                            Text(count != null ? count![entry.value.name].toString() : " 0", textAlign: TextAlign.center)
                           ],
                         ),
                       ),
                     ),
                   ),
-                );
-              }).toList(),
-            ),
+                ),
+            ],
           ),
           // Padding(
           //   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20),

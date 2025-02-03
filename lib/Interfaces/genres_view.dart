@@ -19,14 +19,13 @@ class _GenresViewState extends State<GenresView> {
   bool isAdvancedSearchVisible = false;
   int? idUpdate;
   late String? mediaParam1;
-  final TextEditingController _controllerNom = TextEditingController();
   final TextEditingController _controllerGenre = TextEditingController();
-  final GlobalKey<AnimatedListState> _listKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     DatabaseInit();
+    context.read<GenreProvider>().loadGenres();
   }
 
   @override
@@ -81,7 +80,7 @@ class _GenresViewState extends State<GenresView> {
           Expanded(
             child: Column(
               children: [
-                for (Genre genre in context.read<GenreProvider>().genres)
+                for (Genre genre in context.watch<GenreProvider>().genres)
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0), // Espace autour de la Card
                     child: Card(
@@ -110,8 +109,6 @@ class _GenresViewState extends State<GenresView> {
                                 ],
                               ),
                             ),
-                            // Boutons légèrement décalés vers la gauche
-
                             IconButton(
                               icon: const Icon(Icons.edit),
                               onPressed: () {

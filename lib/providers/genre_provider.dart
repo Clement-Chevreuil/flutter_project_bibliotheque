@@ -20,6 +20,7 @@ class GenreProvider extends ChangeNotifier {
     // TODO : remettre le search
     List<Genre> updatedMediaList = await bdGenres.getGenres(_mediaIndex.name, "");
     _genres = updatedMediaList;
+    notifyListeners();
   }
 
   void deleteGenre(Genre genre) async {
@@ -28,6 +29,7 @@ class GenreProvider extends ChangeNotifier {
   }
 
   void saveGenre(Genre genre) async {
+    genre.media = _mediaIndex.name;
     if (genre.id != null) {
       await bdGenres.update(genre);
     } else {

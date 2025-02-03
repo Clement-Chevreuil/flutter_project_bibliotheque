@@ -56,14 +56,11 @@ class _HomeViewState extends State<HomeView> {
                 padding: EdgeInsets.zero,
                 children: <Widget>[
                   const DrawerHeader(
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                    ),
+                    decoration: BoxDecoration(),
                     child: Center(
                       child: Text(
                         'Menu',
                         style: TextStyle(
-                          color: Colors.white,
                           fontSize: 24,
                         ),
                       ),
@@ -77,7 +74,6 @@ class _HomeViewState extends State<HomeView> {
                             borderRadius: BorderRadius.zero,
                           ),
                         ),
-                        backgroundColor: WidgetStateProperty.all(Colors.transparent),
                       ),
                       onPressed: () {
                         selectedCategories = CategoriesEnum.values[i].name;
@@ -102,9 +98,7 @@ class _HomeViewState extends State<HomeView> {
                   TextButton(
                     onPressed: () {
                       activeMediaIndex = false;
-
                       _changePage(0);
-
                       Navigator.pop(context);
                     },
                     child: const Text("Dashboard"),
@@ -129,25 +123,30 @@ class _HomeViewState extends State<HomeView> {
           ],
         ),
       ),
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        onPageChanged: (page) {
-          context.read<MediaProvider>().setCurrentPage(page);
-        },
-        children: <Widget>[
-          DashboardView(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: PageView(
+            controller: _pageController,
+            physics: const NeverScrollableScrollPhysics(),
             onPageChanged: (page) {
-              _changePage(page);
+              context.read<MediaProvider>().setCurrentPage(page);
             },
+            children: <Widget>[
+              DashboardView(
+                onPageChanged: (page) {
+                  _changePage(page);
+                },
+              ),
+              MediaIndex(CategoriesEnum.series.name),
+              MediaIndex(CategoriesEnum.animes.name),
+              MediaIndex(CategoriesEnum.games.name),
+              MediaIndex(CategoriesEnum.webtoons.name),
+              MediaIndex(CategoriesEnum.books.name),
+              MediaIndex(CategoriesEnum.movies.name),
+            ],
           ),
-          MediaIndex(CategoriesEnum.series.name),
-          MediaIndex(CategoriesEnum.animes.name),
-          MediaIndex(CategoriesEnum.games.name),
-          MediaIndex(CategoriesEnum.webtoons.name),
-          MediaIndex(CategoriesEnum.books.name),
-          MediaIndex(CategoriesEnum.movies.name),
-        ],
+        ),
       ),
     );
   }
