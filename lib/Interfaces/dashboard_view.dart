@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project_n1/Database/database_genre.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
 import 'package:flutter_project_n1/Database/database_media.dart';
-import 'package:flutter_project_n1/constants/app_consts.dart';
+import 'package:flutter_project_n1/enums/categories_enum.dart';
 import 'package:flutter_project_n1/models/media.dart';
 
-class MediaDashboard extends StatefulWidget {
+class DashboardView extends StatefulWidget {
   final Function(int) onPageChanged;
 
-  const MediaDashboard({super.key, required this.onPageChanged});
+  const DashboardView({super.key, required this.onPageChanged});
 
   @override
-  State<MediaDashboard> createState() => _MediaDashboardState();
+  State<DashboardView> createState() => _DashboardViewState();
 }
 
-class _MediaDashboardState extends State<MediaDashboard> {
+class _DashboardViewState extends State<DashboardView> {
   List<String> genresList = [];
 
   List<Media>? mostRecentRecords;
@@ -30,7 +30,7 @@ class _MediaDashboardState extends State<MediaDashboard> {
   Map<String, int>? count;
   List<Map<String, dynamic>>? countDate;
 
-  _MediaDashboardState();
+  _DashboardViewState();
 
   Map<String, int>? countsByStatut;
 
@@ -61,9 +61,9 @@ class _MediaDashboardState extends State<MediaDashboard> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: AppConsts.sidebarItems.asMap().entries.map((entry) {
-                final index = entry.key;
-                final item = entry.value;
+              children: CategoriesEnum.values.asMap().entries.map((entry) {
+                final index = entry.value.index;
+                final item = entry.value.name;
                 return InkWell(
                   onTap: () {
                     // Méthode pour naviguer vers la page "MediaCompare"

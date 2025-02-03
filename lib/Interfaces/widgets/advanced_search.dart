@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_project_n1/constants/app_consts.dart';
-import 'package:flutter_project_n1/interfaces/genres_index.dart';
+import 'package:flutter_project_n1/enums/book_order_enum.dart';
+import 'package:flutter_project_n1/enums/order_enum.dart';
+import 'package:flutter_project_n1/enums/status_enum.dart';
+import 'package:flutter_project_n1/interfaces/genres_view.dart';
 import 'package:flutter_project_n1/interfaces/widgets/build_check_buttons.dart';
 import 'package:flutter_project_n1/interfaces/widgets/build_radio_buttons.dart';
 import 'package:flutter_project_n1/providers/media_provider.dart';
@@ -43,9 +45,7 @@ class AdvancedSearch extends StatelessWidget {
                                   var result = await Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => GenresIndex(
-                                        mediaParam1: context.read<MediaProvider>().tableName,
-                                      ),
+                                      builder: (context) => GenresView(),
                                     ),
                                   );
                                   if (result != null) {
@@ -84,7 +84,7 @@ class AdvancedSearch extends StatelessWidget {
                         ),
                       ]),
                     ),
-                    buildRadioButtons(AppConsts.orderList, context.watch<MediaProvider>().selectedOrder, false, (
+                    buildRadioButtons(BookOrderEnum.values.map((e) => e.name).toList(), context.watch<MediaProvider>().selectedOrder, false, (
                       selectedOrderReturn,
                     ) {
                       context.read<MediaProvider>().setSelectedOrder(selectedOrderReturn);
@@ -105,7 +105,8 @@ class AdvancedSearch extends StatelessWidget {
                       ]),
                     ),
                     //Statut
-                    buildRadioButtons(AppConsts.statutList, context.watch<MediaProvider>().selectedStatut, true, (selectedStatutReturn) {
+                    buildRadioButtons(StatusEnum.values.map((e) => e.name).toList(), context.watch<MediaProvider>().selectedStatut, true,
+                        (selectedStatutReturn) {
                       context.read<MediaProvider>().setSelectedStatut(selectedStatutReturn);
                     }, () {
                       context.read<MediaProvider>().setCurrentPage(1);
@@ -122,7 +123,7 @@ class AdvancedSearch extends StatelessWidget {
                         SizedBox(height: 8.0),
                       ]),
                     ),
-                    buildRadioButtons(AppConsts.orderListAscDesc, context.watch<MediaProvider>().selectedOrderAscDesc, false,
+                    buildRadioButtons(OrderEnum.values.map((e) => e.name).toList(), context.watch<MediaProvider>().selectedOrderAscDesc, false,
                         (selectedOrderAscDescReturn) {
                       context.read<MediaProvider>().setSelectedOrderAscDesc(selectedOrderAscDescReturn!);
                     }, () {

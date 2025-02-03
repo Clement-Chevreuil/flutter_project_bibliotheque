@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
-import 'package:flutter_project_n1/constants/app_consts.dart';
-import 'package:flutter_project_n1/interfaces/media/widgets/advanced_search.dart';
-import 'package:flutter_project_n1/interfaces/media/widgets/media_widget.dart';
+import 'package:flutter_project_n1/constants/routes.dart';
+import 'package:flutter_project_n1/interfaces/widgets/advanced_search.dart';
+import 'package:flutter_project_n1/interfaces/widgets/media_widget.dart';
 import 'package:flutter_project_n1/interfaces/widgets/pagination_builder.dart';
 import 'package:flutter_project_n1/models/media.dart';
 import 'package:flutter_project_n1/providers/media_provider.dart';
 import 'package:provider/provider.dart';
-import 'media_manager.dart';
 import 'package:intl/intl.dart';
 
 class MediaIndex extends StatefulWidget {
@@ -25,7 +24,6 @@ class _MediaIndexState extends State<MediaIndex> {
   final DateFormat formatter = DateFormat('yyyy MM dd');
   final TextEditingController _controllerNom = TextEditingController();
 
-  List<String> statutList = AppConsts.statutList;
   _MediaIndexState() : mediaParam1 = null;
 
   @override
@@ -44,21 +42,7 @@ class _MediaIndexState extends State<MediaIndex> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          var result = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MediaManager(
-                mediaParam: null,
-                tableName: context.read<MediaProvider>().tableName,
-              ),
-            ),
-          );
-          if (result != null) {
-            if (!context.mounted) {
-              return;
-            }
-            context.read<MediaProvider>().loadMedia();
-          }
+          await Navigator.of(context).pushReplacementNamed(Routes.mediaCreate);
         },
         mini: true,
         child: const Icon(Icons.add),
@@ -88,7 +72,7 @@ class _MediaIndexState extends State<MediaIndex> {
                     decoration: InputDecoration(
                       hintText: "Recherche...",
                       hintStyle: TextStyle(
-                        color: Colors.black.withOpacity(0.5), // Texte d'indication en noir
+                        color: Colors.black.withOpacity(0.5),
                       ),
                       border: InputBorder.none,
                     ),
@@ -107,7 +91,7 @@ class _MediaIndexState extends State<MediaIndex> {
                     padding: const EdgeInsets.all(8.0),
                     child: const Icon(
                       Icons.sort,
-                      color: Colors.black, // Icône en noir
+                      color: Colors.black,
                     ),
                   ),
                 ),

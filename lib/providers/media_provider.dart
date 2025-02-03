@@ -3,6 +3,7 @@ import 'package:flutter_project_n1/database/database_genre.dart';
 import 'package:flutter_project_n1/database/database_media.dart';
 import 'package:flutter_project_n1/enums/categories_enum.dart';
 import 'package:flutter_project_n1/enums/menu_enum.dart';
+import 'package:flutter_project_n1/exeptions/my_exceptions.dart';
 import 'package:flutter_project_n1/models/media.dart';
 
 class MediaProvider extends ChangeNotifier {
@@ -140,5 +141,21 @@ class MediaProvider extends ChangeNotifier {
   void setSearch(String text) {
     _search = text;
     notifyListeners();
+  }
+
+  Future<void> saveMediaGestion(Media media) async {
+    final bdMedia = DatabaseMedia("Series");
+
+    if (media.id != null) {
+      int? verif = await bdMedia.updateMedia(media);
+      if (verif == 0) {
+        throw MyException('Erreur lors de la création du média');
+      }
+    } else {
+      int idMedia = await bdMedia.insertMedia(media);
+      if (idMedia == 0) {
+        throw MyException('Erreur lors de la création du média');
+      }
+    }
   }
 }

@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_project_n1/Database/database_media.dart';
-import 'package:flutter_project_n1/interfaces/media/media_manager.dart';
 import 'package:flutter_project_n1/models/media.dart';
 import 'package:flutter_project_n1/providers/media_provider.dart';
 import 'package:getwidget/components/typography/gf_typography.dart';
@@ -58,15 +57,15 @@ class MediaWidget extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MediaManager(
-                            mediaParam: media,
-                            tableName: context.read<MediaProvider>().tableName,
-                          ),
-                        ),
-                      );
+                      // await Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => MediaManager(
+                      //       mediaParam: media,
+                      //       tableName: context.read<MediaProvider>().tableName,
+                      //     ),
+                      //   ),
+                      // );
                     },
                   ),
                   IconButton(

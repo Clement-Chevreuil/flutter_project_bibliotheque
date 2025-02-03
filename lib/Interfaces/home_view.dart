@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_project_n1/Database/database_init.dart';
-import 'package:flutter_project_n1/Interfaces/media/media_dashboard.dart';
-import 'package:flutter_project_n1/Interfaces/media/media_index.dart';
-import 'package:flutter_project_n1/constants/app_consts.dart';
 import 'package:flutter_project_n1/enums/categories_enum.dart';
 import 'package:flutter_project_n1/functions/database/replace_database.dart';
+import 'package:flutter_project_n1/interfaces/dashboard_view.dart';
+import 'package:flutter_project_n1/interfaces/media_index.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_project_n1/providers/media_provider.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomeView extends StatefulWidget {
+  const HomeView({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomeViewState extends State<HomeView> {
   bool activeMediaIndex = true;
   late DatabaseInit _databaseInit;
 
@@ -70,7 +69,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                  for (int i = 0; i < AppConsts.sidebarItems.length; i++)
+                  for (int i = 0; i < CategoriesEnum.values.length; i++)
                     TextButton(
                       style: ButtonStyle(
                         shape: WidgetStateProperty.all(
@@ -81,14 +80,14 @@ class _HomePageState extends State<HomePage> {
                         backgroundColor: WidgetStateProperty.all(Colors.transparent),
                       ),
                       onPressed: () {
-                        selectedCategories = AppConsts.sidebarItems[i];
+                        selectedCategories = CategoriesEnum.values[i].name;
                         _changePage(i + 1);
                         Navigator.pop(context);
                       },
                       child: Text(
-                        AppConsts.sidebarItems[i],
+                        CategoriesEnum.values[i].name,
                         style: TextStyle(
-                          fontWeight: AppConsts.sidebarItems[i] == selectedCategories ? FontWeight.bold : FontWeight.normal,
+                          fontWeight: CategoriesEnum.values[i].name == selectedCategories ? FontWeight.bold : FontWeight.normal,
                           color: Colors.black,
                         ),
                       ),
@@ -110,26 +109,6 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: const Text("Dashboard"),
                   ),
-                  // TextButton(
-                  //   onPressed: () {
-                  //     activeMediaIndex = false;
-                  //
-                  //       _changePage(8);
-                  //
-                  //     Navigator.pop(context);
-                  //   },
-                  //   child: Text("Parametres"),
-                  // ),
-                  // TextButton(
-                  //   onPressed: () {
-                  //     activeMediaIndex = false;
-                  //
-                  //       _changePage(7);
-                  //
-                  //     Navigator.pop(context);
-                  //   },
-                  //   child: Text("Compare Media With Other"),
-                  // ),
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
@@ -157,19 +136,17 @@ class _HomePageState extends State<HomePage> {
           context.read<MediaProvider>().setCurrentPage(page);
         },
         children: <Widget>[
-          MediaDashboard(
+          DashboardView(
             onPageChanged: (page) {
               _changePage(page);
             },
           ),
-          MediaIndex(CategoriesEnum.series.name), //1
-          MediaIndex(CategoriesEnum.animes.name), //2
-          MediaIndex(CategoriesEnum.games.name), //3
-          MediaIndex(CategoriesEnum.webtoons.name), //4
-          MediaIndex(CategoriesEnum.books.name), //5
-          MediaIndex(CategoriesEnum.movies.name), //6
-          //MediaCompare(),
-          //UtilisateurManager(),
+          MediaIndex(CategoriesEnum.series.name),
+          MediaIndex(CategoriesEnum.animes.name),
+          MediaIndex(CategoriesEnum.games.name),
+          MediaIndex(CategoriesEnum.webtoons.name),
+          MediaIndex(CategoriesEnum.books.name),
+          MediaIndex(CategoriesEnum.movies.name),
         ],
       ),
     );

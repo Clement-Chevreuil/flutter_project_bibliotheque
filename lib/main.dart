@@ -1,5 +1,6 @@
 import 'package:flutter_project_n1/constants/app_theme_light.dart';
-import 'package:flutter_project_n1/constants/route.dart';
+import 'package:flutter_project_n1/constants/routes.dart';
+import 'package:flutter_project_n1/providers/genre_provider.dart';
 import 'package:flutter_project_n1/providers/media_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<MediaProvider>(create: (_) => MediaProvider()),
+        ChangeNotifierProvider<GenreProvider>(create: (_) => GenreProvider()),
       ],
       child: MaterialApp(
         title: 'OFLINE',
